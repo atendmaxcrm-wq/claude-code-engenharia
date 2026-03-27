@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "claude-code-memory": {
+      "command": "node",
+      "args": ["{{memory_mcp_path}}"],
+      "env": {
+        "MEMORY_DB_HOST": "{{db_host}}",
+        "MEMORY_DB_PORT": "{{db_port}}",
+        "MEMORY_DB_USER": "{{db_user}}",
+        "MEMORY_DB_PASSWORD": "{{db_password}}",
+        "MEMORY_DB_NAME": "{{db_name}}",
+        "OPENAI_API_KEY": "{{openai_api_key}}"
+      }
+    }
+  }
+}

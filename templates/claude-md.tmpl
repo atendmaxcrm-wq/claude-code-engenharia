@@ -1,0 +1,49 @@
+# {{project_name}} — Claude Code Engineering System
+
+## Identidade
+{{project_description}}
+
+## Stack
+{{stack_description}}
+
+## Comandos Essenciais
+```bash
+# Verificar saude
+{{health_check_command}}
+
+# Verificar logs
+{{log_command}}
+```
+
+## Sistema de Memoria
+
+### Onde Buscar Informacao
+| Contexto | Arquivo |
+|----------|---------|
+| Schema do banco | `/memoria/sistema/database-schema.md` |
+| Endpoints da API | `/memoria/sistema/api-endpoints.md` |
+| Permissoes | `/memoria/sistema/permissoes.md` |
+| Problemas conhecidos | `/memoria/sistema/troubleshooting.md` |
+| Changelog | `/memoria/sistema/changelog.md` |
+| Decisoes e armadilhas | `/memoria/insights.md` |
+| Estado atual | `/memoria/progresso.md` |
+
+### Atualizacao
+Ao final de cada sessao produtiva: `/atualizar-memoria`
+
+### Reinjecao Automatica
+Hook `reinject-memory.js` reinjeta contexto apos compactacao (dual-mode: pgvector + markdown fallback).
+
+### Busca Contextual
+Hook `contextual-memory.js` busca memorias relevantes a CADA mensagem automaticamente via pgvector.
+
+## Principios de Desenvolvimento
+- Queries parametrizadas (prevencao SQL injection)
+- Acentuacao correta em todo conteudo PT-BR
+- Conteudo sem travessao (em-dash) — parece IA
+
+## Validacao
+Antes de finalizar mudancas:
+1. Verificar servico respondendo
+2. Verificar logs para erros
+3. Testar endpoint especifico se alterou rotas
