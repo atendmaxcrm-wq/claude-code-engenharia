@@ -1,4 +1,7 @@
 {
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -15,6 +18,10 @@
       {
         "matcher": "Bash",
         "hooks": [{ "type": "command", "command": ".claude/hooks/block-destructive.sh" }]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{ "type": "command", "command": "node .claude/hooks/safari-guard.js" }]
       }
     ],
     "SessionStart": [

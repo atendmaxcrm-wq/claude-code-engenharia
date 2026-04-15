@@ -1,6 +1,6 @@
 ---
 name: ai-agent-prompt-builder
-description: "Cria system prompts e bases de conhecimento de nível profissional para agentes de IA conversacionais (WhatsApp, chatbots, atendimento, vendas, agendamento). Otimizado para modelos GPT (OpenAI). Use esta skill sempre que o usuário quiser criar, analisar, melhorar ou reestruturar prompts para agentes de IA — especialmente agentes que interagem com clientes via plataformas de mensagem. Ativa em pedidos envolvendo: prompts de agente, system prompts para chatbots, automação de WhatsApp, comportamento de IA conversacional, criação de base de conhecimento, scripts de agentes de vendas, agentes de agendamento, agentes de atendimento, qualificação de leads, separação prompt + base de conhecimento, ou qualquer menção a tools como 'think', 'info_', 'resumo', 'transfere'. Também ativa quando o usuário compartilha um prompt existente e quer feedback, otimização ou reestruturação."
+description: "Cria system prompts e bases de conhecimento de nível profissional para agentes de IA conversacionais (WhatsApp, chatbots, atendimento, vendas, agendamento). Otimizado para modelos GPT (OpenAI). Use esta skill sempre que o usuário quiser criar, analisar, melhorar ou reestruturar prompts para agentes de IA — especialmente agentes que interagem com clientes via plataformas de mensagem. Ativa em pedidos envolvendo: prompts de agente, system prompts para chatbots, automação de WhatsApp, comportamento de IA conversacional, criação de base de conhecimento, scripts de agentes de vendas, agentes de agendamento, agentes de atendimento, qualificação de leads, separação prompt + base de conhecimento, ou qualquer menção a tools como 'think', 'info_', 'resumo', 'transfere'. Também ativa quando o usuário compartilha um prompt existente e quer feedback, otimização ou reestruturação. Suporta Agent Teams para builds completos (prompt + KB + pesquisa em paralelo)."
 ---
 
 # AI Agent Prompt Builder (GPT-Optimized)
@@ -30,6 +30,42 @@ Antes de iniciar qualquer trabalho, leia os arquivos de referência apropriados:
 | Build completo (prompt + KB) | Todos os três arquivos de referência |
 
 ## Workflow Rápido
+
+## Modo Agent Teams (Build Completo)
+
+Usar quando: criar agente complexo do zero (prompt + KB + tools + fluxos) ou reestruturar agente existente com muitos fluxos.
+
+### Time de Build
+
+| Teammate | Tipo | Responsabilidade |
+|----------|------|-----------------|
+| **context-researcher** | Explore (sonnet) | Pesquisa o negocio, concorrentes, tom de voz, publico-alvo. Coleta material bruto |
+| **prompt-architect** | general-purpose (sonnet) | Escreve o system prompt seguindo references/prompt-architecture.md |
+| **kb-builder** | general-purpose (sonnet) | Escreve a base de conhecimento seguindo references/knowledge-base-architecture.md |
+
+### Execucao
+
+```
+TeamCreate: { team_name: "agent-build", description: "Build [nome-agente]" }
+
+Wave 1: context-researcher (Explore) — coleta todo material bruto necessario
+Wave 2 (paralelo, apos Wave 1): prompt-architect + kb-builder
+  - prompt-architect recebe briefing + material do researcher → escreve prompt
+  - kb-builder recebe briefing + material do researcher → escreve KB
+Quality Gate: Lead revisa ambos com references/analysis-checklist.md
+TeamDelete
+```
+
+### Regras
+- **Prompt e KB sempre separados** — nunca misturar comportamento com dados
+- **Researcher coleta ANTES** — architects nao pesquisam, so constroem
+- **Lead revisa ao final** — nenhum agente vai pra producao sem review humano
+- **Few-shot examples obrigatorios** — prompt sem exemplos = prompt incompleto
+
+### Quando NAO usar Agent Teams
+- Ajuste pequeno em prompt existente (mudar tom, adicionar regra) → editar direto
+- Criar KB simples (FAQ, precos) → fazer direto
+- Analise de prompt existente → single pass com checklist
 
 ### 1. Briefing (Entender o Agente)
 

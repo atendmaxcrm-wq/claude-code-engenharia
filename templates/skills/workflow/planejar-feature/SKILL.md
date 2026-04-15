@@ -1,6 +1,6 @@
 ---
 name: planejar-feature
-description: Workflow de 6 fases para planejar features. Use antes de implementar qualquer feature media ou grande.
+description: Workflow de 6 fases para planejar features, com suporte a Agent Teams para features grandes. Use antes de implementar qualquer feature media ou grande.
 ---
 
 # Planejar Feature — Workflow de 6 Fases
@@ -43,7 +43,36 @@ description: Workflow de 6 fases para planejar features. Use antes de implementa
 |---------|----------|-----------|
 | Pequena | 1-3 | Implementar direto |
 | Media | 3-5 | Planejar passos, sequencial |
-| Grande | 5+ | Agent teams com ondas paralelas |
+| Grande | 5+ | Agent Teams (/agent-teams) com ondas paralelas |
+
+## Modo Agent Teams (Features Grandes)
+
+**Quando usar:** Feature com 5+ arquivos OU multiplos dominios (DB + API + frontend).
+
+Features pequenas/medias (1-5 arquivos) nao precisam de Agent Teams no planejamento — planejar direto.
+
+### Time de Planejamento
+
+| Papel | Tipo | Responsabilidade |
+|-------|------|-----------------|
+| **researcher** | Explore | Explora codebase, le memoria, verifica o que ja existe |
+| **architect** | Plan | Desenha plano tecnico, schema DB, contratos de API |
+| **estimator** | Explore | Mapeia todos os arquivos afetados, estima complexidade |
+
+### Fluxo de Execucao
+
+**Wave 1 (paralela):** researcher + architect + estimator rodam simultaneamente.
+
+**Consolidacao:** Lead mescla os findings em um plano final unico.
+
+**Aprovacao:** Apresentar plano ao usuario — NAO implementar sem "ok".
+
+### Apos Aprovacao
+
+Para a implementacao, usar `/agent-teams` com times especializados:
+- `frontend-dev` — componentes e UI
+- `backend-dev` — endpoints e logica de negocio
+- `test-dev` — testes e validacao
 
 ## Fase 5: LISTAR ARQUIVOS
 Todos os arquivos que serao criados ou modificados.
