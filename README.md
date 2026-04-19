@@ -40,10 +40,54 @@ O resultado: Claude Code que lembra do projeto entre sessoes, segue padroes sem 
 ## Instalacao rapida
 
 ```bash
-npx claude-code-engenharia
+git clone https://github.com/atendmaxcrm-wq/claude-code-engenharia.git
+cd claude-code-engenharia
+node install.js
 ```
 
 O instalador interativo guia voce pela escolha do modulo e configuracao.
+
+> **Nota:** o pacote ainda nao esta publicado no npm, entao `npx claude-code-engenharia` nao funciona. Use o clone manual acima.
+
+---
+
+## Instalacao para agentes (Claude Code, etc.)
+
+Se voce e um agente pedindo instalacao, o instalador interativo trava em prompts que voce nao consegue responder. Use o modo nao-interativo:
+
+```bash
+git clone https://github.com/atendmaxcrm-wq/claude-code-engenharia.git /tmp/cce \
+  && cd /tmp/cce \
+  && node install.js --yes --module core --dir "$TARGET_PROJECT_DIR"
+```
+
+Flags:
+
+| Flag | Efeito |
+|------|--------|
+| `--yes` (ou `-y`) | Pula o wizard. Usa defaults para todo campo. |
+| `--module <core\|standard\|full>` | Escolhe o modulo. Default com `--yes`: `full`. |
+| `--dir <path>` | Diretorio de instalacao. Default: cwd. |
+| `--dry-run` | Lista o que seria criado, sem escrever. Rode antes pra auditar. |
+| `--force` | Sobrescreve arquivos existentes no modo brownfield. |
+
+Para modulo `full` (pgvector + embeddings), passe credenciais via env:
+
+```bash
+CCE_DB_PASSWORD=xxx OPENAI_API_KEY=sk-xxx \
+  node install.js --yes --module full --dir "$TARGET_PROJECT_DIR"
+```
+
+Env vars aceitas: `CCE_DB_HOST`, `CCE_DB_PORT`, `CCE_DB_USER`, `CCE_DB_PASSWORD`, `CCE_DB_NAME`, `CCE_OPENAI_KEY` (ou `OPENAI_API_KEY`), `CCE_STACK`, `CCE_HEALTH_CHECK`, `CCE_LOG_COMMAND`.
+
+**Verificacao pos-install** (o agente deve rodar isto antes de reportar "pronto"):
+
+```bash
+ls "$TARGET_PROJECT_DIR/.claude/hooks/" "$TARGET_PROJECT_DIR/.claude/skills/" 2>/dev/null
+test -f "$TARGET_PROJECT_DIR/CLAUDE.md" && echo "CLAUDE.md OK"
+```
+
+Se algum desses nao existir, a instalacao falhou silenciosamente — investigue os logs do `install.js` ao inves de reportar sucesso.
 
 ---
 

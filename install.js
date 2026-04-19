@@ -12,6 +12,7 @@
  *   npx claude-code-engenharia --dry-run
  *   npx claude-code-engenharia --module core
  *   npx claude-code-engenharia --quiet
+ *   npx claude-code-engenharia --yes --module full     # non-interactive, use defaults
  */
 
 const path = require('path');
@@ -31,6 +32,7 @@ function parseArgs() {
     dryRun: args.includes('--dry-run'),
     quiet: args.includes('--quiet'),
     force: args.includes('--force'),
+    yes: args.includes('--yes') || args.includes('-y'),
     module: null,
     targetDir: process.cwd(),
   };
