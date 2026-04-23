@@ -16,11 +16,44 @@ Pega um perfil Instagram publico e entrega:
 5. **Padrao destilado** em markdown: formula replicavel + hooks testados com numbers reais
 6. **Dataset JSONL** (opcional) pronto pra fine-tuning na OpenAI
 
-Output final igual ao `garbers-viral-formulas.md` do projeto original: formula de N blocos + biblioteca de hooks rankeada por engagement.
+A skill e auto-contida: o scraper fica em `assets/instagram-scraper-native.js` dentro da propria skill. Nao depende de caminhos externos.
+
+## Passo 0: Verificar dependencias
+
+Antes de rodar, confira se o sistema tem as dependencias. Se faltar algo, informe o usuario e instale:
+
+```bash
+# Checar
+command -v node && node --version     # >= 18
+command -v yt-dlp && yt-dlp --version
+command -v ffmpeg && ffmpeg -version | head -1
+echo $OPENAI_API_KEY | head -c 10     # deve comecar com sk-
+
+# Instalar o que faltar (Linux)
+pip install -U yt-dlp
+apt-get install -y ffmpeg
+npm install openai    # instala localmente no projeto
+```
+
+Depois, **descubra onde a skill esta instalada**. Use o diretorio pra achar o asset:
+
+```bash
+SKILL_DIR="$(find . -type d -path '*/.claude/skills/scraping-insta' 2>/dev/null | head -1)"
+[ -z "$SKILL_DIR" ] && SKILL_DIR="$HOME/.claude/skills/scraping-insta"
+echo "Skill em: $SKILL_DIR"
+ls "$SKILL_DIR/assets/instagram-scraper-native.js"  # deve existir
+```
+
+Crie um diretorio de trabalho pra essa analise:
+
+```bash
+WORK_DIR="/tmp/scraping-insta-$USERNAME-$(date +%s)"
+mkdir -p "$WORK_DIR"
+```
 
 ## Passo 1: Perguntar ao usuario
 
-ANTES de qualquer acao, use AskUserQuestion:
+Use AskUserQuestion:
 
 1. **Qual perfil?** (username sem @, ex: `dr.luizgarbers`)
 
@@ -35,92 +68,99 @@ ANTES de qualquer acao, use AskUserQuestion:
    - Ambos (padrao completo)
 
 4. **Gerar JSONL pra fine-tuning?**
-   - Sim (gera dataset no formato da OpenAI, pronto pra `fine_tuning.jobs.create`)
+   - Sim (gera dataset no formato da OpenAI)
    - Nao (so o markdown de padrao)
 
 5. **Nicho do perfil?** (opcional, melhora a analise)
-   - Ex: saude/odontologia/estetica, marketing, fitness, etc. Se nao souber, deixa vazio.
+   - Ex: saude/odontologia/estetica, marketing, fitness, etc.
 
 ## Passo 2: Scrape do perfil
 
-Use o scraper nativo do monitor-server (REST API interna do IG, sem Apify, $0):
+Usa o scraper que vem empacotado com a skill. Crie `$WORK_DIR/scrape.js`:
 
-```bash
-node -e "
-const scraper = require('/root/teste-aios/aios-core/apps/monitor-server/src/instagram-scraper-native.js');
+```javascript
+const scraper = require(process.env.SKILL_DIR + '/assets/instagram-scraper-native.js');
+const fs = require('fs');
+
 (async () => {
-  const data = await scraper.scrapeProfile('USERNAME', { maxPosts: N });
-  require('fs').writeFileSync('/tmp/ig-raw.json', JSON.stringify(data, null, 2));
-})();
-"
+  const username = process.env.IG_USERNAME;
+  const maxPosts = parseInt(process.env.MAX_POSTS || '50', 10);
+  const data = await scraper.scrapeInstagramProfile(username, { maxPosts });
+  fs.writeFileSync(process.env.WORK_DIR + '/raw.json', JSON.stringify(data, null, 2));
+  console.log(`Scraped ${data.posts.length} posts from @${username}`);
+})().catch(e => { console.error(e); process.exit(1); });
 ```
 
-Endpoints que o scraper usa internamente:
-- `/api/v1/users/web_profile_info/` - metadata + primeiros 12 posts
-- `/api/v1/feed/user/{id}/` - paginacao (12 por pagina, delay 2s)
+Rode:
 
-Rate limit: ~200 req/h por IP. Se der 429, esperar 30min e retomar.
+```bash
+SKILL_DIR="$SKILL_DIR" WORK_DIR="$WORK_DIR" \
+  IG_USERNAME="perfil_aqui" MAX_POSTS=50 \
+  node "$WORK_DIR/scrape.js"
+```
 
-**Se o scraper nativo nao existir no projeto de destino**, implementar seguindo:
-- Base URL: `https://www.instagram.com`
-- Headers: `X-IG-App-ID: 936619743392459`, `User-Agent: Mozilla/5.0 (Chrome 131)`
-- POSTS_PER_PAGE: 12, DELAY_BETWEEN_PAGES_MS: 2000
+**Sobre o scraper:** usa endpoints internos do Instagram (`/api/v1/users/web_profile_info/` e `/api/v1/feed/user/{id}/`) com header `X-IG-App-ID: 936619743392459`. Sem login, sem Apify, custo zero. Rate limit ~200 req/h por IP, delay automatico de 2s entre paginas.
+
+Se voltar 429 (rate limit), espere 30min e retome. Se voltar 404, perfil nao existe ou e privado.
 
 ## Passo 3: Ranquear e filtrar top virais
 
-Ordenar posts por engagement rate:
+Leia `$WORK_DIR/raw.json` e ordene por engagement:
+
 ```
-score = (likes + comments*3 + shares*5 + saves*4) / views
+score = (likes + comments*3 + shares*5 + saves*4) / max(views, 1)
 ```
 
-Pegar os top N definidos no Passo 1.
+Filtrar pelo tipo escolhido no Passo 1 (reels/posts/ambos). Pegar top N. Salvar em `$WORK_DIR/top.json`.
 
 ## Passo 4: Download dos videos
 
-Usar `yt-dlp` pra cada reel:
+Pra cada item de `top.json` que seja video/reel:
 
 ```bash
-yt-dlp -o "/tmp/ig-analysis/%(id)s.mp4" \
+yt-dlp -o "$WORK_DIR/videos/%(id)s.mp4" \
   --max-filesize 50M \
+  --no-warnings \
   "https://www.instagram.com/reel/CODIGO/"
 ```
 
-Limites: 50MB por video. Se estourar, pular.
+Limites: 50MB. Se estourar, pula e registra.
 
 ## Passo 5: Extrair audio
 
 Pra cada video baixado:
 
 ```bash
-ffmpeg -i /tmp/ig-analysis/ID.mp4 \
+ffmpeg -i "$WORK_DIR/videos/ID.mp4" \
   -vn -acodec mp3 -ar 16000 -ac 1 -b:a 64k \
-  /tmp/ig-analysis/ID.mp3
+  -y "$WORK_DIR/audio/ID.mp3" 2>/dev/null
 ```
 
-MP3 16kHz mono 64k = fica abaixo dos 25MB do limite do Whisper.
+MP3 16kHz mono 64k fica abaixo do limite de 25MB do Whisper.
 
 ## Passo 6: Transcrever
 
-**Modelo: `gpt-4o-mini-transcribe`** (custo ~$0.003/min, qualidade otima em PT-BR)
+**Modelo: `gpt-4o-mini-transcribe`** (PT-BR otimo, ~$0.003/min):
 
 ```javascript
 const { OpenAI } = require('openai');
+const fs = require('fs');
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const transcription = await openai.audio.transcriptions.create({
-  file: fs.createReadStream('/tmp/ig-analysis/ID.mp3'),
+  file: fs.createReadStream(audioPath),
   model: 'gpt-4o-mini-transcribe',
   language: 'pt',
 });
-```
 
-Salvar cada transcricao em `/tmp/ig-analysis/ID.txt`.
+fs.writeFileSync(`${WORK_DIR}/transcripts/${id}.txt`, transcription.text);
+```
 
 ## Passo 7: Analise individual por post
 
-**Modelo: `gpt-4o-mini`** (tarefa repetitiva estruturada, nao precisa modelo premium)
+**Modelo: `gpt-4o-mini`** (tarefa estruturada, barato). Usa `max_tokens` normal.
 
-Pra cada post, enviar: caption + transcricao + metricas. Pedir JSON:
+Pra cada post, enviar caption + transcricao + metricas. Pedir JSON:
 
 ```json
 {
@@ -130,7 +170,7 @@ Pra cada post, enviar: caption + transcricao + metricas. Pedir JSON:
   "estrutura_blocos": ["hook", "dor", "validacao", "quebra", "solucao", "resultado", "cta"],
   "cta_tipo": "comentar|salvar|compartilhar|seguir|dm|link-bio|nenhum",
   "cta_frase": "texto exato do CTA",
-  "tema": "tema central do conteudo",
+  "tema": "tema central",
   "gatilhos": ["autoridade", "escassez", "prova-social", "urgencia", "reciprocidade"],
   "tom": "provocativo|educativo|inspirador|humor|serio",
   "duracao_estimada_seg": 45,
@@ -138,16 +178,18 @@ Pra cada post, enviar: caption + transcricao + metricas. Pedir JSON:
 }
 ```
 
-Sistema prompt deve enfatizar PT-BR, sem travessao (em-dash), acentuacao correta.
+System prompt: enfatize PT-BR, sem travessao (em-dash), acentuacao correta.
+
+Salvar cada JSON em `$WORK_DIR/analysis/ID.json`.
 
 ## Passo 8: Destilacao do padrao
 
-**Modelo: `gpt-5.2`** (etapa criativa/sintese, vale pagar mais). Lembrete: GPT-5.2 usa `max_completion_tokens`, NAO `max_tokens`.
+**Modelo: `gpt-5.2`** (sintese criativa). Usa `max_completion_tokens`, NAO `max_tokens`.
 
-Enviar todos os JSONs do Passo 7 + metricas dos posts e pedir:
+Envie todos os JSONs do Passo 7 + metricas e peca:
 
-1. **Formula de N blocos** (identificar quantos blocos recorrentes, nomear cada um, descrever funcao)
-2. **Biblioteca de hooks** rankeada por tier S/A/B baseado em views reais
+1. **Formula de N blocos** recorrentes (nomear cada um, descrever funcao)
+2. **Biblioteca de hooks** rankeada por tier baseado em views reais:
    - Tier S: top 10% em views
    - Tier A: 10-30%
    - Tier B: 30-60%
@@ -155,74 +197,80 @@ Enviar todos os JSONs do Passo 7 + metricas dos posts e pedir:
 4. **CTAs mais usados** (com frequencia)
 5. **Temas recorrentes** (top 5)
 6. **Gatilhos dominantes** (top 3)
-7. **Voz/tom caracteristico** (descricao em 3-5 bullets)
-8. **Vocabulario obrigatorio** (palavras que o criador usa muito)
+7. **Voz/tom caracteristico** (3-5 bullets)
+8. **Vocabulario obrigatorio** (palavras recorrentes do criador)
 9. **Vocabulario proibido** (palavras que ele EVITA)
 10. **Checklist pre-publicacao** (replicavel)
 
-Salvar em `/root/scraping-insta-output/USERNAME/padrao-viral.md`.
+Salvar em `$WORK_DIR/padrao-viral.md`.
 
 ## Passo 9: JSONL (se usuario pediu)
 
-Formato OpenAI fine-tuning (`messages` array por linha):
+Formato OpenAI fine-tuning (uma linha por post):
 
 ```jsonl
-{"messages":[{"role":"system","content":"Voce escreve reels no estilo de @USERNAME. Tom: [X]. Vocabulario: [Y]."},{"role":"user","content":"Tema: [tema do post]"},{"role":"assistant","content":"[caption + roteiro do post real]"}]}
+{"messages":[{"role":"system","content":"Voce escreve reels no estilo de @USERNAME. Tom: X. Vocabulario: Y."},{"role":"user","content":"Tema: [tema do post]"},{"role":"assistant","content":"[caption + roteiro do post real]"}]}
 ```
 
-Uma linha por post analisado. Salvar em `/root/scraping-insta-output/USERNAME/dataset.jsonl`.
+Salvar em `$WORK_DIR/dataset.jsonl`.
 
-Treinar depois com:
+Pra treinar depois:
 ```bash
 openai api fine_tuning.jobs.create -t dataset.jsonl -m gpt-4o-mini-2024-07-18
 ```
 
-## Passo 10: Apresentar resultado
+## Passo 10: Copiar output e apresentar resultado
+
+Copie `padrao-viral.md` (e `dataset.jsonl` se gerado) de `$WORK_DIR` pra um diretorio estavel no projeto atual:
+
+```bash
+OUTPUT_DIR="./scraping-insta-output/$IG_USERNAME"
+mkdir -p "$OUTPUT_DIR"
+cp "$WORK_DIR/padrao-viral.md" "$OUTPUT_DIR/"
+[ -f "$WORK_DIR/dataset.jsonl" ] && cp "$WORK_DIR/dataset.jsonl" "$OUTPUT_DIR/"
+```
 
 Mostrar ao usuario:
 - Total de posts scrapados / analisados / transcritos
-- Custo real estimado (tokens + Whisper minutos)
+- Custo real (tokens + minutos Whisper)
 - Caminho do `padrao-viral.md`
 - Caminho do `dataset.jsonl` (se gerado)
 - Preview dos 3 top hooks encontrados
-- Perguntar se quer ajustar nicho/categorizacao antes de salvar final
+- Perguntar se quer ajustar nicho/categorizacao
 
 ## Modelos OpenAI (referencia rapida)
 
-| Etapa | Modelo | Parametro tokens | Por que |
-|-------|--------|------------------|---------|
+| Etapa | Modelo | Param tokens | Por que |
+|-------|--------|--------------|---------|
 | Transcricao | `gpt-4o-mini-transcribe` | - | Whisper barato PT-BR |
 | Analise por post | `gpt-4o-mini` | `max_tokens` | Estruturado, repetitivo |
 | Destilacao final | `gpt-5.2` | `max_completion_tokens` | Sintese criativa |
-| Embeddings (opcional) | `text-embedding-3-small` | - | 1536D padrao projeto |
+| Embeddings (opcional) | `text-embedding-3-small` | - | 1536D |
 
-**IMPORTANTE sobre GPT-5.2:** usa `max_completion_tokens`, nao `max_tokens`. Passar `max_tokens` retorna 400.
+**IMPORTANTE GPT-5.2:** usa `max_completion_tokens`. Passar `max_tokens` retorna 400.
 
-## Dependencias
+## Dependencias do sistema
 
-No sistema de destino precisa ter:
-- `node` 18+
-- `yt-dlp` (`pip install yt-dlp`)
-- `ffmpeg` (`apt install ffmpeg`)
-- `openai` npm package
-- Variavel `OPENAI_API_KEY` no ambiente
+| Dep | Checar | Instalar |
+|-----|--------|----------|
+| Node 18+ | `node --version` | nvm ou gerenciador |
+| yt-dlp | `yt-dlp --version` | `pip install -U yt-dlp` |
+| ffmpeg | `ffmpeg -version` | `apt install ffmpeg` |
+| openai (npm) | dentro do projeto | `npm install openai` |
+| OPENAI_API_KEY | `echo $OPENAI_API_KEY` | exportar no shell |
 
-Scraper nativo (se nao existir no projeto):
-- Copiar `instagram-scraper-native.js` do projeto teste-aios: `aios-core/apps/monitor-server/src/instagram-scraper-native.js`
-- Ou implementar seguindo os endpoints documentados no Passo 2.
+## Custos estimados
 
-## Custos estimados por perfil
-
-| Tamanho | Custo total | Breakdown |
-|---------|-------------|-----------|
-| Top 20 reels | ~$0.30 | Whisper $0.20 + analise $0.05 + destilacao $0.05 |
-| Top 50 reels | ~$0.65 | Whisper $0.50 + analise $0.10 + destilacao $0.05 |
-| Top 100 reels | ~$1.30 | Whisper $1.00 + analise $0.20 + destilacao $0.10 |
+| Tamanho | Custo total |
+|---------|-------------|
+| Top 20 reels | ~$0.30 |
+| Top 50 reels | ~$0.65 |
+| Top 100 reels | ~$1.30 |
 
 ## Observacoes
 
-- Rate limit IG (~200 req/h): se analisando varios perfis em sequencia, esperar entre eles.
-- Perfis privados: nao da, scraper so funciona em perfis publicos.
-- Reels com musica copyright: yt-dlp baixa normalmente, Whisper transcreve apenas audio do criador.
-- Conteudo PT-BR: acentuacao correta OBRIGATORIA, travessao (em-dash) PROIBIDO no padrao final (parece IA).
-- Se o perfil tiver menos posts que N solicitado, usar o que tem e avisar o usuario.
+- Rate limit IG (~200 req/h): ao analisar varios perfis em sequencia, aguardar entre eles
+- Perfis privados: nao funciona, scraper so pega publicos
+- Reels com musica copyright: yt-dlp baixa normal, Whisper transcreve so o audio do criador
+- Conteudo PT-BR: acentuacao correta OBRIGATORIA, travessao (em-dash) PROIBIDO no padrao final
+- Se o perfil tem menos posts que N, usar o que tem e avisar
