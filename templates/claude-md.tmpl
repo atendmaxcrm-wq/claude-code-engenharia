@@ -37,6 +37,11 @@ Hook `reinject-memory.js` reinjeta contexto apos compactacao (dual-mode: pgvecto
 ### Busca Contextual
 Hook `contextual-memory.js` busca memorias relevantes a CADA mensagem automaticamente via pgvector.
 
+### Reformulacao Ativa de Query (Claude)
+O hook envia o prompt CRU como query. Claude DEVE complementar reformulando a intencao
+real e chamando `mcp__aios-memory__search_memories` com query densa em mensagens com
+intencao real (nao triviais). Ver `.claude/rules/memoria-contextual.md` para detalhes.
+
 ## Principios de Desenvolvimento
 - Queries parametrizadas (prevencao SQL injection)
 - Acentuacao correta em todo conteudo PT-BR
