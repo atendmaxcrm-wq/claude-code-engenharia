@@ -142,6 +142,9 @@ async function main() {
     console.log('[6/7] Dependencias MCP (pulado - modulo nao requer)');
   }
 
+  // Write version marker (.cce-version)
+  writeVersionMarker(config, PACKAGE_ROOT);
+
   // Step 7: Post-install validation
   console.log('\n[7/7] Validacao pos-instalacao...');
   const validation = validateInstallation(config);
@@ -169,10 +172,43 @@ async function main() {
   console.log('');
 }
 
+function writeVersionMarker(config, packageRoot) {
+  const fs = require('fs');
+  const { execSync } = require('child_process');
+
+  let commit = null;
+  try {
+    commit = execSync('git rev-parse HEAD', {
+      cwd: packageRoot,
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).toString().trim();
+  } catch (_) {
+    // Not a git checkout (e.g. installed via npm tarball) — skip commit field.
+  }
+
+  const marker = {
+    version: VERSION,
+    commit,
+    module: config.module,
+    installedAt: new Date().toISOString(),
+    repo: 'https://github.com/atendmaxcrm-wq/claude-code-engenharia',
+  };
+
+  const dest = path.join(config.targetDir, '.claude', '.cce-version');
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.writeFileSync(dest, JSON.stringify(marker, null, 2) + '\n');
+}
+
 function validateInstallation(config) {
   const fs = require('fs');
   const checks = [];
   const target = config.targetDir;
+
+  // Version marker
+  checks.push({
+    name: '.cce-version registrado',
+    ok: fs.existsSync(path.join(target, '.claude', '.cce-version')),
+  });
 
   // Check hooks
   checks.push({
