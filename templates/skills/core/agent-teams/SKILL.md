@@ -9,6 +9,62 @@ Tarefa recebida: $ARGUMENTS
 
 ---
 
+## STOP — GATE DE ADERENCIA (LEIA ANTES DE QUALQUER COISA)
+
+As ferramentas `TeamCreate`, `TaskCreate`, `TaskUpdate`, `SendMessage`, `TeamDelete`
+sao **deferred tools** no Claude Code. Elas NAO aparecem no schema inicial da
+sessao — se voce tentar chamar direto, recebe `InputValidationError` e cai
+silenciosamente no Agent tool normal (subagents isolados, SEM time, SEM
+comunicacao). Foi exatamente isso que aconteceu nas tentativas anteriores
+quando "agent-teams nao rodou times de verdade".
+
+### Checklist obrigatorio antes de criar o time
+
+1. **Carregar schemas com ToolSearch** (PRIMEIRA acao desta skill, sem excecao):
+
+   ```
+   ToolSearch({ query: "select:TeamCreate,TaskCreate,TaskUpdate,SendMessage,TeamDelete,TaskList", max_results: 6 })
+   ```
+
+   Apos esse call, as 6 ferramentas ficam disponiveis ate o fim da sessao.
+
+2. **Confirmar env var ativa** (so se houver duvida): `grep CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS .claude/settings.json` — deve retornar `"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"`. Se ausente, parar e avisar usuario.
+
+3. **NUNCA usar Agent tool sem team_name** dentro do fluxo desta skill. Isso reverte pra subagent isolado.
+
+### Anti-padrao (codigo ERRADO — NAO faca isso)
+
+```
+# ERRADO: spawn paralelo sem time, vira 3 subagents isolados sem comunicacao
+Agent({ subagent_type: "dev", prompt: "..." })
+Agent({ subagent_type: "dev", prompt: "..." })
+Agent({ subagent_type: "dev", prompt: "..." })
+```
+
+### Padrao correto
+
+```
+# CERTO: ToolSearch -> TeamCreate -> TaskCreate -> Agent com team_name+name
+ToolSearch({ query: "select:TeamCreate,TaskCreate,SendMessage,TeamDelete", max_results: 4 })
+TeamCreate({ team_name: "feature-x", description: "..." })
+TaskCreate({ subject: "..." })  # uma por sub-tarefa
+Agent({ team_name: "feature-x", name: "alice", subagent_type: "dev", prompt: "..." })
+Agent({ team_name: "feature-x", name: "bob",   subagent_type: "dev", prompt: "..." })
+# ... monitor via TaskList + mensagens automaticas ...
+TeamDelete({ team_name: "feature-x" })
+```
+
+### Auto-check rapido
+
+Se voce ja chegou no Passo "Spawnar teammates" mas NAO viu o resultado de uma
+chamada `ToolSearch` retornando os schemas de `TeamCreate`/`TaskCreate`/etc neste
+turno, **volte ao topo e execute o ToolSearch primeiro.** Sem ele, todo o
+restante da skill vira teatro.
+
+---
+
+---
+
 ## COMO FUNCIONA
 
 Agent Teams usa as ferramentas nativas do Claude Code:
