@@ -16,7 +16,7 @@
  */
 
 const path = require('path');
-const { preFlightChecks } = require('./lib/validators');
+const { preFlightChecks, checkRootSandbox } = require('./lib/validators');
 const { runWizard } = require('./lib/wizard');
 const { renderTemplates } = require('./lib/templates');
 const { handleBrownfield } = require('./lib/brownfield');
@@ -153,6 +153,12 @@ async function main() {
     console.log(`  [${icon}] ${check.name}`);
   }
 
+  // Root + bypassPermissions safety net: templates ship defaultMode=bypassPermissions,
+  // which the CLI rejects under root unless IS_SANDBOX=1 (or CLAUDE_CODE_BUBBLEWRAP).
+  // Without this fix the next `claude` launch exits with:
+  //   "--dangerously-skip-permissions cannot be used with root/sudo privileges..."
+  await maybeFixRootSandbox(opts);
+
   // Summary
   console.log('\n  ════════════════════════════════════════');
   console.log('  Instalacao concluida!');
@@ -170,6 +176,74 @@ async function main() {
   console.log('');
   console.log('  Ao final de cada sessao, use: /atualizar-memoria');
   console.log('');
+}
+
+async function maybeFixRootSandbox(opts) {
+  const status = checkRootSandbox();
+  if (!status.needsFix) return;
+
+  const fs = require('fs');
+  const os = require('os');
+  const bashrc = path.join(os.homedir(), '.bashrc');
+  const marker = '# Added by claude-code-engenharia: allow Claude Code as root with defaultMode=bypassPermissions';
+  const line = 'export IS_SANDBOX=1';
+
+  let existingContent = '';
+  try {
+    existingContent = fs.readFileSync(bashrc, 'utf8');
+  } catch (_) {
+    // No .bashrc yet — we'll create it if user opts in.
+  }
+
+  if (existingContent.includes('IS_SANDBOX=1') || existingContent.includes('CLAUDE_CODE_BUBBLEWRAP=')) {
+    console.log('\n  Root sandbox: ~/.bashrc ja exporta IS_SANDBOX/CLAUDE_CODE_BUBBLEWRAP. Nada a fazer.');
+    return;
+  }
+
+  console.log('\n  ATENCAO: rodando como root e IS_SANDBOX nao esta exportado.');
+  console.log('  Os settings deste install usam permissions.defaultMode = "bypassPermissions",');
+  console.log('  o que faz a CLI do Claude Code recusar o launch como root.');
+  console.log('  Sintoma no proximo `claude`:');
+  console.log('    --dangerously-skip-permissions cannot be used with root/sudo privileges');
+
+  let accept = opts.yes;
+  if (!accept) {
+    accept = await promptYesNo('  Adicionar `export IS_SANDBOX=1` ao ~/.bashrc?', true);
+  }
+
+  if (!accept) {
+    console.log('\n  Pulado. Para aplicar manualmente:');
+    console.log(`    echo '${marker}' >> ~/.bashrc`);
+    console.log(`    echo '${line}' >> ~/.bashrc`);
+    console.log('    source ~/.bashrc');
+    console.log('  Ou rode com CLAUDE_CODE_BUBBLEWRAP=1 dentro de bubblewrap.');
+    return;
+  }
+
+  const prefix = existingContent.length > 0 && !existingContent.endsWith('\n') ? '\n' : '';
+  const block = `${prefix}\n${marker}\n${line}\n`;
+  try {
+    fs.appendFileSync(bashrc, block);
+    console.log(`  ~/.bashrc atualizado. Aplique agora com: source ~/.bashrc`);
+    console.log('  (Se voce usa zsh/fish, replique a linha no rc do seu shell.)');
+  } catch (err) {
+    console.error(`  AVISO: falhou ao editar ~/.bashrc: ${err.message}`);
+    console.error(`  Adicione manualmente:\n    ${line}`);
+  }
+}
+
+function promptYesNo(question, defaultYes) {
+  return new Promise((resolve) => {
+    const readline = require('readline');
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    const hint = defaultYes ? '[Y/n]' : '[y/N]';
+    rl.question(`${question} ${hint} `, (answer) => {
+      rl.close();
+      const norm = (answer || '').trim().toLowerCase();
+      if (!norm) return resolve(defaultYes);
+      resolve(norm === 'y' || norm === 'yes' || norm === 's' || norm === 'sim');
+    });
+  });
 }
 
 function writeVersionMarker(config, packageRoot) {
