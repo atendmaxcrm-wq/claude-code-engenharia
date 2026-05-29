@@ -119,7 +119,8 @@ Apresentar ao usuario neste formato ANTES de executar:
 **Padrao:** [parallel/pipeline/competing/specialist/review]
 **Risco:** [baixo/medio/alto]
 **Arquivos afetados:** [N arquivos]
-**Custo estimado:** [N teammates x contexto = ~Nx tokens]
+**Modelo:** opus em todos os teammates (padrao)
+**Custo estimado:** [N teammates opus x contexto = ~Nx tokens — custo alto por escolha de qualidade]
 
 ### Time
 | # | Teammate | Tipo | Dominio | Arquivos |
@@ -152,8 +153,12 @@ Apresentar ao usuario neste formato ANTES de executar:
 - Quality gate **obrigatorio** ao final
 - Se risco alto: adicionar teammate arquiteto na fase de design
 - **5-6 tasks por teammate** e o ideal
-- Preferir **haiku** ou **sonnet** para teammates de execucao (custo menor)
-- Reservar **opus** para lead e tarefas que exigem raciocinio profundo
+- **PADRAO: opus em TODOS os teammates** (`model: "opus"`)
+  - Prioriza qualidade de raciocinio sobre custo
+  - A versao exata (4.8/4.7) NAO e selecionavel por teammate — herda o opus da sessao atual
+  - Para usar uma versao especifica em todos, rodar a sessao inteira nessa versao (`/model`) antes de orquestrar
+  - Custo escala linearmente com N teammates opus em paralelo (limite de 5 mantido)
+  - Se custo for restricao explicita do usuario, ai sim cair pra sonnet nos executores
 
 ---
 
@@ -178,7 +183,7 @@ Agent tool: {
   team_name: "[nome-do-time]",
   name: "[nome-do-teammate]",
   subagent_type: "[tipo]",
-  model: "[sonnet/haiku/opus]"
+  model: "opus"   // PADRAO: opus em TODOS os teammates (versao herda da sessao)
 }
 ```
 

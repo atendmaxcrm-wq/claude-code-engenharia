@@ -31,9 +31,13 @@ Pedido do usuario
     |       -> Planejar -> implementar -> validar
     |
     |-- E TAREFA GRANDE / complexa / multiplos arquivos?
-    |   -> Preferir /agent-teams-v2 (orquestracao nativa)
-    |   -> Alternativa simples: /agent-teams (subagents basicos)
+    |   -> Usar /agent-teams (orquestracao nativa: TeamCreate + TaskCreate + SendMessage + quality gate)
     |   -> Decompor em ondas paralelas -> apresentar plano -> aguardar aprovacao
+    |   -> PROIBIDO o atalho: NUNCA disparar Agent tool em paralelo NEM usar Workflow
+    |      sem TeamCreate antes. Isso reverte pra subagents isolados (sem time, sem
+    |      task list compartilhada, sem quality gate) e e exatamente o anti-padrao
+    |      que a skill /agent-teams existe para impedir. Se a tarefa e grande e
+    |      paralelizavel, e /agent-teams — nao improvisar fan-out por ser "mais facil".
     |
     |-- E AJUSTE SIMPLES / texto / cor / campo / tweak pequeno?
     |   -> Implementar direto (sem processo formal)
@@ -81,7 +85,7 @@ ENTENDER -> PESQUISAR (se necessario) -> PLANEJAR -> IMPLEMENTAR -> VALIDAR
 ### 3. Planejar Antes de Codar
 - Ajuste simples: implementar direto
 - Feature media (2-5 arquivos): listar passos, implementar sequencial
-- Feature grande (5+ arquivos): usar /agent-teams-v2 (recomendado) ou /agent-teams
+- Feature grande (5+ arquivos): usar /agent-teams (orquestracao nativa: TeamCreate + TaskCreate + teammates com team_name + SendMessage + quality gate + TeamDelete). NUNCA disparar Agent tool em paralelo NEM usar Workflow sem criar time antes — o atalho reverte pra subagents isolados e e proibido.
 - SEMPRE apresentar plano para features medias/grandes antes de implementar
 
 ### 4. Validar Sempre
