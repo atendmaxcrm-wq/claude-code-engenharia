@@ -26,12 +26,22 @@ ANTES de qualquer acao, use AskUserQuestion para perguntar:
 
 ## Passo 2: Executar o design scraper
 
-Monte o comando baseado nas respostas:
+Garanta o Playwright primeiro (idempotente, instala so se faltar):
 
 ```bash
-python3 /root/teste-aios/aios-core/apps/monitor-server/src/scripts/design-scraper.py \
+python3 -c "import playwright" 2>/dev/null \
+  && python3 -c "from playwright.sync_api import sync_playwright; p=sync_playwright().start(); p.chromium.launch(headless=True).close(); p.stop()" 2>/dev/null \
+  && echo "Playwright OK" \
+  || { echo "Instalando Playwright..."; pip install playwright playwright-stealth && python3 -m playwright install chromium; }
+```
+
+O script e self-contained na skill `clonar-design` (instalada junto). Monte o
+comando baseado nas respostas:
+
+```bash
+python3 "$CLAUDE_PROJECT_DIR/.claude/skills/clonar-design/assets/design-scraper.py" \
   --url "URL_DO_SITE" \
-  --output "/root/teste-aios/scraping-output/NOME_DO_SITE/design" \
+  --output "$CLAUDE_PROJECT_DIR/scraping-output/NOME_DO_SITE/design" \
   --video \
   --responsive
 ```
@@ -173,7 +183,7 @@ Mostrar ao usuario:
 - Timeout de 30s por pagina, scroll automatico para lazy loading
 - Maximo de 2000 elementos analisados (performance)
 - Logs vao para stderr, dados para stdout
-- Output fica em `/root/teste-aios/scraping-output/NOME/design/`
-- Script: `/root/teste-aios/aios-core/apps/monitor-server/src/scripts/design-scraper.py`
+- Output fica em `scraping-output/NOME/design/` (relativo a raiz do projeto, `$CLAUDE_PROJECT_DIR`)
+- Script (self-contained na skill): `.claude/skills/clonar-design/assets/design-scraper.py`
 - Video e gravado em instancia separada do browser (contexto com recordVideo)
 - Formato do video: WebM (nativo Playwright)

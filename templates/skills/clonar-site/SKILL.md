@@ -28,7 +28,7 @@ Se o usuario der instrucoes adicionais, honrar sobre os padroes.
 
 1. **Modo de extracao:** Este skill suporta dois modos de extracao, escolhido automaticamente:
    - **Browser MCP** (preferido se disponivel): Chrome MCP, Playwright MCP, etc. Permite interacao em tempo real (click, hover, scroll).
-   - **Design Scraper** (fallback headless): Script Python em `/root/teste-aios/aios-core/apps/monitor-server/src/scripts/design-scraper.py`. Usa Playwright headless + Stealth. Funciona em VPS sem display. Extrai design tokens, animacoes, layout, screenshots e video automaticamente.
+   - **Design Scraper** (fallback headless): Script Python self-contained na propria skill, em `.claude/skills/clonar-site/assets/design-scraper.py`. Usa Playwright headless + Stealth. Funciona em VPS sem display. Extrai design tokens, animacoes, layout, screenshots e video automaticamente.
    
    **Deteccao automatica:** Verificar se ha browser MCP disponivel. Se sim, usar browser MCP. Se nao, usar design-scraper.py (confirmar que Playwright esta instalado: `python3 -c "from playwright.async_api import async_playwright; print('ok')"`).
 
@@ -128,10 +128,19 @@ Navegue ate a URL alvo com browser MCP. Siga o fluxo interativo completo abaixo.
 
 ### Modo B: Design Scraper (headless, para VPS sem display)
 
-Rode o design-scraper.py para extracao automatica:
+Garanta o Playwright primeiro (idempotente, instala so se faltar):
 
 ```bash
-python3 /root/teste-aios/aios-core/apps/monitor-server/src/scripts/design-scraper.py \
+python3 -c "import playwright" 2>/dev/null \
+  && python3 -c "from playwright.sync_api import sync_playwright; p=sync_playwright().start(); p.chromium.launch(headless=True).close(); p.stop()" 2>/dev/null \
+  && echo "Playwright OK" \
+  || { echo "Instalando Playwright..."; pip install playwright playwright-stealth && python3 -m playwright install chromium; }
+```
+
+Rode o design-scraper.py (self-contained na skill) para extracao automatica:
+
+```bash
+python3 "$CLAUDE_PROJECT_DIR/.claude/skills/clonar-site/assets/design-scraper.py" \
   --url "$ARGUMENTS" \
   --output "docs/research/scraper-output" \
   --video \

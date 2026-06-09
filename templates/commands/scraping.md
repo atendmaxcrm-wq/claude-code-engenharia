@@ -30,12 +30,21 @@ ANTES de qualquer acao, use AskUserQuestion para perguntar:
 
 ## Passo 2: Executar o scraper
 
-Rode o script Python com Playwright:
+Garanta o Playwright primeiro (idempotente, instala so se faltar):
 
 ```bash
-python3 /root/teste-aios/aios-core/apps/monitor-server/src/scripts/site-scraper.py \
+python3 -c "import playwright" 2>/dev/null \
+  && python3 -c "from playwright.sync_api import sync_playwright; p=sync_playwright().start(); p.chromium.launch(headless=True).close(); p.stop()" 2>/dev/null \
+  && echo "Playwright OK" \
+  || { echo "Instalando Playwright..."; pip install playwright playwright-stealth && python3 -m playwright install chromium; }
+```
+
+Rode o script Python (self-contained na skill `scraping`):
+
+```bash
+python3 "$CLAUDE_PROJECT_DIR/.claude/skills/scraping/assets/site-scraper.py" \
   --url "URL_DO_SITE" \
-  --output "/root/teste-aios/scraping-output/NOME_DO_SITE" \
+  --output "$CLAUDE_PROJECT_DIR/scraping-output/NOME_DO_SITE" \
   --max-pages 100 \
   --delay 2
 ```
@@ -50,8 +59,8 @@ O script:
 
 ## Passo 3: Se pediu base de conhecimento
 
-Leia o `content.json` completo e gere um arquivo MD seguindo o formato de referencia:
-`/root/teste-aios/scraping-output/lavorofoton/base_conhecimento_odontobarra_v2.md`
+Leia o `content.json` completo e gere um arquivo MD de base de conhecimento (este
+formato e a referencia — nao depende de nenhum arquivo externo):
 
 A base de conhecimento deve conter (adaptar conforme o tipo de negocio):
 
@@ -90,9 +99,9 @@ Mostrar ao usuario:
 
 ## Notas tecnicas
 
-- O scraper usa `playwright` + `playwright-stealth` (Python, ja instalado)
+- O scraper usa `playwright` + `playwright-stealth` (auto-instalado no Passo 2 se faltar)
 - Sites renderizados por JS (React, Next.js, etc) sao suportados
 - Timeout de 30s por pagina, scroll automatico para lazy loading
 - Logs vao para stderr, dados para stdout
-- Output fica em `/root/teste-aios/scraping-output/`
-- Script: `/root/teste-aios/aios-core/apps/monitor-server/src/scripts/site-scraper.py`
+- Output fica em `scraping-output/` (relativo a raiz do projeto, `$CLAUDE_PROJECT_DIR`)
+- Script (self-contained na skill): `.claude/skills/scraping/assets/site-scraper.py`

@@ -23,14 +23,28 @@ ANTES de qualquer acao, use AskUserQuestion para perguntar:
    - Sim (video WebM do scroll completo da pagina)
    - Nao
 
-## Passo 2: Executar o design scraper
+## Passo 1.5: Garantir Playwright (pre-requisito)
 
-Monte o comando baseado nas respostas:
+O scraper depende de `playwright` + Chromium. Antes de rodar, verifique e instale
+APENAS se faltar (idempotente, nao reinstala se ja existe):
 
 ```bash
-python3 /root/teste-aios/aios-core/apps/monitor-server/src/scripts/design-scraper.py \
+python3 -c "import playwright" 2>/dev/null \
+  && python3 -c "from playwright.sync_api import sync_playwright; p=sync_playwright().start(); p.chromium.launch(headless=True).close(); p.stop()" 2>/dev/null \
+  && echo "Playwright OK" \
+  || { echo "Instalando Playwright..."; pip install playwright playwright-stealth && python3 -m playwright install chromium; }
+```
+
+## Passo 2: Executar o design scraper
+
+O script vive DENTRO desta skill (self-contained, em `assets/`). Monte o comando
+baseado nas respostas. `$CLAUDE_PROJECT_DIR` e a raiz do projeto onde a skill foi
+instalada:
+
+```bash
+python3 "$CLAUDE_PROJECT_DIR/.claude/skills/clonar-design/assets/design-scraper.py" \
   --url "URL_DO_SITE" \
-  --output "/root/teste-aios/scraping-output/NOME_DO_SITE/design" \
+  --output "$CLAUDE_PROJECT_DIR/scraping-output/NOME_DO_SITE/design" \
   --video \
   --responsive
 ```
@@ -90,6 +104,7 @@ Mostrar quantas cores, fontes, animacoes, secoes foram detectadas. Perguntar se 
 
 ## Notas tecnicas
 
-- Script: `/root/teste-aios/aios-core/apps/monitor-server/src/scripts/design-scraper.py`
-- Output: `/root/teste-aios/scraping-output/NOME/design/`
+- Script (self-contained na skill): `.claude/skills/clonar-design/assets/design-scraper.py`
+- Output: `scraping-output/NOME/design/` (relativo a raiz do projeto, `$CLAUDE_PROJECT_DIR`)
+- Pre-requisito: `playwright` + Chromium (ver Passo 1.5 para auto-instalacao)
 - Video em WebM (nativo Playwright)
