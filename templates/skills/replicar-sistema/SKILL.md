@@ -1,6 +1,6 @@
 ---
 name: replicar-sistema
-description: Pipeline completo para replicar o design de qualquer sistema a partir de foto/print OU VIDEO (screen recording) e construir um sistema real com aquela cara. Fluxo validado: extracao cirurgica do design system (video vira frames via ffmpeg + notas de movimento) -> mockup HTML canonico de alta fidelidade (aprovado pelo usuario ANTES de codar) -> tokens semanticos no Tailwind -> telas em ondas (Agent Teams se grande) -> quality gate visual com screenshots. Use quando o usuario manda print, foto ou video de um sistema, app ou dashboard e quer "fazer igual", "replicar esse design", "criar meu sistema com essa cara", "quero um sistema assim", "clonar esse visual pro meu app", "replica esse sistema", "replica desse video". NAO e para clonar sites de marketing por URL (isso e /clonar-site); aqui a entrada e IMAGEM/VIDEO e a saida e um SISTEMA do usuario com o design da referencia.
+description: Pipeline completo para replicar o design de qualquer sistema a partir de foto/print OU VIDEO (screen recording) e construir um sistema real com aquela cara. Fluxo validado: extracao cirurgica do design system (video vira frames via ffmpeg + notas de movimento) -> mockup HTML canonico de alta fidelidade (aprovado pelo usuario ANTES de codar) -> tokens semanticos no Tailwind -> telas em ondas (Agent Teams se grande) -> quality gate visual + auditoria de completude (skill auditar-fidelidade: renderizar a referencia e achar features/recursos faltando, nao so o visual). Use quando o usuario manda print, foto ou video de um sistema, app ou dashboard e quer "fazer igual", "replicar esse design", "criar meu sistema com essa cara", "quero um sistema assim", "clonar esse visual pro meu app", "replica esse sistema", "replica desse video". NAO e para clonar sites de marketing por URL (isso e /clonar-site); aqui a entrada e IMAGEM/VIDEO e a saida e um SISTEMA do usuario com o design da referencia.
 ---
 
 # Replicar Sistema a partir de Foto
@@ -132,16 +132,23 @@ Gotchas reais (aprendidos em producao no My Zap):
   (mandar ler com Read), a tabela de tokens e as regras de ouro da Fase 3.
 - Proibir: hex hardcoded, mudanca de layout fora do espec, dois teammates no mesmo arquivo.
 
-## Fase 5 — Quality gate visual (obrigatorio antes de "pronto")
+## Fase 5 — Quality gate: visual + COMPLETUDE (obrigatorio antes de "pronto")
 
 1. `tsc --noEmit` + build limpo (mover `.next` se mexeu no @theme).
-2. **Screenshots com sessao real** (Playwright/Chrome headless; se houver auth, forjar
-   cookie de sessao assinando o JWT com o secret do .env) em mobile (360 e 390px) e
-   desktop. Medir `scrollWidth - clientWidth` (overflowX deve ser 0) e capturar erros
-   de console (devem ser 0).
-3. **Comparar lado a lado com o mockup canonico** e com o print original.
-4. Rodar `safari-check` se a skill existir no projeto.
-5. Mostrar os prints ao usuario e iterar o que ele apontar.
+2. **Renderize a REFERENCIA (rode o JS dela), nao audite so o HTML estatico.** Mockup
+   monta telas/widgets/temas em runtime; capture TODAS as views (clicar `[data-view]`)
+   nos DOIS temas como ground truth em /tmp/ref-render*/. (Foi o furo do My Zap v10:
+   li o estatico e perdi a dashboard rica + features que so existem no JS.)
+3. **Screenshots do app com sessao real** (forjar cookie JWT com o secret do .env) em
+   mobile (390px) e desktop, nos DOIS temas. Overflow: meça POR ELEMENTO
+   (`getBoundingClientRect().right > innerWidth`), nao so `scrollWidth-clientWidth`
+   (que esconde blowout clipado). Erros de console = 0.
+4. **Comparar lado a lado** cada tela do app com o render da referencia (claro E escuro).
+5. **Auditoria de COMPLETUDE (nao so visual): rode a skill `auditar-fidelidade`.** Ela
+   enumera funcoes/handlers/modais/settings do JS da referencia e acha RECURSOS faltando
+   (galeria de tema, telas de detalhe, campos de modal, botoes mortos, simuladores
+   estaticos). Fidelidade visual NAO garante que as features existem.
+6. Rodar `safari-check` se a skill existir; mostrar os prints ao usuario e iterar.
 
 ## Anti-padroes (o que mata o resultado)
 
