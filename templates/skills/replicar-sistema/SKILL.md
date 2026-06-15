@@ -11,7 +11,7 @@ Filosofia (validada no build do My Zap Money): a foto NAO e o alvo final, e mate
 O que separa resultado mediano de resultado perfeito e o passo intermediario:
 
 ```
-FOTO -> EXTRACAO (tokens) -> MOCKUP HTML CANONICO (aprovar!) -> TOKENS NO CODIGO -> TELAS EM ONDAS -> VERIFICACAO VISUAL
+FOTO -> EXTRACAO (tokens) -> STYLEGUIDE HTML (aprovar) -> MOCKUP HTML CANONICO (aprovar!) -> TOKENS NO CODIGO -> TELAS EM ONDAS -> VERIFICACAO VISUAL
 ```
 
 REGRA DE OURO: nunca pular o mockup. Codar direto da foto perde as decisoes de design
@@ -27,6 +27,15 @@ O mockup aprovado vira o ALVO CANONICO de todo o resto do projeto.
 Localizar a(s) referencia(s): caminho em $ARGUMENTS, ou a mais recente em docs/
 (`ls -lt docs/*.{png,jpg,jpeg,webp,mp4,mov,webm,mkv} 2>/dev/null | head`).
 Imagens: ler TODAS com a tool Read (visao).
+
+**Mineracao de referencia (enriquecer o print unico).** Um print so deixa ambiguidades
+(como esse arquetipo trata hover? estado vazio? o dark? a tabela densa?). Antes de extrair,
+garimpar 2-3 shots ADICIONAIS do MESMO arquetipo visual (Dribbble/Pinterest: a estetica que
+o usuario quer, ex: "fintech dark lime", "invoices premium") e ler todos juntos. Destilar de
+3-4 referencias concretas de alto nivel - em vez de adivinhar do print unico - ancora o
+resultado em proporcoes e relacoes JA validadas por designers e resolve os casos que uma
+imagem sozinha nao mostra. Registrar a origem no eyebrow/footer do styleguide ("destilado de
+X · invoices"). Nao copiar conteudo das referencias - so a gramatica visual.
 
 ### Entrada em VIDEO (screen recording da referencia)
 
@@ -79,7 +88,46 @@ Senao, aplicar o protocolo inline (mesmo nivel de um designer destilando tokens)
 Salvar em `docs/design-extraido-<slug>.md`. Nao inventar o que nao da pra ver;
 marcar inferencias como "(aproximado)".
 
+## Fase 1.5 — Styleguide HTML (antes das telas)
+
+O passo do Kainan que mais elevou o resultado: antes de qualquer tela, gerar UM
+`docs/<dominio>-design-system.html` renderizado e aprova-lo lado a lado com a referencia.
+O styleguide NAO e documentacao pos-fato: e o contrato que torna telas (e ate dominios)
+diferentes coerentes. Forca decidir cor/tipo/raio UMA vez, em isolamento, sem a pressao de
+uma tela funcionar; depois toda tela so consome tokens ja decididos e nenhuma inventa um
+cinza ou um raio novo.
+
+O arquivo tem 6 secoes numeradas (badge com numero em accent + descricao a direita):
+- **01 Paleta:** swatches com hex + papel + regra de uso ("`#8FF500` accent - so CTA/nav
+  ativo/progresso, nunca fundo de card").
+- **02 Tipografia:** specimen da fonte real (nome + classificacao, ex: "Lufga · geometrica
+  humanista") e a escala por papel com size/weight/tracking rotulados ("300 · titulos",
+  "500 · nav/labels", "800 · labels pequenos").
+- **03 Raios e superficies:** os 7 raios visualizados + a inversao de superficie demonstrada.
+- **04 Sombras e efeitos:** elevacao (spread negativo), glow duplo do acento, glass.
+- **05 Componentes:** os controles REAIS que as telas vao reusar - botoes accent/dark/ghost,
+  tabs com badge de contagem, chips, pills, avatares em stack, KPI/metrica, payment cards,
+  estados (hover/ativo/done/vazio). A tela depois so COMPOE pecas ja aprovadas.
+- **06 Tokens CSS:** o bloco `:root` + `[data-theme]` EXATAMENTE como vai pro codigo (mesmos
+  nomes `--accent/--page/--panel/--ink/--line`, escalas `--r-*`, `--speed-*`, `--ease-*`).
+  Esse bloco e colado VERBATIM no topo de cada tela; telas so consomem `var(--token)`.
+
+Obrigatorio: toggle de tema FUNCIONAL e render/print nos DOIS temas (light + dark) como
+checagem - pega cedo onde um token quebra contraste (ex: texto sobre lime sempre escuro).
+
+So depois deste arquivo aprovado parte-se pra Fase 2 (telas). Regra de revisao: `#hex`
+literal dentro do markup de uma tela (fora do `:root`) e bug - trocar por `var(--token)`.
+Dominio novo (clinica, logistica) com a MESMA cara: duplicar o `:root` + temas e reescrever
+SO o conteudo; o sistema visual e transversal a dominios.
+
+> Em projetos que ja tem extracao forte na Fase 1, o styleguide e leve: e a Fase 1 montada
+> como HTML navegavel + bloco de tokens copiavel. Vale o passo porque renderizar > ler texto.
+
 ## Fase 2 — Mockup HTML canonico (O CORACAO desta skill)
+
+> **Regra de ouro de beleza:** uma fonte com personalidade + headline gigante-fino +
+> UM acento que so marca acao + inversao de superficie - se faltar um desses quatro, ainda
+> e mockup generico.
 
 E o passo que muda o nivel do resultado. Gerar UM arquivo HTML autocontido com a cara
 da referencia aplicada ao PRODUTO DO USUARIO, e iterar ate o usuario aprovar.
@@ -103,6 +151,114 @@ Checklist de qualidade do mockup (nivel "ficou perfeito"):
 - Salvar em `docs/<produto>-mockup-v1.html`, mostrar ao usuario (servir ou abrir),
   **ITERAR** (v2, v3...) ate aprovacao explicita. A versao aprovada e o alvo canonico:
   registrar isso na memoria do projeto.
+
+## Excelencia visual (rubrica do mockup)
+
+Aprovar um mockup "ok" e o que produz sistema mediano. Esta rubrica e o sarrafo do
+nivel "parece desenhado por designer, nao gerado". Aplicar item a item ao mockup da
+Fase 2 e re-conferir no render. Validada no redesign do nosso dashboard
+(docs/prints/myzap-dashboard-redesign.html): Lufga + headline gigante-fino +
+inversao de superficie + acento contido.
+
+### Tipografia
+- [ ] UMA familia geometrica-humanista pra 100% da UI (Lufga; gratis: Manrope, Onest,
+      Geist). Stack com fallback que mantem o DNA: `'Lufga','Manrope','Inter',ui-sans-serif`.
+      ZERO segunda familia pra titulo. Carregar pesos 300;400;500;600;700;800 de uma vez.
+- [ ] Headline gigante-fino: H1 `clamp(46px,6vw,82px)`, weight `300-500` (NUNCA bold),
+      `letter-spacing:-.075em`, `line-height:.88-.96`, `margin:0`. Quanto maior o titulo,
+      mais negativo o tracking e mais leve o peso.
+- [ ] Pesos por papel (inversao deliberada): 300 = display/metrica grande; 400 = numero
+      medio; 500 = nav/labels/titulo de pagina; 600 = subtitulo/destaque; 700 = H2 secao;
+      800 = label PEQUENO/badge/botao/nav/brand. Regra: texto <16px funcional = 700-800;
+      texto >40px decorativo = 300-500.
+- [ ] Metrica/KPI tratado como display: `font-weight:500`, `letter-spacing:-.06 a -.07em`
+      (mais negativo que titulo), `line-height:.92`, `white-space:nowrap`, flex
+      `align-items:baseline`. Numero hero NUNCA em bold.
+- [ ] Cifrao e unidade rebaixados em span: `font-size:.46-.55em`, `color:var(--tmut)`,
+      `font-weight:500-600`. Tamanho em `em` (escala com clamp), nao px. Superscript do
+      simbolo via `vertical-align` positivo, nunca `<sup>`.
+- [ ] Tracking por faixa: >40px `-.06 a -.075em`; 20-40px `-.03 a -.05em`; body 14-16px
+      `-.01em`. Excecao: uppercase <14px (eyebrow, th de tabela, label de coluna) recebe
+      tracking POSITIVO `+.04 a +.05em` + weight 800-900. Uppercase miudo com tracking 0
+      e preguica.
+
+### Cor e acento
+- [ ] UM unico acento quente, e ele significa ACAO ou ESTADO ATIVO (nav ativo, CTA, item
+      concluido, progresso, toggle on, card em foco). Nunca decoracao (titulo, icone solto).
+- [ ] Escassez do acento: 1 a 3 pontos quentes por viewport. Contar no render; acima de 3,
+      rebaixar os menos importantes pra neutro ou pra versao soft (cor a ~16% alpha).
+- [ ] Base 100% neutra fria: pagina/superficies/bordas/texto so com cinzas frios (vies azul).
+      No maximo UM neutro com leve matiz (steel-blue) pro painel de detalhe. Nada mais ganha
+      cor exceto o acento e os 2 estados.
+- [ ] Texto sobre o acento e SEMPRE ink escuro fixo (`#071006`/`#0e1a00`), hardcoded fora do
+      sistema de tema, pra contraste garantido nos 2 modos (token viraria branco e sumiria).
+- [ ] Danger/warning NUNCA preenchem botao nem viram bloco chapado. Trio do mesmo hex: texto
+      = hex puro, fundo = hex a 13-16% alpha, borda = hex a 24-25% alpha. Preenchimento solido
+      e glow sao exclusivos do acento. Sucesso pode ser o proprio acento.
+- [ ] Acento com profundidade: gradiente vertical sutil (tom +claro no topo -> accent na base,
+      ~4-5% de luminancia) + glow duplo na cor + `inset 0 1px 0 rgba(255,255,255,.45)`. Lime
+      chapado fica plastico.
+
+### Superficie e profundidade
+- [ ] Escala de 7 raios proporcional ao tamanho: xs=12 / sm=18 / md=26 / lg=36 / xl=48 /
+      xxl=58 / pill=999. Shell-hero 48-58px; card padrao 26-38px; input/botao/chip-acao = pill;
+      tag/badge interna 12-18px. Nunca o mesmo raio num painel de 600px e num botao de 40px.
+- [ ] Sombra de elevacao com offset Y grande + spread NEGATIVO (sombra macia, curta, "pousada"):
+      light `0 18px 44px -26px rgba(40,60,90,.5)`, dark `0 24px 54px -30px rgba(0,0,0,.7)`.
+      Tonalizar com a cor do fundo, NUNCA preto puro. Combinar com `inset 0 1px 0 rgba(255,255,255,.09)`.
+- [ ] Glow do acento = halo DUPLO na propria cor (curto+forte e longo+fraco):
+      `0 0 18px rgba(143,245,0,.34), 0 0 48px rgba(143,245,0,.16)`. So no acento. Sombra cinza
+      em botao verde mata o brilho.
+- [ ] Inversao de superficie (a jogada-mestra): o painel-ancora e o OPOSTO de luminancia da
+      pagina. Canvas escuro -> bloco branco `#FFF`; canvas claro -> bloco `#1C2024`. Raio grande
+      (44-58px) reforca o efeito "folha pousada". Texto dentro inverte junto (cor fixa).
+- [ ] Glass de verdade = 4-5 camadas, nao so backdrop-filter: gradiente diagonal 135-142deg
+      entre 2 superficies (~.82 e ~.92 alpha) + `backdrop-filter:blur(20-30px) saturate(1.15-1.2)`
+      + borda branca 8-12% + `::after` sweep de luz 120deg + `::before` glow radial. O saturate
+      reanima a cor atras (sem ele o blur deixa tudo cinza-morto).
+- [ ] Ritmo de espaco: o espaco MORA dentro dos cards. Padding interno 32-54px; gap entre cards
+      14-18px. Regra: padding interno >= 2x o gap do grid. Metricas dentro do card com gap maior (~40px).
+
+### Componentes
+- [ ] Estado ativo unificado (o MESMO gesto em nav/tab/method-card/switch/badge): gradiente lime
+      vertical + glow duplo + texto `#071006` + `inset 0 1px 0 rgba(255,255,255,.45)`. O olho
+      reconhece "selecionado" sem ler.
+- [ ] Badge de contagem dentro de pill inverte quando o pai fica ativo: bg semitransparente escuro
+      no normal; solido escuro `#12141C` + texto branco no ativo (pra nao sumir sobre o lime claro).
+- [ ] Hachura diagonal pra tudo "nao confirmado/vazio/secundario":
+      `repeating-linear-gradient(135deg, cor-fraca 0 7px, cor 7px 14px)`. Vale ate pra barra de
+      progresso (dois tons do acento em bandas de 6-7px = sensacao de material).
+- [ ] Pilha de avatares: `margin-left:-13px` (zerando o primeiro), border de 3px na COR DA
+      SUPERFICIE (token, nao branco fixo), preenchimento `linear-gradient(135deg, corA, corA-escura)`.
+- [ ] Anel de progresso sem SVG: `conic-gradient(var(--accent) var(--p), trilha-fraca 0)` num circulo
+      + `::after inset:10px` com a cor EXATA da superficie do card (token por tema) abrindo o furo.
+- [ ] Iconografia 100% line: `fill:none; stroke:currentColor; stroke-width:1.7-1.8;
+      stroke-linecap/linejoin:round`, grid 24, renderizado 20-22px. Herdar currentColor pra seguir
+      o estado. NUNCA misturar solid com stroke.
+- [ ] Hover universal de micro-elevacao 1-3px com 2 easings nomeados: `--ease-smooth
+      cubic-bezier(.22,1,.36,1)` pra mover/hover, `--ease-snap cubic-bezier(.16,1,.3,1)` pra
+      entradas. Botao/card `translateY(-2px)`; linha de lista `translateX(3px)`. Velocidades
+      160/260/520ms. Gesto grande (scale/rotate) so no toggle de tema.
+
+### Composicao
+- [ ] Grade do hero assimetrica `1.55fr / 1fr` (ou `1.58fr/.98fr`), nunca 50/50. O lado largo e o
+      protagonista.
+- [ ] Cards-filhos que furam a base do pai: fileira de opcoes posicionada `absolute` no bottom, cada
+      item com cantos so no topo (`border-radius:34px 34px 0 0`), o selecionado 30-40px mais alto +
+      glow de acento, `align-items:end`, `overflow:hidden` no pai. A ALTURA comunica selecao mesmo
+      em escala de cinza.
+
+### Anti-slop: sinais de mockup generico a evitar
+- Inter (ou system-ui) em TUDO -> usar geometrica-humanista com personalidade.
+- Header em bold/600 medio "tamanho de subtitulo" -> headline gigante-fino 300-500.
+- Acento espalhado (titulo colorido, icones decorativos, varios botoes lime) -> 1-3 pontos quentes.
+- Numero KPI em bold sem tracking, com R$ do mesmo tamanho boiando -> weight 500, tracking -.07em,
+  cifrao/unidade rebaixados.
+- Dark uniforme (tudo no mesmo cinza-chumbo, sem figura-fundo) -> inversao de superficie.
+- Flat sem ritmo: todos os cards com mesmo raio, mesmo gap, sombra preta dura -> escala de 7 raios,
+  padding interno > gap, sombra com spread negativo tonalizada.
+- Tudo em weight 600/700 (cara de bootstrap) -> mapa de pesos por papel.
+- Lime chapado e glow cinza -> gradiente vertical + halo duplo na cor.
 
 ## Fase 3 — Tokens semanticos no codigo
 
