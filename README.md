@@ -32,7 +32,7 @@ O resultado: Claude Code que lembra do projeto entre sessoes, segue padroes sem 
 | 10 commands | Workflows padronizados: /commit, /review-pr, /deploy, /atualizar-memoria, entre outros |
 | 4 agentes especializados | dev (implementacao), reviewer (code review), investigador (debug), arquiteto (decisoes tecnicas) |
 | 5 rules com roteador | Roteador inteligente ativa apenas regras relevantes por tipo de arquivo ou contexto |
-| Custo minimo | text-embedding-3-small da OpenAI: ~$0.02/1M tokens, estimativa real ~R$ 0,10/mes |
+| Custo minimo | Embeddings via Gemini (gemini-embedding-001, free tier generoso) por padrao; OpenAI text-embedding-3-small como fallback opcional |
 | Instalacao modular | Escolha entre core (sem banco), standard (com skills) ou full (pgvector + MCP) |
 
 ---
@@ -121,7 +121,7 @@ Se algum desses nao existir, a instalacao falhou silenciosamente — investigue 
 
 **Apenas para modulo full:**
 - PostgreSQL 16+ com extensao pgvector 0.8+
-- Chave de API da OpenAI (para embeddings text-embedding-3-small)
+- Chave de API do Gemini (para embeddings gemini-embedding-001, 1536 dims) -- OpenAI text-embedding-3-small fica como fallback opcional
 
 ---
 
@@ -222,15 +222,16 @@ CLAUDE.md                      # Instrucoes do projeto (modulo standard+)
 
 ## Custo
 
-O modulo full usa `text-embedding-3-small` da OpenAI para gerar embeddings das memorias.
+O modulo full usa `gemini-embedding-001` do Gemini para gerar embeddings das memorias (1536 dims, L2-normalizado). OpenAI `text-embedding-3-small` continua disponivel como fallback (defina `EMBEDDING_PROVIDER=openai`).
 
 | Metrica | Valor |
 |---------|-------|
-| Modelo | text-embedding-3-small |
-| Preco | $0.02 por 1M tokens |
+| Modelo padrao | gemini-embedding-001 (1536 dims) |
+| Fallback | text-embedding-3-small (OpenAI) |
+| Selecao | `EMBEDDING_PROVIDER=gemini\|openai` (auto: Gemini se houver GEMINI_API_KEY) |
 | Tokens por memoria | ~200-500 tokens |
 | Memorias tipicas/mes | ~100-500 |
-| **Custo estimado** | **~$0.02/mes (~R$ 0,10)** |
+| **Custo estimado** | **~zero (Gemini free tier cobre embedding com folga)** |
 
 Os modulos core e standard nao tem custo adicional (usam busca por texto em arquivos markdown).
 
