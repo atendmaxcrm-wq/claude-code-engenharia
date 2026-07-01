@@ -1,6 +1,6 @@
 ---
 name: site-elite-cinema
-description: Adiciona camada cinematografica ao /site-elite. Captura visual (Playwright OU foto OU gpt-image-2) -> Veo 3.1 image-to-video -> ffmpeg -g 1 baseline -> hero com scroll-scrub frame-accurate em Next.js 16. Inclui fabrica de assets generativos com validacao por asset (prompts tecnicos + relatorio PASSA/ARTEFATO) e o hero de TRANSFORMACAO (materia A vira materia B: foto que dissolve e remonta no produto, o efeito viral nomadatoast/PeachWeb - que e video scrubado, nao WebGL). Use quando o usuario pedir hero cinematografico, scroll-scrub video, redesign visual de site/sistema existente, landing com produto fisico real, hero de SaaS sem produto pronto, "site com produto", "video hero scrubbed", Veo 3.1, Veo image-to-video, "filme curto na home", "abre um filminho na pagina", "foto que vira produto", "dissolve no scroll", transformacao cinematografica, fabrica de assets, geracao de assets pra site, reuso da estetica /site-elite com camada audiovisual.
+description: Adiciona camada cinematografica ao /site-elite. Captura visual (Playwright OU foto OU gpt-image-2) -> Veo 3.1 image-to-video -> ffmpeg -g 1 baseline -> hero com scroll-scrub frame-accurate em Next.js 16. Inclui fabrica de assets generativos com validacao por asset (prompts tecnicos + relatorio PASSA/ARTEFATO) e o hero de TRANSFORMACAO (materia A vira materia B: foto que dissolve e remonta no produto, o efeito viral nomadatoast/PeachWeb - que e video scrubado, nao WebGL). Use quando o usuario pedir hero cinematografico, scroll-scrub video, redesign visual de site/sistema existente, landing com produto fisico real, hero de SaaS sem produto pronto, "site com produto", "video hero scrubbed", Veo 3.1, Veo image-to-video, "filme curto na home", "abre um filminho na pagina", "foto que vira produto", "dissolve no scroll", transformacao cinematografica, fabrica de assets, geracao de assets pra site, prompt-spec com assets embutidos (formato MotionSites, empacotar secao pra reusar/distribuir), spotlight cursor-reveal, reuso da estetica /site-elite com camada audiovisual.
 ---
 
 # /site-elite-cinema - Hero Cinematografico com Scroll-Scrub (Veo 3.1)
@@ -654,6 +654,13 @@ Estou na Fase 1, Ramo C (gpt-image-2 -> Veo)
 Estou na Fase 1, Ramo D (transformacao A->B) ou o site precisa de varios assets
   -> references/07-fabrica-assets.md (lista + orcamento + prompts .txt + validacao)
   -> references/08-hero-transformacao.md (prompt multi-shot 4 beats + gates do ramo)
+
+Quero EMPACOTAR uma secao/mecanica pronta pra reusar em outro projeto (ou distribuir)
+  -> references/09-prompt-spec-assets.md (formato MotionSites: prompt autocontido com
+     fontes + assets em URL publica + mecanica como implementacao + spotlight exemplo)
+
+Texto ilegivel sobre video de fundo / IA escureceu o video
+  -> references/08-hero-transformacao.md secao "Legibilidade do texto sobre video"
 
 Estou na Fase 2 (preparar input Veo)
   -> references/03-compose-mockup.md secao "resize 1280x720"

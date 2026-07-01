@@ -28,6 +28,11 @@ Divisao honesta:
 [1] Fabrica de assets (07): still ORIGEM + still DESTINO
     - MESMO enquadramento/proporcao/paleta declarada nos dois prompts
     - Gerados com direcao de arte, NUNCA foto crua do usuario direto no Veo
+    - ATALHO ZOOM-OUT (metodo MotionSites, pro caso "mesma cena que abre"): gerar o
+      still 1 e pedir "zoom out" da MESMA imagem (image-to-image/ref) -> still 2 e a
+      cena mais aberta com coerencia total. Serve quando a transformacao e de
+      enquadramento/carena (aviao voa, camera recua), nao de materia (A vira B -
+      nesse caso continua o par origem/destino da fabrica)
 [2] Prompt de transformacao multi-shot (template abaixo)
 [3] Veo 3.1 FAST 720p -> validar os 4 beats -> so entao STANDARD
     - **CONFIRMADO em producao (01/07/2026):** `veo-3.1-fast-generate-preview`
@@ -38,6 +43,10 @@ Divisao honesta:
       MOLDURA DE FILME literal (furos de pelicula + texto "35mm 55" nas bordas).
       Usar "subtle digital sensor grain ISO 400" e incluir no negative:
       "film strip border, sprocket holes, film frame edges, frame numbers".
+    - Rota alternativa equivalente: Kling 3.0 via Higgsfield (frame 1 + frame 2 nos
+      dois slots, prompt minimo "animate this, smooth transition from frame 1 to
+      frame 2, natural and aesthetic scene", 10s 1080p, testar 2 seeds). E o que o
+      MotionSites usa; nosso Veo lastFrame trava os extremos com mais garantia.
 [4] ffmpeg -g 1 baseline (Fase 4 da SKILL.md, inegociavel)
 [5] ScrollVideoHero (Fase 5) - o scroll vira a timeline da transformacao
 ```
@@ -60,6 +69,20 @@ O usuario viu "so a foto parada" na primeira versao. Correcoes obrigatorias:
    por palavra + janelas de progresso no ticker), caption no HOLD, text-fill no
    manifesto, parallax em stills, reveals, footer gigante outline. Exemplo
    funcionando: output/cinema-tino/2026-07-01/site/index.html (porta 3115).
+
+## Legibilidade do texto sobre video (gotchas MotionSites, confirmados em frames)
+
+1. **IA ESCURECE o video por default.** Toda AI coder poe overlay escuro em video de
+   fundo sem pedir. Corrigir explicitamente: "video at 100% opacity, no overlays,
+   keep the previous color scheme, I did not ask for dark mode".
+2. **O fix de legibilidade certo e MASCARA-GRADIENTE no CONTEUDO, nao overlay no
+   video:** gradiente de baixo pra cima (solido -> transparente) aplicado como mask
+   no bloco de texto/conteudo - o texto "nasce" da pagina ao rolar e o video fica
+   100% visivel. Overlay escurecendo o video inteiro mata o asset caro que geramos.
+3. **Toda secao com 100vh (100dvh no hero).** IA cria secao apertada por default;
+   altura de viewport da respiro e percepcao premium imediata ("a dica que vale 3x"
+   do metodo). Ja esta na rubrica da /replicar-sistema; aqui vale pro conjunto
+   hero + secoes em volta do video.
 
 ## Template: prompt de transformacao multi-shot
 

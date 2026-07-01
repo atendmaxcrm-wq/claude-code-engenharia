@@ -254,6 +254,10 @@ inversao de superficie + acento contido.
 ### Composicao
 - [ ] Grade do hero assimetrica `1.55fr / 1fr` (ou `1.58fr/.98fr`), nunca 50/50. O lado largo e o
       protagonista.
+- [ ] Secoes de landing com altura de viewport: hero `100dvh` (nao 100vh - browser chrome mobile
+      corta), secoes narrativas `min-h-screen`/100vh. IA gera secao apertada por default; respiro
+      de viewport e a correcao mais barata com maior salto de percepcao premium ("regra do 3x" do
+      metodo MotionSites). Excecao: telas de SISTEMA/dashboard densas - la vale o ritmo de cards.
 - [ ] Cards-filhos que furam a base do pai: fileira de opcoes posicionada `absolute` no bottom, cada
       item com cantos so no topo (`border-radius:34px 34px 0 0`), o selecionado 30-40px mais alto +
       glow de acento, `align-items:end`, `overflow:hidden` no pai. A ALTURA comunica selecao mesmo
