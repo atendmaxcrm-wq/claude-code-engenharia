@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<!--
+  Template de board de cores para a skill extrair-design-imagem.
+  Clone este arquivo e edite os swatches com as cores extraidas.
+  Cada swatch: data-hex no style (background) + .hex e .role no texto.
+  Para fundo escuro use class="dark" no swatch (texto branco).
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Color System Board</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #FAFAF8; color: #1A1A1A; font-family: Inter, system-ui, sans-serif; padding: 48px; }
+  h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; text-transform: uppercase; margin-bottom: 24px; }
+  h2 { font-size: 13px; font-weight: 700; color: #6B6B66; margin: 28px 0 12px; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .grid.trio { grid-template-columns: repeat(3, 1fr); }
+  .grid.text { grid-template-columns: repeat(5, 1fr); }
+  .swatch {
+    border: 0.5px solid #E8E8E2; border-radius: 16px; min-height: 150px;
+    padding: 18px; display: flex; flex-direction: column; justify-content: flex-end;
+  }
+  .swatch.dark { color: #fff; border-color: transparent; }
+  .swatch .hex { font-size: 15px; font-weight: 700; }
+  .swatch .role { font-size: 12px; opacity: .75; margin-top: 2px; }
+  .combos { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+  .combo { border-radius: 12px; padding: 14px 22px; font-weight: 700; font-size: 16px; }
+</style>
+</head>
+<body>
+  <h1>Color System &mdash; &lt;NOME DA REFERENCIA&gt;</h1>
+
+  <h2>Backgrounds e superficies</h2>
+  <div class="grid">
+    <div class="swatch dark" style="background:#1A1A1A"><span class="hex">#1A1A1A</span><span class="role">Sidebar / Dark BG</span></div>
+    <div class="swatch" style="background:#F2F2EF"><span class="hex">#F2F2EF</span><span class="role">Main Content BG</span></div>
+    <div class="swatch" style="background:#FFFFFF"><span class="hex">#FFFFFF</span><span class="role">Cards / Modais</span></div>
+    <div class="swatch dark" style="background:#262626"><span class="hex">#262626</span><span class="role">Dark Panels</span></div>
+  </div>
+
+  <h2>Trio cromatico (identidade)</h2>
+  <div class="grid trio">
+    <div class="swatch" style="background:#C5F74F"><span class="hex">#C5F74F</span><span class="role">Primary &mdash; CTA / Accent</span></div>
+    <div class="swatch" style="background:#B7A4F0"><span class="hex">#B7A4F0</span><span class="role">Secondary &mdash; Charts</span></div>
+    <div class="swatch dark" style="background:#7C6BE0"><span class="hex">#7C6BE0</span><span class="role">Accent &mdash; Progress</span></div>
+  </div>
+
+  <h2>Escala de texto e bordas</h2>
+  <div class="grid text">
+    <div class="swatch dark" style="background:#1A1A1A"><span class="hex">#1A1A1A</span><span class="role">Text Primary</span></div>
+    <div class="swatch dark" style="background:#111111"><span class="hex">#111111</span><span class="role">Headings Bold</span></div>
+    <div class="swatch dark" style="background:#6B6B66"><span class="hex">#6B6B66</span><span class="role">Text Secondary</span></div>
+    <div class="swatch" style="background:#AEAEA6"><span class="hex">#AEAEA6</span><span class="role">Text Muted</span></div>
+    <div class="swatch" style="background:#E8E8E2"><span class="hex">#E8E8E2</span><span class="role">Border / Divider</span></div>
+  </div>
+
+  <h2>Combos aprovados (contraste)</h2>
+  <div class="combos">
+    <div class="combo" style="background:#C5F74F;color:#1A1A1A">Lime + Dark</div>
+    <div class="combo" style="background:#1A1A1A;color:#C5F74F">Dark + Lime</div>
+    <div class="combo" style="background:#7C6BE0;color:#fff">Purple + White</div>
+    <div class="combo" style="background:#B7A4F0;color:#1A1A2E">Soft Purple + Navy</div>
+    <div class="combo" style="background:#F2F2EF;color:#1A1A1A">Light BG + Dark Text</div>
+  </div>
+</body>
+</html>

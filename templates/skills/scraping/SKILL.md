@@ -1,6 +1,6 @@
 ---
 name: scraping
-description: Fazer scraping completo de um site (texto + imagens + base de conhecimento). Use ao extrair conteudo de sites.
+description: Fazer scraping completo de um site (texto + imagens + videos + base de conhecimento). Use ao extrair conteudo de sites.
 ---
 
 Faca o scraping do seguinte site: $ARGUMENTS
@@ -10,9 +10,10 @@ Faca o scraping do seguinte site: $ARGUMENTS
 ANTES de qualquer acao, use AskUserQuestion para perguntar:
 
 1. **O que extrair?**
-   - Tudo (texto + imagens)
+   - Tudo (texto + imagens + videos)
    - So textos
    - So imagens
+   - Sem videos (texto + imagens; usar --skip-videos)
 
 2. **Profundidade do scraping?**
    - So a pagina principal (home)
@@ -52,12 +53,20 @@ python3 "$CLAUDE_PROJECT_DIR/.claude/skills/scraping/assets/site-scraper.py" \
   --delay 2
 ```
 
+Flags opcionais: `--max-video-mb 200` (cap de tamanho por video) e
+`--skip-videos` (nao baixar videos).
+
 O script:
 - Usa Playwright + Stealth (headless Chromium) para renderizar JS
 - Navega por todas as paginas internas automaticamente
 - Extrai textos (titulos, headings, paragrafos, meta tags)
 - Extrai e baixa todas as imagens
-- Salva `content.json` (dados estruturados) + pasta `images/`
+- Extrai e baixa videos diretos (tag video, source, data-src lazy, links .mp4/.webm/.mov,
+  og:video; poster do video vai junto como imagem). Dedup por URL entre paginas e
+  cap de 200MB por arquivo (ajustavel via --max-video-mb)
+- Embeds (YouTube/Vimeo/Wistia/Loom) e streams (HLS .m3u8/DASH/blob) NAO sao baixados;
+  ficam registrados no content.json em `video_embeds` por pagina
+- Salva `content.json` (dados estruturados) + pastas `images/` e `videos/`
 - Rate limiting de 2s entre paginas para nao sobrecarregar o servidor
 
 ## Passo 3: Se pediu base de conhecimento
@@ -96,6 +105,7 @@ Salvar como: `base_conhecimento_NOME.md` na pasta de output.
 Mostrar ao usuario:
 - Quantidade de paginas scrapadas
 - Quantidade de imagens baixadas (antes e depois da limpeza)
+- Quantidade de videos baixados + embeds registrados (se houver)
 - Tamanho total do output
 - Estrutura de pastas gerada
 - Resumo do conteudo da base de conhecimento (se gerada)

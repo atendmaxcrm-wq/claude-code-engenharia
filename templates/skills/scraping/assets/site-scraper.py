@@ -2,16 +2,21 @@
 """
 Generic Website Scraper using Playwright + Stealth
 
-Crawls an entire website, extracting all text content and downloading images.
-Navigates through all internal links recursively.
+Crawls an entire website, extracting all text content and downloading images
+and videos. Navigates through all internal links recursively.
 
 Usage:
     python3 site-scraper.py --url "https://example.com" --output "./output"
     python3 site-scraper.py --url "https://example.com" --output "./output" --max-pages 50 --delay 2
+    python3 site-scraper.py --url "https://example.com" --output "./output" --max-video-mb 100
+    python3 site-scraper.py --url "https://example.com" --output "./output" --skip-videos
 
 Output:
     - content.json: Structured text content per page
     - images/: Downloaded images organized by page slug
+    - videos/: Downloaded videos (direct files: mp4, webm, mov...). Embeds
+      (YouTube/Vimeo/etc) and streams (HLS/blob) are recorded in content.json
+      under "video_embeds" but not downloaded.
     Logs go to stderr, final summary JSON to stdout.
 """
 
@@ -76,6 +81,43 @@ def normalize_url(url):
     if not path:
         path = ''
     return f"{parsed.scheme}://{parsed.netloc}{path}"
+
+
+VIDEO_EXT_RE = re.compile(r'\.(mp4|webm|mov|m4v|ogv|avi|mkv)(?=\?|#|$)', re.IGNORECASE)
+STREAM_EXT_RE = re.compile(r'\.(m3u8|mpd)(?=\?|#|$)', re.IGNORECASE)
+
+
+async def download_video(page, video_url, output_dir, page_slug, vid_index, max_bytes):
+    """Download a single video file using the browser context, respecting size cap."""
+    try:
+        ext_match = VIDEO_EXT_RE.search(video_url)
+        ext = '.' + ext_match.group(1).lower() if ext_match else '.mp4'
+        filename = f"{page_slug}_{vid_index:03d}{ext}"
+        filepath = os.path.join(output_dir, filename)
+
+        # Try HEAD first to avoid buffering huge files in memory
+        try:
+            head = await page.request.head(video_url, timeout=30000)
+            content_length = head.headers.get('content-length')
+            if content_length and int(content_length) > max_bytes:
+                log(f"  Skipping video over size limit ({int(content_length) / 1e6:.0f}MB > {max_bytes / 1e6:.0f}MB): {video_url[:80]}")
+                return None
+        except Exception:
+            pass  # HEAD not supported everywhere; fall through to GET
+
+        response = await page.request.get(video_url, timeout=120000)
+        if response.ok:
+            body = await response.body()
+            if len(body) > max_bytes:
+                log(f"  Skipping video over size limit ({len(body) / 1e6:.0f}MB > {max_bytes / 1e6:.0f}MB): {video_url[:80]}")
+                return None
+            if len(body) > 10000:  # Skip stubs/error pages
+                with open(filepath, 'wb') as f:
+                    f.write(body)
+                return {"url": video_url, "file": filename, "size": len(body)}
+    except Exception as e:
+        log(f"  Failed to download video: {video_url[:80]} - {e}")
+    return None
 
 
 async def download_image(page, img_url, output_dir, page_slug, img_index):
@@ -194,6 +236,59 @@ async def extract_page_content(page, url):
                 images.push({ src: ogImage.content, alt: 'og:image', width: 0, height: 0 });
             }
 
+            // All videos
+            const videos = [];
+            const videoEmbeds = [];
+            const seenVideoSrcs = new Set();
+
+            function addVideoSrc(src, poster) {
+                if (!src || seenVideoSrcs.has(src) || src.startsWith('data:')) return;
+                seenVideoSrcs.add(src);
+                if (src.startsWith('blob:')) {
+                    videoEmbeds.push({ src: src, type: 'blob', poster: poster || '' });
+                } else if (/\\.(m3u8|mpd)(\\?|#|$)/i.test(src)) {
+                    videoEmbeds.push({ src: src, type: 'stream', poster: poster || '' });
+                } else {
+                    videos.push({ src: src, poster: poster || '' });
+                }
+            }
+
+            // <video> tags (src direct, lazy data-src, nested <source>)
+            document.querySelectorAll('video').forEach(v => {
+                const poster = v.poster || v.dataset.poster || '';
+                addVideoSrc(v.src || v.dataset.src || v.currentSrc || '', poster);
+                v.querySelectorAll('source').forEach(s => {
+                    addVideoSrc(s.src || s.dataset.src || '', poster);
+                });
+                // Poster frame is also a useful image
+                if (poster && !seenSrcs.has(poster) && !poster.startsWith('data:')) {
+                    seenSrcs.add(poster);
+                    images.push({ src: poster, alt: 'video-poster', width: 0, height: 0 });
+                }
+            });
+
+            // Direct links to video files
+            document.querySelectorAll('a[href]').forEach(a => {
+                if (/\\.(mp4|webm|mov|m4v|ogv)(\\?|#|$)/i.test(a.href)) {
+                    addVideoSrc(a.href, '');
+                }
+            });
+
+            // og:video meta
+            document.querySelectorAll('meta[property="og:video"], meta[property="og:video:url"], meta[property="og:video:secure_url"]').forEach(m => {
+                if (m.content) addVideoSrc(m.content, '');
+            });
+
+            // Embedded players (not downloadable directly; recorded for reference)
+            document.querySelectorAll('iframe[src]').forEach(f => {
+                const src = f.src || f.dataset.src || '';
+                if (/youtube(-nocookie)?\\.com\\/embed|youtu\\.be\\/|player\\.vimeo\\.com|wistia\\.(com|net)|fast\\.wistia|loom\\.com\\/embed|dailymotion\\.com\\/embed/i.test(src)
+                        && !seenVideoSrcs.has(src)) {
+                    seenVideoSrcs.add(src);
+                    videoEmbeds.push({ src: src, type: 'embed', poster: '' });
+                }
+            });
+
             return {
                 title: title,
                 h1: h1Text,
@@ -207,7 +302,9 @@ async def extract_page_content(page, url):
                 headings: headings,
                 paragraphs: uniqueParagraphs,
                 links: links,
-                images: images
+                images: images,
+                videos: videos,
+                video_embeds: videoEmbeds
             };
         }
     """)
@@ -215,8 +312,8 @@ async def extract_page_content(page, url):
     return content
 
 
-async def scrape_site(base_url, output_dir, max_pages=100, delay=2):
-    """Crawl entire site and extract content + images."""
+async def scrape_site(base_url, output_dir, max_pages=100, delay=2, max_video_mb=200, skip_videos=False):
+    """Crawl entire site and extract content + images + videos."""
     from playwright.async_api import async_playwright
     from playwright_stealth import Stealth
 
@@ -226,15 +323,22 @@ async def scrape_site(base_url, output_dir, max_pages=100, delay=2):
     # Create output directories
     images_dir = os.path.join(output_dir, 'images')
     os.makedirs(images_dir, exist_ok=True)
+    videos_dir = os.path.join(output_dir, 'videos')
+    if not skip_videos:
+        os.makedirs(videos_dir, exist_ok=True)
 
     visited = set()
     to_visit = [normalize_url(base_url)]
     all_pages = []
     total_images_downloaded = 0
+    total_videos_downloaded = 0
+    downloaded_video_urls = {}  # url -> record; same video often repeats across pages
+    max_video_bytes = int(max_video_mb * 1024 * 1024)
 
     log(f"Starting crawl of {base_url}")
     log(f"Output directory: {output_dir}")
     log(f"Max pages: {max_pages}, Delay: {delay}s")
+    log(f"Videos: {'skipped' if skip_videos else f'enabled (cap {max_video_mb}MB per file)'}")
 
     async with Stealth().use_async(async_playwright()) as p:
         browser = await p.chromium.launch(
@@ -319,6 +423,27 @@ async def scrape_site(base_url, output_dir, max_pages=100, delay=2):
                         downloaded_images.append(result)
                         total_images_downloaded += 1
 
+                # Download videos (dedup by URL across pages)
+                downloaded_videos = []
+                if not skip_videos:
+                    for idx, vid in enumerate(content.get('videos', [])):
+                        src = vid.get('src', '')
+                        if not src:
+                            continue
+
+                        full_src = urljoin(url, src)
+                        if full_src in downloaded_video_urls:
+                            existing = downloaded_video_urls[full_src]
+                            downloaded_videos.append({**existing, "dedup": True})
+                            continue
+
+                        log(f"  Downloading video: {full_src[:80]}")
+                        result = await download_video(page, full_src, videos_dir, page_slug, idx, max_video_bytes)
+                        if result:
+                            downloaded_video_urls[full_src] = result
+                            downloaded_videos.append(result)
+                            total_videos_downloaded += 1
+
                 # Build page data
                 page_data = {
                     "url": url,
@@ -329,6 +454,8 @@ async def scrape_site(base_url, output_dir, max_pages=100, delay=2):
                     "headings": content.get('headings', []),
                     "paragraphs": content.get('paragraphs', []),
                     "images": downloaded_images,
+                    "videos": downloaded_videos,
+                    "video_embeds": content.get('video_embeds', []),
                     "internal_links_found": len([
                         l for l in content.get('links', [])
                         if is_same_domain(l.get('href', ''), base_domain)
@@ -338,7 +465,7 @@ async def scrape_site(base_url, output_dir, max_pages=100, delay=2):
                 all_pages.append(page_data)
 
                 log(f"  Title: {content.get('title', 'N/A')[:60]}")
-                log(f"  Paragraphs: {len(content.get('paragraphs', []))}, Images: {len(downloaded_images)}, Links found: {page_data['internal_links_found']}")
+                log(f"  Paragraphs: {len(content.get('paragraphs', []))}, Images: {len(downloaded_images)}, Videos: {len(downloaded_videos)}, Embeds: {len(page_data['video_embeds'])}, Links found: {page_data['internal_links_found']}")
 
             except Exception as e:
                 log(f"  Error crawling {url}: {e}")
@@ -354,12 +481,17 @@ async def scrape_site(base_url, output_dir, max_pages=100, delay=2):
     with open(content_path, 'w', encoding='utf-8') as f:
         json.dump(all_pages, f, ensure_ascii=False, indent=2)
 
+    total_embeds = sum(len(p.get("video_embeds", [])) for p in all_pages)
+
     log(f"\n{'='*50}")
     log(f"Crawl complete!")
     log(f"Pages scraped: {len(all_pages)}")
     log(f"Images downloaded: {total_images_downloaded}")
+    log(f"Videos downloaded: {total_videos_downloaded} (embeds/streams recorded: {total_embeds})")
     log(f"Content saved to: {content_path}")
     log(f"Images saved to: {images_dir}")
+    if not skip_videos:
+        log(f"Videos saved to: {videos_dir}")
     log(f"Remaining in queue: {len(to_visit)} (limit was {max_pages})")
     log(f"{'='*50}")
 
@@ -369,10 +501,13 @@ async def scrape_site(base_url, output_dir, max_pages=100, delay=2):
         "base_url": base_url,
         "pages_scraped": len(all_pages),
         "images_downloaded": total_images_downloaded,
+        "videos_downloaded": total_videos_downloaded,
+        "video_embeds_recorded": total_embeds,
         "output_dir": output_dir,
         "content_file": content_path,
         "images_dir": images_dir,
-        "pages": [{"url": p["url"], "title": p["title"], "paragraphs": len(p["paragraphs"]), "images": len(p["images"])} for p in all_pages]
+        "videos_dir": videos_dir if not skip_videos else None,
+        "pages": [{"url": p["url"], "title": p["title"], "paragraphs": len(p["paragraphs"]), "images": len(p["images"]), "videos": len(p.get("videos", [])), "video_embeds": len(p.get("video_embeds", []))} for p in all_pages]
     }
 
     return summary
@@ -384,9 +519,11 @@ async def main():
     parser.add_argument("--output", required=True, help="Output directory path")
     parser.add_argument("--max-pages", type=int, default=100, help="Maximum pages to crawl (default: 100)")
     parser.add_argument("--delay", type=float, default=2.0, help="Delay between requests in seconds (default: 2)")
+    parser.add_argument("--max-video-mb", type=float, default=200, help="Max size per video file in MB (default: 200)")
+    parser.add_argument("--skip-videos", action="store_true", help="Do not download videos")
     args = parser.parse_args()
 
-    summary = await scrape_site(args.url, args.output, args.max_pages, args.delay)
+    summary = await scrape_site(args.url, args.output, args.max_pages, args.delay, args.max_video_mb, args.skip_videos)
     json.dump(summary, sys.stdout, ensure_ascii=False, indent=2)
 
 
