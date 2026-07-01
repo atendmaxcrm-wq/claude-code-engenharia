@@ -1,6 +1,6 @@
 {
   "name": "claude-code-engenharia",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Sistema de engenharia profissional para Claude Code com memoria persistente pgvector, hooks de protecao, skills, agentes e workflows automaticos.",
   "main": "install.js",
   "bin": {

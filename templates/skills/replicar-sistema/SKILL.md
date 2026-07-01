@@ -18,7 +18,7 @@ REGRA DE OURO: nunca pular o mockup. Codar direto da foto perde as decisoes de d
 que dao identidade. O mockup e barato de iterar (1 arquivo HTML); o sistema e caro.
 O mockup aprovado vira o ALVO CANONICO de todo o resto do projeto.
 
-## Fase 0 — Entender o pedido (2 perguntas no maximo)
+## Fase 0 - Entender o pedido (2 perguntas no maximo)
 
 1. Replicar o DESIGN (a cara) ou o PRODUTO (funcionalidades tambem)?
    Default: design da referencia + conteudo/funcionalidades DO PRODUTO DO USUARIO.
@@ -66,7 +66,7 @@ Protocolo:
 
 Frames sao descartaveis: limpar /tmp/frames-replica ao final.
 
-## Fase 1 — Extracao cirurgica do design system
+## Fase 1 - Extracao cirurgica do design system
 
 Se a skill `extrair-design-imagem` existir no projeto, invocar via Skill tool.
 Senao, aplicar o protocolo inline (mesmo nivel de um designer destilando tokens):
@@ -88,7 +88,7 @@ Senao, aplicar o protocolo inline (mesmo nivel de um designer destilando tokens)
 Salvar em `docs/design-extraido-<slug>.md`. Nao inventar o que nao da pra ver;
 marcar inferencias como "(aproximado)".
 
-## Fase 1.5 — Styleguide HTML (antes das telas)
+## Fase 1.5 - Styleguide HTML (antes das telas)
 
 O passo do Kainan que mais elevou o resultado: antes de qualquer tela, gerar UM
 `docs/<dominio>-design-system.html` renderizado e aprova-lo lado a lado com a referencia.
@@ -123,7 +123,7 @@ SO o conteudo; o sistema visual e transversal a dominios.
 > Em projetos que ja tem extracao forte na Fase 1, o styleguide e leve: e a Fase 1 montada
 > como HTML navegavel + bloco de tokens copiavel. Vale o passo porque renderizar > ler texto.
 
-## Fase 2 — Mockup HTML canonico (O CORACAO desta skill)
+## Fase 2 - Mockup HTML canonico (O CORACAO desta skill)
 
 > **Regra de ouro de beleza:** uma fonte com personalidade + headline gigante-fino +
 > UM acento que so marca acao + inversao de superficie - se faltar um desses quatro, ainda
@@ -151,6 +151,17 @@ Checklist de qualidade do mockup (nivel "ficou perfeito"):
 - Salvar em `docs/<produto>-mockup-v1.html`, mostrar ao usuario (servir ou abrir),
   **ITERAR** (v2, v3...) ate aprovacao explicita. A versao aprovada e o alvo canonico:
   registrar isso na memoria do projeto.
+
+### Assets generativos (quando o mockup/telas precisam de imagem real)
+
+Se o produto pede imagens que nao existem (hero com foto, fundos cinematograficos,
+fotos de produto, avatares nao-genericos), NAO improvisar geracao solta: rodar a
+**fabrica de assets** de `.claude/skills/site-elite-cinema/references/07-fabrica-assets.md`
+(lista com orcamento aprovado -> prompt tecnico por asset com negative prompt de
+fotorealismo -> geracao API ou manual -> validacao com veredito PASSA/ARTEFATO por
+asset). So asset aprovado entra no mockup. Placeholder cinza no mockup v1 e valido;
+asset slop nao e. Se o hero pedir transformacao/video scrubado, isso e
+/site-elite-cinema (ramo D, `references/08-hero-transformacao.md`).
 
 ## Excelencia visual (rubrica do mockup)
 
@@ -260,7 +271,7 @@ inversao de superficie + acento contido.
 - Tudo em weight 600/700 (cara de bootstrap) -> mapa de pesos por papel.
 - Lime chapado e glow cinza -> gradiente vertical + halo duplo na cor.
 
-## Fase 3 — Tokens semanticos no codigo
+## Fase 3 - Tokens semanticos no codigo
 
 Wirar o design aprovado como tokens SEMANTICOS (Tailwind v4: bloco `@theme` no
 globals.css). Nomear por papel, nunca por cor: `canvas/paper/panel/ink/ink2/tsec/
@@ -277,7 +288,7 @@ Gotchas reais (aprendidos em producao no My Zap):
    semanticos + `@custom-variant dark (&:where(.dark, .dark *))` + cookie de tema
    aplicado no `<html>` via SSR (com `suppressHydrationWarning`).
 
-## Fase 4 — Implementacao em ondas
+## Fase 4 - Implementacao em ondas
 
 - **Pequeno (1-3 telas):** implementar direto, comecando pelo shell (sidebar/topbar)
   e componentes base (tokens.ts com fieldCls/btnPrimary..., Pill, Modal).
@@ -288,7 +299,7 @@ Gotchas reais (aprendidos em producao no My Zap):
   (mandar ler com Read), a tabela de tokens e as regras de ouro da Fase 3.
 - Proibir: hex hardcoded, mudanca de layout fora do espec, dois teammates no mesmo arquivo.
 
-## Fase 5 — Quality gate: visual + COMPLETUDE (obrigatorio antes de "pronto")
+## Fase 5 - Quality gate: visual + COMPLETUDE (obrigatorio antes de "pronto")
 
 1. `tsc --noEmit` + build limpo (mover `.next` se mexeu no @theme).
 2. **Renderize a REFERENCIA (rode o JS dela), nao audite so o HTML estatico.** Mockup

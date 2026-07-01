@@ -1,6 +1,6 @@
 ---
 name: site-elite-cinema
-description: Adiciona camada cinematografica ao /site-elite. Captura visual (Playwright OU foto OU gpt-image-2) -> Veo 3.1 image-to-video -> ffmpeg -g 1 baseline -> hero com scroll-scrub frame-accurate em Next.js 16. Use quando o usuario pedir hero cinematografico, scroll-scrub video, redesign visual de site/sistema existente, landing com produto fisico real, hero de SaaS sem produto pronto, "site com produto", "video hero scrubbed", Veo 3.1, Veo image-to-video, "filme curto na home", "abre um filminho na pagina", reuso da estetica /site-elite com camada audiovisual.
+description: Adiciona camada cinematografica ao /site-elite. Captura visual (Playwright OU foto OU gpt-image-2) -> Veo 3.1 image-to-video -> ffmpeg -g 1 baseline -> hero com scroll-scrub frame-accurate em Next.js 16. Inclui fabrica de assets generativos com validacao por asset (prompts tecnicos + relatorio PASSA/ARTEFATO) e o hero de TRANSFORMACAO (materia A vira materia B: foto que dissolve e remonta no produto, o efeito viral nomadatoast/PeachWeb - que e video scrubado, nao WebGL). Use quando o usuario pedir hero cinematografico, scroll-scrub video, redesign visual de site/sistema existente, landing com produto fisico real, hero de SaaS sem produto pronto, "site com produto", "video hero scrubbed", Veo 3.1, Veo image-to-video, "filme curto na home", "abre um filminho na pagina", "foto que vira produto", "dissolve no scroll", transformacao cinematografica, fabrica de assets, geracao de assets pra site, reuso da estetica /site-elite com camada audiovisual.
 ---
 
 # /site-elite-cinema - Hero Cinematografico com Scroll-Scrub (Veo 3.1)
@@ -58,9 +58,26 @@ O usuario tem o que como "produto" pra estampar no hero?
   |       -> Ramo C: gerar foto base com gpt-image-2 PRIMEIRO, depois Veo
   |       -> Combo: gpt-image-2 -> Veo image-to-video
   |       -> Output: imagem gerada que serve de frame 0 pra Veo
+  |
+  |-- (D) Hero de TRANSFORMACAO? (materia A vira materia B)
+  |       ("foto que dissolve e vira o produto", "rosto vira perfume",
+  |        "ingrediente vira prato", efeito viral nomadatoast/PeachWeb)
+  |       -> Ramo D: fabrica gera still ORIGEM + still DESTINO ->
+  |          prompt multi-shot 4 beats -> Veo -> scrub
+  |       -> Ver references/08-hero-transformacao.md (excecao a regra de
+  |          movimento sutil; anti-drift vem dos beats + paleta declarada)
+  |       -> NAO tentar esse efeito com particulas WebGL real-time: e o
+  |          caminho que ja decepcionou (teto de gl.Points = poeira brilhante)
 ```
 
-**Se o usuario nao se encaixa em A/B/C, pare e pergunte.** Nao chute. Hero cinematografico de SaaS abstrato (C) ja e categoria de fronteira - se ele nao sabe qual ramo, e porque ainda nao definiu o que vai mostrar.
+**Se o usuario nao se encaixa em A/B/C/D, pare e pergunte.** Nao chute. Hero cinematografico de SaaS abstrato (C) ja e categoria de fronteira - se ele nao sabe qual ramo, e porque ainda nao definiu o que vai mostrar.
+
+**Fabrica de assets (transversal aos ramos):** sempre que a fase 1 GERAR imagem
+(ramo C, ramo D, ou composicao do ramo B) ou o site precisar de mais de 1 asset
+visual (stills de secao, fundos, refs), rodar `references/07-fabrica-assets.md`:
+lista com orcamento -> prompt tecnico por asset (.txt versionado) -> modo API ou
+manual -> validacao com veredito PASSA/ARTEFATO por asset. Foto crua do usuario
+direto no Veo so no ramo B com foto JA profissional.
 
 ---
 
@@ -141,11 +158,16 @@ Sinais implicitos: usuario mostrou um trailer/comercial como referencia, ou diss
 
 ### Fase 0 - Vibe Questionnaire + Decision tree
 
-#### Vibe Questionnaire (delegar pra /site-elite)
+#### Vibe Questionnaire (inline - /site-elite foi ARQUIVADA)
 
-Antes de qualquer captura, rodar as 4 perguntas Vibe da /site-elite (Purpose / Tone / Constraints / Differentiation). Se ja existe documento VIBE.md de uma sessao previa de /site-elite, reusar. Se nao existe, abrir /site-elite Fase 0 primeiro.
+A /site-elite foi aposentada (sessao #86; /replicar-sistema e a autoridade de
+acabamento agora). As 4 perguntas Vibe continuam valendo, respondidas AQUI:
+Purpose (o que o site vende/comunica), Tone (2-3 adjetivos + 1 referencia real),
+Constraints (marca, paleta, prazos, device do publico), Differentiation (a UMA
+coisa memoravel). Se ja existe `VIBE.md` de sessao previa, reusar.
 
-**Saida da Fase 0 Vibe:** `VIBE.md` com as 4 respostas. Esta skill nao reescreve isso - /site-elite e a fonte de verdade.
+**Saida da Fase 0 Vibe:** `VIBE.md` com as 4 respostas. Para o acabamento 2D das
+secoes (styleguide, tokens, rubrica visual), a fonte de verdade e /replicar-sistema.
 
 #### Decision tree A/B/C (especifico desta skill)
 
@@ -628,6 +650,10 @@ Estou na Fase 1, Ramo B (foto + composicao)
 Estou na Fase 1, Ramo C (gpt-image-2 -> Veo)
   -> references/02-veo-prompts.md secao "Combo gpt-image-2 + Veo"
   -> /site-elite references/06-gpt-image-2-prompts.md (prompts canonicos)
+
+Estou na Fase 1, Ramo D (transformacao A->B) ou o site precisa de varios assets
+  -> references/07-fabrica-assets.md (lista + orcamento + prompts .txt + validacao)
+  -> references/08-hero-transformacao.md (prompt multi-shot 4 beats + gates do ramo)
 
 Estou na Fase 2 (preparar input Veo)
   -> references/03-compose-mockup.md secao "resize 1280x720"
