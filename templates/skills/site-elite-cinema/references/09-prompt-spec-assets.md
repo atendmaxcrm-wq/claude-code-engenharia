@@ -86,6 +86,12 @@ texto que "nasce" da pagina por mascara-gradiente (ver 08), scroll-float, glass 
 
 - [ ] Cola num AI coder LIMPO (sem contexto) e sai a secao certa? (teste real)
 - [ ] Assets acessiveis por URL publica (curl -I 200) e com papel nomeado?
+- [ ] **Assets respondem `Access-Control-Allow-Origin: *`** - mecanica com fetch/blob
+      quebra silenciosamente sem CORS quando o site roda em outra origem (achado do
+      1o teste clean-room, 01/07/2026; Mux/R2/CDNs ja mandam, servidor proprio NAO)
+- [ ] **overflow-x hidden SO no body via CSS** - no `html` ou num wrapper div ancestral
+      ele mata `position: sticky` sem erro nenhum (2o achado do teste clean-room; o
+      spec deve dizer isso explicitamente, senao a IA poe no wrapper)
 - [ ] Mecanica descrita como algoritmo (da pra implementar sem ver a demo)?
 - [ ] reduced-motion coberto? Mobile coberto?
 - [ ] Textos literais (zero lorem ipsum)?
