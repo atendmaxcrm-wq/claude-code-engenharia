@@ -72,7 +72,7 @@ O script:
 Leia o `design-data.json` completo e gere um arquivo MD estruturado:
 
 ```markdown
-# Design System — [Nome do Site]
+# Design System - [Nome do Site]
 
 ## Paleta de Cores
 | Cor | Hex | Uso | Frequencia |
