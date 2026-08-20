@@ -106,9 +106,14 @@ seletor hardcoded):
 - **`scripts/driver.mjs`** - le um arquivo de comandos (1 por linha) e os manda pro
   servidor vivo, coletando cada resultado. E assim que voce "dirige" a captura.
 
-Verbos do servidor (mesmos nos dois casos reais):
+Verbos do servidor:
 `click:TEXTO` `snap:ROTULO` `menu` `tab:TEXTO` `goto:/rota` `goback` `home` `dismiss`
-`sel:CSS` `selnth:CSS::N` `type:CSS::texto` `dump` `quit`.
+`sel:CSS` `selnth:CSS::N` `type:CSS::texto` `dump` `quit`
+`xy:X,Y` (clique por coordenada - pra FAB/elemento sem seletor)
+`eval:JS` (roda JS no browser vivo e retorna o resultado - inspecionar DOM/achar coordenadas)
+`press:TECLA` (keyboard.press - Enter/ArrowDown/Tab)
+`kbtype:TEXTO` (keyboard.type no foco atual - pra MASCARA e Multiselect Vue que so aceitam
+teclado: clicar o campo, kbtype o filtro, press ArrowDown, press Enter).
 
 Cada tela capturada gera: um **screenshot** (`screens/modulos/mod-NN-rotulo.png`) e uma
 entrada no **`manifest.json`** com a ESTRUTURA DOM (title, headings, tabs, tableHeaders,

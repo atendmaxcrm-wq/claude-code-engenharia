@@ -57,3 +57,25 @@ Armadilhas reais, todas medidas em campo. Agrupadas por fase.
   O sanitizar-manifest.mjs DROPA esses dois campos.
 - **Pagina publica do profissional/lead**: abrir a tela de ENTRADA e ok; NAO percorrer os
   passos que criam um lead/registro real, e NAO publicar a pagina (seria escrita na conta).
+
+## Ferramental (aprendido no teste ao vivo - Clinica Experts 2026-08-20)
+
+- **import do playwright-core (CommonJS)**: `const { chromium } = await import(pw)` da
+  `chromium` UNDEFINED (o CJS expoe tudo em `.default`). Usar
+  `const _pw = await import(pw); const chromium = _pw.chromium ?? _pw.default?.chromium`.
+  O teste de guard (sai por env faltando ANTES do launch) NAO pega esse bug - so a captura real.
+- **Elemento sem seletor claro (FAB "+", botao de icone)**: usar `eval` pra achar a posicao
+  (`getBoundingClientRect` dos elementos no canto) e depois `xy:X,Y` pra clicar. Speed-dial:
+  clicar o FAB abre as opcoes; cada uma tem coordenada propria.
+- **Multiselect Vue (campo "Pesquise/Selecione")**: clique JS na opcao NAO confirma no modelo.
+  Fluxo por TECLADO: `xy` no campo -> `kbtype:filtro` -> `press:ArrowDown` -> `press:Enter`.
+- **Restart do run.mjs custa o manifest E colide screenshots**: o motor comeca MANIFEST=[] e
+  renumera mod-01, mod-02... sobrescrevendo os arquivos da sessao anterior. ANTES de reiniciar,
+  ARQUIVAR os screenshots (mv screens/modulos/mod-*.png screens/fase-anterior/) e extrair o que
+  precisa do manifest.json (ele sera sobrescrito). Reiniciar so quando a sessao sobrevive
+  (relogin automatico sem 2FA) - senao perde tudo.
+- **Modais deep-linkaveis por query param**: muitos SPAs abrem modal por `?x_modal_type=...&
+  x_modal_mode=new` (visto: person_modal_type=patient, event_modal_type=consultation). Registrar
+  esses params no blueprint - sao deep-links de reconstrucao.
+- **Validacao de formulario**: e-mail com TLD invalido (`.test`) e recusado no submit. Usar
+  formato valido (`@example.com`) ou deixar campos opcionais vazios.

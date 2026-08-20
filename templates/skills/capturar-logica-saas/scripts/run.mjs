@@ -31,7 +31,8 @@
 // ============================================================================
 import fs from 'node:fs';
 const PW = process.env.CAP_PW || '/root/my-zap/node_modules/playwright-core/index.js';
-const { chromium } = await import(PW);
+const _pw = await import(PW);
+const chromium = _pw.chromium ?? _pw.default?.chromium ?? _pw.default;
 
 const ROOT = process.env.CAP_ROOT || process.cwd();
 const OUT = ROOT + '/_recon', SCREENS = ROOT + '/screens', MODS = SCREENS + '/modulos';
@@ -215,6 +216,10 @@ const goHome = async () => {
         else if (verb === 'sel') { const l = page.locator(arg).first(); const c = await l.count().catch(() => 0); if (c) await l.click().catch(() => {}); await page.waitForTimeout(2600); await dismissModals(); res = { ok: !!c, sel: arg, url: page.url() }; }
         else if (verb === 'selnth') { const i = arg.lastIndexOf('::'); const sel = arg.slice(0, i); const n = parseInt(arg.slice(i + 2), 10) || 0; const l = page.locator(sel).nth(n); const c = await l.count().catch(() => 0); if (c) await l.click().catch(() => {}); await page.waitForTimeout(2800); await dismissModals(); res = { ok: !!c, sel, n, url: page.url() }; }
         else if (verb === 'type') { const i = arg.indexOf('::'); const sel = arg.slice(0, i); const txt = arg.slice(i + 2); const l = page.locator(sel).first(); const c = await l.count().catch(() => 0); if (c) { await l.fill(txt).catch(() => {}); await page.waitForTimeout(1800); } res = { ok: !!c, typed: txt, url: page.url() }; }
+        else if (verb === 'xy') { const [x, y] = arg.split(',').map(n => parseFloat(n)); await page.mouse.click(x, y).catch(() => {}); await page.waitForTimeout(2200); await dismissModals(); res = { ok: true, xy: [x, y], url: page.url() }; }
+        else if (verb === 'eval') { const r = await page.evaluate((code) => { try { const out = eval(code); return typeof out === 'string' ? out : JSON.stringify(out); } catch (e) { return 'EVAL_ERR: ' + e.message; } }, arg); res = { ok: true, eval: r, url: page.url() }; }
+        else if (verb === 'press') { await page.keyboard.press(arg).catch(() => {}); await page.waitForTimeout(900); res = { ok: true, pressed: arg, url: page.url() }; }
+        else if (verb === 'kbtype') { await page.keyboard.type(arg, { delay: 60 }).catch(() => {}); await page.waitForTimeout(900); res = { ok: true, kbtyped: arg, url: page.url() }; }
         else if (verb === 'snap') { res = await snap(arg || 'tela'); }
         else res = { ok: false, err: 'verbo desconhecido: ' + verb };
       } catch (e) { res = { ok: false, err: String(e) }; }
