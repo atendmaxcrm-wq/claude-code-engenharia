@@ -7,40 +7,40 @@ description: Deploy completo (restart PM2 + verificacao). Use ao fazer deploy de
 
 1. Ja testou as mudancas? Feature/fix DEVE ter sido testada antes
 2. Aprovacao do usuario: Deploy so com aprovacao explicita
+3. Ler no CLAUDE.md do projeto: nome do processo PM2, porta, rota de health e receita
+   de build. Esta skill NAO crava nenhum desses valores; se o CLAUDE.md nao tiver, perguntar.
 
 ## Passos
+
+Abaixo, `<processo>`, `<porta>` e `<health>` vem do CLAUDE.md do projeto.
 
 ### 1. Verificar estado atual
 ```bash
 pm2 status
-curl http://localhost:4001/health
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:<porta><health>
 ```
 
-### 2. Restart do servico
+### 2. Build (se o projeto tiver etapa de build)
+Seguir a receita do CLAUDE.md (ex.: parar, arquivar o build antigo, buildar, subir).
+Se o build falhar, NAO reiniciar o processo com o build quebrado.
+
+### 3. Restart do servico
 ```bash
-pm2 restart monitor-server
+pm2 restart <processo>
 ```
 
-### 3. Verificar saude pos-restart
+### 4. Verificar saude pos-restart
 ```bash
-# Aguardar 5 segundos para o servidor subir
 sleep 5
-
-# Health check
-curl http://localhost:4001/health
-
-# Verificar logs (sem erros)
-pm2 logs monitor-server --lines 20 --nostream
-
-# Status do blog
-curl http://localhost:4001/api/blog/status
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:<porta><health>
+pm2 logs <processo> --lines 20 --nostream
 ```
 
-### 4. Validacao
+### 5. Validacao
 - [ ] Health check retorna 200
 - [ ] Logs sem erros de startup
-- [ ] Crons registrados corretamente
-- [ ] Endpoints respondendo
+- [ ] Crons registrados corretamente (se houver)
+- [ ] Endpoints alterados respondendo
 
 Se algum passo falhar, NAO continue. Reporte o erro.
 
@@ -49,6 +49,6 @@ Se algum passo falhar, NAO continue. Reporte o erro.
 # Reverter ultimo commit
 git revert HEAD
 
-# Restart com codigo anterior
-pm2 restart monitor-server
+# Rebuild (se houver) e restart com codigo anterior
+pm2 restart <processo>
 ```

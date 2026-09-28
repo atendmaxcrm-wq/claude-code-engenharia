@@ -11,9 +11,9 @@ description: Proibe dizer "pronto" sem evidencia. Build, teste, logs devem confi
 ## O que Conta como Evidencia
 
 ### Backend
-- [ ] `curl localhost:4001/health` retorna 200
+- [ ] Health check retorna 200
 - [ ] Endpoint especifico retorna dados corretos
-- [ ] `pm2 logs monitor-server` sem erros
+- [ ] Logs do servico sem erros
 - [ ] Consulta SQL retorna resultado esperado
 
 ### Frontend
