@@ -11,16 +11,16 @@ Voce vai fazer engenharia reversa e reconstruir **$ARGUMENTS** como clone(s) pix
 
 Quando multiplas URLs forem fornecidas, processe cada uma independentemente e em paralelo quando possivel, mantendo artefatos isolados em pastas dedicadas (ex: `docs/research/<hostname>/`).
 
-Isto NAO e um processo de duas fases (inspecionar, depois construir). Voce e um **mestre de obras no canteiro** — conforme inspeciona cada secao da pagina, escreve uma especificacao detalhada em arquivo, depois entrega ao agente builder especializado com tudo que ele precisa. Extracao e construcao acontecem em paralelo, mas a extracao e meticulosa e produz artefatos auditaveis.
+Isto NAO e um processo de duas fases (inspecionar, depois construir). Voce e um **mestre de obras no canteiro** - conforme inspeciona cada secao da pagina, escreve uma especificacao detalhada em arquivo, depois entrega ao agente builder especializado com tudo que ele precisa. Extracao e construcao acontecem em paralelo, mas a extracao e meticulosa e produz artefatos auditaveis.
 
 ## Escopo Padrao
 
 O alvo e o que `$ARGUMENTS` resolve. Clone exatamente o que esta visivel naquela URL. A menos que o usuario especifique diferente:
 
-- **Fidelidade:** Pixel-perfect — match exato em cores, espacamentos, tipografia, animacoes
+- **Fidelidade:** Pixel-perfect - match exato em cores, espacamentos, tipografia, animacoes
 - **Incluso:** Layout visual, estrutura de componentes, interacoes, responsividade, dados mock para demo
 - **Excluido:** Backend real, autenticacao, features real-time, SEO, auditoria de acessibilidade
-- **Customizacao:** Nenhuma — emulacao pura
+- **Customizacao:** Nenhuma - emulacao pura
 
 Se o usuario der instrucoes adicionais, honrar sobre os padroes.
 
@@ -28,7 +28,7 @@ Se o usuario der instrucoes adicionais, honrar sobre os padroes.
 
 1. **Modo de extracao:** Este skill suporta dois modos de extracao, escolhido automaticamente:
    - **Browser MCP** (preferido se disponivel): Chrome MCP, Playwright MCP, etc. Permite interacao em tempo real (click, hover, scroll).
-   - **Design Scraper** (fallback headless): Script Python em `/root/teste-aios/aios-core/apps/monitor-server/src/scripts/design-scraper.py`. Usa Playwright headless + Stealth. Funciona em VPS sem display. Extrai design tokens, animacoes, layout, screenshots e video automaticamente.
+   - **Design Scraper** (fallback headless): Script Python self-contained na propria skill, em `.claude/skills/clonar-site/assets/design-scraper.py`. Usa Playwright headless + Stealth. Funciona em VPS sem display. Extrai design tokens, animacoes, layout, screenshots e video automaticamente.
    
    **Deteccao automatica:** Verificar se ha browser MCP disponivel. Se sim, usar browser MCP. Se nao, usar design-scraper.py (confirmar que Playwright esta instalado: `python3 -c "from playwright.async_api import async_playwright; print('ok')"`).
 
@@ -41,11 +41,11 @@ Se o usuario der instrucoes adicionais, honrar sobre os padroes.
 
 ### 1. Completude Vence Velocidade
 
-Cada builder agent deve receber **tudo** para fazer o trabalho perfeitamente: screenshot, valores CSS exatos, assets baixados com paths locais, texto real, estrutura de componentes. Se o builder precisar ADIVINHAR qualquer coisa — uma cor, um font-size, um padding — voce falhou na extracao.
+Cada builder agent deve receber **tudo** para fazer o trabalho perfeitamente: screenshot, valores CSS exatos, assets baixados com paths locais, texto real, estrutura de componentes. Se o builder precisar ADIVINHAR qualquer coisa - uma cor, um font-size, um padding - voce falhou na extracao.
 
 ### 2. Tarefas Pequenas, Resultados Perfeitos
 
-Quando um agente recebe "construir a secao inteira de features", ele ignora detalhes — aproxima espacamentos, chuta font-sizes. Quando recebe um unico componente focado com valores CSS exatos, ele acerta toda vez.
+Quando um agente recebe "construir a secao inteira de features", ele ignora detalhes - aproxima espacamentos, chuta font-sizes. Quando recebe um unico componente focado com valores CSS exatos, ele acerta toda vez.
 
 Avalie a complexidade de cada secao. Banner simples com heading e botao? Um agente. Secao complexa com 3 variantes de card, cada uma com hover states unicos? Um agente por variante + um para o wrapper.
 
@@ -55,7 +55,7 @@ Avalie a complexidade de cada secao. Banner simples com heading e botao? Um agen
 
 Extraia texto, imagens, videos e SVGs reais do site. Isto e um clone, nao um mockup. Use `element.textContent`, baixe cada `<img>` e `<video>`, extraia `<svg>` inline como componentes React.
 
-**Assets em camadas importam.** Uma secao que parece uma imagem e frequentemente multiplas camadas — background watercolor/gradient, PNG de foreground, icone overlay. Inspecione a arvore DOM completa de cada container e enumere TODOS os `<img>` e background-images, incluindo overlays posicionados absolutamente.
+**Assets em camadas importam.** Uma secao que parece uma imagem e frequentemente multiplas camadas - background watercolor/gradient, PNG de foreground, icone overlay. Inspecione a arvore DOM completa de cada container e enumere TODOS os `<img>` e background-images, incluindo overlays posicionados absolutamente.
 
 ### 4. Fundacao Primeiro
 
@@ -63,9 +63,9 @@ Nada pode ser construido ate a fundacao existir: CSS global com design tokens do
 
 ### 5. Extrair Como Parece E Como Se Comporta
 
-Um website nao e um screenshot — e algo vivo. Elementos se movem, mudam, aparecem e desaparecem em resposta a scroll, hover, click, resize e tempo.
+Um website nao e um screenshot - e algo vivo. Elementos se movem, mudam, aparecem e desaparecem em resposta a scroll, hover, click, resize e tempo.
 
-Para cada elemento, extraia sua **aparencia** (CSS exato via `getComputedStyle()`) E seu **comportamento** (o que muda, o que dispara a mudanca, e como a transicao acontece). Nao "parece 16px" — extraia o valor computado real. Nao "o nav muda no scroll" — documente o trigger exato, os estados antes/depois, e a transicao.
+Para cada elemento, extraia sua **aparencia** (CSS exato via `getComputedStyle()`) E seu **comportamento** (o que muda, o que dispara a mudanca, e como a transicao acontece). Nao "parece 16px" - extraia o valor computado real. Nao "o nav muda no scroll" - documente o trigger exato, os estados antes/depois, e a transicao.
 
 Comportamentos a observar (lista ilustrativa, nao exaustiva):
 - Navbar que encolhe, muda background ou ganha shadow apos scroll threshold
@@ -79,10 +79,10 @@ Comportamentos a observar (lista ilustrativa, nao exaustiva):
 - Transicoes dark-to-light entre secoes
 - Conteudo tabbado/pill que cicla com transicoes
 - Tab/accordion switching scroll-driven (IntersectionObserver, NAO click)
-- Smooth scroll libraries (Lenis, Locomotive Scroll — checar `.lenis` class)
-- **GSAP ScrollTrigger** — checar `data-speed`, `data-scroll`, `gsap.registerPlugin`
-- **Framer Motion** — checar `motion.div`, `AnimatePresence`, `useScroll`
-- **AOS (Animate On Scroll)** — checar `data-aos` attributes
+- Smooth scroll libraries (Lenis, Locomotive Scroll - checar `.lenis` class)
+- **GSAP ScrollTrigger** - checar `data-speed`, `data-scroll`, `gsap.registerPlugin`
+- **Framer Motion** - checar `motion.div`, `AnimatePresence`, `useScroll`
+- **AOS (Animate On Scroll)** - checar `data-aos` attributes
 
 ### 6. Identificar Modelo de Interacao Antes de Construir
 
@@ -128,10 +128,19 @@ Navegue ate a URL alvo com browser MCP. Siga o fluxo interativo completo abaixo.
 
 ### Modo B: Design Scraper (headless, para VPS sem display)
 
-Rode o design-scraper.py para extracao automatica:
+Garanta o Playwright primeiro (idempotente, instala so se faltar):
 
 ```bash
-python3 /root/teste-aios/aios-core/apps/monitor-server/src/scripts/design-scraper.py \
+python3 -c "import playwright" 2>/dev/null \
+  && python3 -c "from playwright.sync_api import sync_playwright; p=sync_playwright().start(); p.chromium.launch(headless=True).close(); p.stop()" 2>/dev/null \
+  && echo "Playwright OK" \
+  || { echo "Instalando Playwright..."; pip install playwright playwright-stealth && python3 -m playwright install chromium; }
+```
+
+Rode o design-scraper.py (self-contained na skill) para extracao automatica:
+
+```bash
+python3 "$CLAUDE_PROJECT_DIR/.claude/skills/clonar-site/assets/design-scraper.py" \
   --url "$ARGUMENTS" \
   --output "docs/research/scraper-output" \
   --video \
@@ -166,13 +175,13 @@ Apos o scraper rodar, leia `design-data.json` e use os dados para preencher os a
 ### Extracao Global
 Extraia antes de qualquer outra coisa:
 
-**Fontes** — No modo scraper: ler `design-data.json > typography` para font families e weights usados. No modo browser MCP: inspecionar `<link>` tags e computed `font-family`. Configure em `src/app/layout.tsx` usando `next/font/google` ou `next/font/local`.
+**Fontes** - No modo scraper: ler `design-data.json > typography` para font families e weights usados. No modo browser MCP: inspecionar `<link>` tags e computed `font-family`. Configure em `src/app/layout.tsx` usando `next/font/google` ou `next/font/local`.
 
-**Cores** — No modo scraper: ler `design-data.json > colors` (ja ordenado por frequencia) e `cssVariables`. No modo browser MCP: extrair via getComputedStyle. Atualize `src/app/globals.css` com tokens shadcn.
+**Cores** - No modo scraper: ler `design-data.json > colors` (ja ordenado por frequencia) e `cssVariables`. No modo browser MCP: extrair via getComputedStyle. Atualize `src/app/globals.css` com tokens shadcn.
 
-**Favicons & Meta** — Baixe favicons, apple-touch-icons, OG images, webmanifest para `public/seo/`. Use WebFetch para obter o HTML da pagina e extrair `<link rel="icon">` tags. Atualize metadata do `layout.tsx`.
+**Favicons & Meta** - Baixe favicons, apple-touch-icons, OG images, webmanifest para `public/seo/`. Use WebFetch para obter o HTML da pagina e extrair `<link rel="icon">` tags. Atualize metadata do `layout.tsx`.
 
-**Padroes globais** — No modo scraper: ler `design-data.json > animations > jsLibraries` para detectar Lenis, Locomotive, etc. Ler `keyframes` para animacoes globais. Ler `interactions` para scroll behaviors. Adicione ao `globals.css`.
+**Padroes globais** - No modo scraper: ler `design-data.json > animations > jsLibraries` para detectar Lenis, Locomotive, etc. Ler `keyframes` para animacoes globais. Ler `interactions` para scroll behaviors. Adicione ao `globals.css`.
 
 ### Sweep de Interacoes
 
@@ -222,8 +231,8 @@ Isto e sequencial. Faca voce mesmo (nao delegue):
 1. **Atualizar fontes** em `layout.tsx` para fontes reais do site alvo
 2. **Atualizar globals.css** com color tokens, spacing, keyframes, utility classes e scroll behaviors globais
 3. **Criar interfaces TypeScript** em `src/types/` para estruturas de conteudo observadas
-4. **Extrair icones SVG** — encontre todos `<svg>` inline, deduplique e salve como componentes React em `src/components/icons.tsx`
-5. **Baixar assets globais** — escreva e rode script Node.js (`scripts/download-assets.mjs`) que baixa todas imagens, videos e binarios para `public/`. Downloads paralelos (4 por vez).
+4. **Extrair icones SVG** - encontre todos `<svg>` inline, deduplique e salve como componentes React em `src/components/icons.tsx`
+5. **Baixar assets globais** - escreva e rode script Node.js (`scripts/download-assets.mjs`) que baixa todas imagens, videos e binarios para `public/`. Downloads paralelos (4 por vez).
 6. Verificar: `npm run build` passa
 
 ### Script de Descoberta de Assets
@@ -272,7 +281,7 @@ Para cada secao, via browser MCP (ou analisando design-data.json no modo scraper
 
 1. **Screenshot** da secao isolada. Salvar em `docs/design-references/`.
 
-2. **Extrair CSS** de cada elemento. Use o script abaixo — nao mexa propriedade por propriedade:
+2. **Extrair CSS** de cada elemento. Use o script abaixo - nao mexa propriedade por propriedade:
 
 ```javascript
 (function(selector) {
@@ -316,13 +325,13 @@ Para cada secao, via browser MCP (ou analisando design-data.json no modo scraper
 })('SELECTOR');
 ```
 
-3. **Extrair estilos multi-estado** — para elementos com multiplos estados (scroll-triggered, hover, tab ativo), capture AMBOS estados e registre o diff: "Propriedade X muda de VALOR_A para VALOR_B, trigger: TRIGGER, transicao: TRANSITION_CSS."
+3. **Extrair estilos multi-estado** - para elementos com multiplos estados (scroll-triggered, hover, tab ativo), capture AMBOS estados e registre o diff: "Propriedade X muda de VALOR_A para VALOR_B, trigger: TRIGGER, transicao: TRANSITION_CSS."
 
-4. **Extrair conteudo real** — todo texto, alt attributes, aria labels, placeholders. Para conteudo tabbado, clique cada tab e extraia conteudo por estado.
+4. **Extrair conteudo real** - todo texto, alt attributes, aria labels, placeholders. Para conteudo tabbado, clique cada tab e extraia conteudo por estado.
 
-5. **Identificar assets** da secao — quais imagens/videos de `public/`, quais icones de `icons.tsx`. Checar assets em camadas.
+5. **Identificar assets** da secao - quais imagens/videos de `public/`, quais icones de `icons.tsx`. Checar assets em camadas.
 
-6. **Avaliar complexidade** — quantos sub-componentes distintos?
+6. **Avaliar complexidade** - quantos sub-componentes distintos?
 
 ### Passo 2: Escrever Spec File
 
@@ -392,7 +401,7 @@ Baseado na complexidade, despachar builder agent(s) em worktree(s) usando Agent 
 **Secao complexa** (3+ sub-componentes): Quebrar. Um agente por sub-componente + um para o wrapper. Sub-componentes primeiro.
 
 **O que cada builder recebe:**
-- Conteudo completo do spec file (inline no prompt — NAO diga "leia o spec file")
+- Conteudo completo do spec file (inline no prompt - NAO diga "leia o spec file")
 - Path do screenshot em `docs/design-references/`
 - Quais componentes compartilhados importar (`icons.tsx`, `cn()`, shadcn)
 - Path do arquivo alvo (ex: `src/components/HeroSection.tsx`)
@@ -429,7 +438,7 @@ Apos montagem, NAO declare o clone completo. Compare side-by-side:
 2. Compare secao por secao, desktop (1440px)
 3. Compare novamente mobile (390px)
 4. Para cada discrepancia:
-   - Cheque spec file — valor extraido corretamente?
+   - Cheque spec file - valor extraido corretamente?
    - Spec errado: re-extraia, atualize spec, corrija componente
    - Spec correto mas builder errou: corrija componente para bater com spec
 5. Teste todas interacoes: scroll, clique cada botao/tab, hover
@@ -454,15 +463,15 @@ Antes de despachar QUALQUER builder, verifique TODOS:
 
 ## O que NAO Fazer
 
-Licoes de clones falhos — cada um custou horas de retrabalho:
+Licoes de clones falhos - cada um custou horas de retrabalho:
 
-- **Nao construa tabs click-based quando o original e scroll-driven (ou vice-versa).** Determine o modelo de interacao PRIMEIRO scrollando antes de clicar. Erro #1 mais caro — requer reescrita completa.
+- **Nao construa tabs click-based quando o original e scroll-driven (ou vice-versa).** Determine o modelo de interacao PRIMEIRO scrollando antes de clicar. Erro #1 mais caro - requer reescrita completa.
 - **Nao extraia apenas o estado default.** Se tem tabs mostrando "Featured" no load, clique em cada tab e extraia tudo.
 - **Nao perca imagens overlay/camadas.** Background watercolor + foreground mockup = 2 imagens. Cheque DOM tree de cada container.
 - **Nao construa mockups para conteudo que e video/animacao.** Cheque se a secao usa `<video>`, Lottie ou canvas.
 - **Nao aproxime classes CSS.** "Parece text-lg" esta errado se o valor computado nao bate exatamente. Extraia valores exatos.
 - **Nao construa tudo num commit monolitico.** Progresso incremental com builds verificados.
-- **Nao referencie docs nos prompts dos builders.** Cada builder recebe spec inline — nunca "veja DESIGN_TOKENS.md".
+- **Nao referencie docs nos prompts dos builders.** Cada builder recebe spec inline - nunca "veja DESIGN_TOKENS.md".
 - **Nao pule extracao de assets.** Sem imagens, videos e fontes reais, o clone sempre parecera falso.
 - **Nao de escopo demais a um builder.** Prompt ficando longo = sinal para quebrar em tarefas menores.
 - **Nao junte secoes nao-relacionadas num agente.** CTA e footer sao componentes diferentes.

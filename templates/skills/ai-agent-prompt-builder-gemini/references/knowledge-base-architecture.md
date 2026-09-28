@@ -1,6 +1,6 @@
 # Referência de Arquitetura de Base de Conhecimento
 
-> **Nota:** Bases de conhecimento são agnósticas de modelo — são servidas via RAG/tools, não embarcadas no system prompt. O formato e estrutura abaixo funcionam identicamente para GPT, Claude ou qualquer outro LLM. A única consideração específica de GPT é garantir que as tags de busca correspondam às palavras-chave que o agente vai usar nas chamadas de tools.
+> **Nota:** Bases de conhecimento são agnósticas de modelo — são servidas via RAG/pgvector/tools, não embarcadas no system prompt. O formato e a estrutura abaixo funcionam identicamente para Gemini, GPT, Claude ou qualquer outro LLM, e a recomendação desta família de skills é manter embeddings OpenAI mesmo rodando o LLM no Gemini (ver `SKILL.md`, seção "Decisão Crítica: Embeddings"). A única consideração específica do Gemini é a ponte entre KB e prompt: as tags de busca da KB precisam casar com as **palavras-chave que o agente passa na invocação da tool** (`info_*`). No Gemini isso é mais sensível que no GPT porque a chamada de tool é representada via padrão anti-roleplay (ver `SKILL.md`, seção "Padrão de Exemplos com Tools") — a query que o agente gera ao invocar `info_*` deve usar exatamente os termos que aparecem nas linhas `Tags:` dos sub-blocos. Sempre que projetar um sub-bloco com `Tags:`, garanta que essas mesmas palavras apareçam como exemplos de query na descrição da tool no prompt.
 
 ---
 
@@ -12,8 +12,9 @@
 4. [Estrutura Otimizada para Busca](#4-estrutura-otimizada-para-busca)
 5. [Diretrizes de Conteúdo](#5-diretrizes-de-conteúdo)
 6. [O Que Pertence Aqui vs. No Prompt](#6-o-que-pertence-aqui-vs-no-prompt)
-7. [Estratégia de Manutenção](#7-estratégia-de-manutenção)
-8. [Template Completo de KB](#8-template-completo-de-kb)
+7. [Chunking Semântico (Tags por Sub-Bloco)](#7-chunking-semântico-tags-por-sub-bloco)
+8. [Estratégia de Manutenção](#8-estratégia-de-manutenção)
+9. [Template Completo de KB](#9-template-completo-de-kb)
 
 ---
 
@@ -215,12 +216,142 @@ posicionamento premium — nunca como "preço" ou "custo".
 | Calendário de feriados e fechamentos | Variáveis de runtime (data/hora atual) |
 | Ofertas promocionais e scripts | Identidade e personalidade do agente |
 | Credenciais e bio da equipe | Guardrails e limites |
+| **Regras de combinação de produtos** (ex: 4 pessoas = 2 DUOs, 5 = DUO + TRIO) | **Princípio: "grupos 4+ → consulte info_X com `grupos família`"** |
+| **Listas de exceções por categoria** (ex: unidades sem DUO LOCAL) | **Princípio: "apresentar sempre o caminho positivo, nunca 'não tem'"** |
+| **Scripts de apresentação com formato específico** | **Princípio: "apresentar Mensal + Anual GOLD como padrão"** |
+| **Tabelas de valores por variação** (ex: diária por grupo de unidade) | **Princípio: "ao informar preço, sempre consultar a tool"** |
 
 **Regra de ouro:** Se responde "o que eu devo dizer/saber?", é KB. Se responde "como eu devo pensar/decidir?", é prompt.
 
+### Padrão de Seção para Regras de Negócio
+
+Quando uma regra de negócio tem dados concretos (números, listas, scripts específicos), ela merece **seção própria na KB** com estrutura:
+
+```markdown
+## CATEGORIA: Nome da Regra
+Tags: [palavras-chave descritivas para retrieval]
+
+### Contexto
+[Quando essa regra se aplica]
+
+### Regras / Tabela
+[Os dados específicos — combinações, valores, listas]
+
+### Scripts de Apresentação
+[Como apresentar para o lead — formato específico]
+
+### Exceções
+[Casos especiais que mudam a regra padrão]
+
+### Quando transferir
+[Se houver critério de escalação específico dessa regra]
+```
+
+Com isso, o prompt só precisa saber: "Se a situação X acontecer, consulte `info_X` com palavra-chave Y". A complexidade fica encapsulada na KB, onde é fácil de atualizar sem mexer no comportamento do agente.
+
 ---
 
-## 7. Estratégia de Manutenção
+## 7. Chunking Semântico (Tags por Sub-Bloco)
+
+Quando a KB é consumida via retrieval semântico (pgvector, embeddings), a forma como o conteúdo é organizado em **chunks** afeta diretamente se o agente vai receber a info certa no top-K. Este é um padrão comprovado para evitar uma classe inteira de bugs de retrieval falho.
+
+### O bug que esse padrão resolve
+
+Cenário típico: o lead usa um **alias** ou **sinônimo** para identificar algo (uma unidade pelo bairro, um produto pelo apelido, etc). A KB tem o conteúdo correto, mas dentro de um bloco cujo cabeçalho usa o **nome oficial**. Resultado: a query do retrieval não encontra match forte com o cabeçalho do chunk certo, e outros chunks (com info incorreta para o caso específico) ganham no top-K. O agente recebe dados de outro item e responde errado.
+
+**Exemplo real:** lead diz "Restinga" (alias da unidade Extremo Sul). KB tem bloco `### EXTREMO SUL (Center Kan)` com `**Aliases:** Restinga, Center Kan, ...`. Query `planos Restinga` retornou blocos de outras unidades (com valores padrão diferentes), porque "Restinga" não estava no cabeçalho do chunk certo, só no conteúdo. Agente apresentou valor errado — DUO LOCAL 12x 219,80 (valor padrão) em vez de 12x 179,80 (valor especial da Restinga). R$ 500 a mais cobrados errado.
+
+### A solução: Tags semânticas por sub-bloco
+
+Para cada item identificável (unidade, produto, categoria) que possa ser referido por aliases ou termos variados, criar um **sub-bloco dedicado** com:
+
+1. **Cabeçalho específico e único** (`### NomeBloco: Identificador` ou `### Categoria: NomeItem`)
+2. **Linha `Tags:` logo abaixo** com todas as palavras-chave de busca (aliases, sinônimos, variações de query)
+3. **Conteúdo completo dentro do bloco** — o sub-bloco deve ser autossuficiente, sem depender que outros chunks venham junto
+
+```markdown
+### Endereço: EXTREMO SUL (Restinga)
+Tags: endereço extremo sul, endereço restinga, horário restinga, telefone restinga, center kan, joão antônio silveira, restinga
+- **Endereço:** Estrada João Antônio Silveira, 1335 – 2º andar (Center Kan, Restinga)
+- **Horários:** Seg-Sex 05h30-23h | Sáb 08h-20h | Dom/Fer 09h-15h
+- **WhatsApp:** (51) 98146-0158
+```
+
+Agora a query "endereço Restinga" pesca esse bloco diretamente — `restinga` está nas Tags, e o conteúdo está completo no chunk.
+
+### Quando aplicar (sinais de risco)
+
+Aplique o padrão preventivamente quando o conteúdo tiver QUALQUER destes:
+
+- **Aliases dentro do bloco**: cabeçalho usa nome oficial, mas o conteúdo cita outros nomes (bairro, ponto de referência, apelido). Classic.
+- **Tabela monolítica de N itens**: ex: tabela única com 25 unidades + endereços. Vira chunk único enorme; quando o lead pergunta sobre uma unidade específica, ou o chunk inteiro vem (ineficiente) ou não vem (bug).
+- **Sub-categorias dentro de uma seção**: ex: "Estacionamento — 4 categorias" listadas em um bloco. Cada categoria deve virar sub-bloco com Tags próprias incluindo as unidades que pertencem àquela categoria.
+- **Conteúdo que pode ser pedido por sinônimos**: "valores X" ou "preços X" ou "mensalidade X" — todas devem estar nas Tags do bloco de planos da unidade X.
+
+### Construção das Tags (anatomia)
+
+Para cada sub-bloco, as Tags devem incluir:
+
+1. **Termos de query padrão** com o nome principal: `planos NOMEUNIDADE, valores NOMEUNIDADE, preço NOMEUNIDADE, mensalidade NOMEUNIDADE` (adapte ao domínio)
+2. **Todos os aliases conhecidos**: bairros, ruas, pontos de referência, apelidos, nomes de shopping
+3. **Variações morfológicas comuns**: singular/plural, com/sem acento, com/sem preposição (`av padre cacique` e `padre cacique`)
+4. **Termos contrastivos**: se o item é "valores especiais" ou "diferenciado", incluir essas palavras
+
+```markdown
+### Grade: TERESÓPOLIS
+Tags: grade teresópolis, aulas teresópolis, horários teresópolis, bourbon teresópolis aulas, cel aparício 250 aulas
+```
+
+### Atenção a colisões cruzadas
+
+Quando dois blocos compartilham aliases (ex: "Cidade Baixa" pode ser Venâncio OU República), use **disambiguators explícitos** dentro do bloco — uma frase curta deixando claro o que NÃO é:
+
+```markdown
+### Ambiguidade: Cidade Baixa
+Tags: cidade baixa, bairro cidade baixa, qual unidade da cidade baixa, venâncio, república
+- O lead diz: "Cidade Baixa" / "bairro Cidade Baixa"
+- Pode ser: **Venâncio** (Av. Venâncio Aires) ou **República** (Rua da República)
+- ⚠️ Cidade Baixa NÃO inclui Centro/Andradas — Centro é outro bairro (Centro Histórico).
+```
+
+Isso evita que o agente cruze conceitos quando o retrieval traz dois blocos similares no top-K.
+
+### Diagnóstico rápido: é bug de retrieval?
+
+Quando um agente erra um dado factual que sabidamente está na KB, antes de mexer no prompt, **inspecione o que a tool retornou de fato**:
+
+- ✅ Veio o chunk certo? Bug é comportamental (modelo embaralhou ou ignorou).
+- ❌ Não veio o chunk certo, vieram chunks de itens parecidos? **Bug de retrieval.** Aplicar este padrão (Tags + sub-bloco autossuficiente).
+
+A solução para retrieval falho **não é mexer no prompt** — é mexer na KB. Reforçar regras no prompt enquanto o retrieval continua falhando só infla tokens sem resolver o problema raiz.
+
+### Ordem de operações ao aplicar em escala
+
+Quando uma KB existente vai receber Tags em todas as seções vulneráveis, seguir esta ordem evita retrabalho:
+
+1. **Mapear blocos vulneráveis** — listar tudo que tem aliases dentro do conteúdo, tabelas monolíticas de N itens, sub-categorias listadas em bloco único.
+2. **Priorizar pelo histórico de bugs** — onde já houve bug, tratar primeiro.
+3. **Para cada bloco vulnerável**: explodir em sub-blocos com Tags se for tabela; adicionar linha `Tags:` se for bloco já estruturado.
+4. **Confirmar que o conteúdo é autossuficiente** — cada sub-bloco precisa funcionar sozinho. Se depende de outro chunk vir junto, refatorar pra incluir o necessário.
+5. **Reindexar o pgvector** — chunks novos só aparecem após reindex.
+6. **Conferir contagem de chunks pós-reindex** — deve aumentar (mais sub-blocos = mais chunks atômicos).
+7. **Testar queries que usem aliases** — não só o nome oficial.
+
+### Padrões de cabeçalho recomendados
+
+Para clareza visual e match semântico, padronizar os cabeçalhos por categoria:
+
+- `### Grade: NOMEUNIDADE` — para grades de aulas
+- `### Endereço: NOMEUNIDADE` — para endereços/horários/telefones
+- `### Ambiguidade: TERMO` — para casos onde um termo pode ser N coisas
+- `#### Lutas: NOMEUNIDADE` — para sub-blocos dentro de uma seção pai (`## PLANOS: Lutas`)
+- `#### Estacionamento: TIPO` — para sub-blocos dentro de seção pai
+
+Esse padrão tem se provado robusto em produção. Sempre que o pgvector falha em entregar o chunk certo no top-K, a solução tem sido aplicar exatamente este formato.
+
+---
+
+## 8. Estratégia de Manutenção
 
 ### Atualizações Regulares
 
@@ -248,6 +379,6 @@ Ao analisar conversas reais, observe:
 
 ---
 
-## 8. Template Completo de KB
+## 9. Template Completo de KB
 
 Veja `assets/kb-template.md` para um template pronto para uso que implementa todos os princípios descritos acima.
