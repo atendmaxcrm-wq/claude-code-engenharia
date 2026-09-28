@@ -6,9 +6,9 @@ description: Padroes de queries SQL e schema PostgreSQL. Use ao criar tabelas, m
 # Database Query Patterns
 
 ## Stack
-- PostgreSQL 16 + pgvector 0.8.1
-- Conexao: postgresql://crmax:***@localhost:5432/aios_teste
-- Acesso: `psql -U crmax -d aios_teste`
+- PostgreSQL 16 + pgvector
+- Conexao: Conforme CLAUDE.md do projeto
+- Acesso: `psql -U <user> -d <database>`
 
 ## Queries Parametrizadas (OBRIGATORIO)
 ```sql
