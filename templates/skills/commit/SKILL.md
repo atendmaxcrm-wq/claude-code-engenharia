@@ -48,7 +48,7 @@ ref(api): extrai validacao de input para middleware
 
 perf(queries): adiciona indice em posts.created_at
 
-chore: atualiza dependencias do monitor-server
+chore: atualiza dependencias do projeto
 ```
 
 ## Anti-padroes

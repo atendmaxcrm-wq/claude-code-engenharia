@@ -3,17 +3,17 @@ name: agent-teams
 description: "Orquestracao multi-agent com Agent Teams nativo do Claude Code. Cria times reais com comunicacao entre teammates, task list compartilhada e quality gates. Use para tarefas grandes que envolvem multiplos arquivos ou dominios. Ativa quando o usuario pede: agent teams, time de agentes, trabalho paralelo, decompor tarefa, orquestrar agentes, swarm, ou qualquer tarefa complexa que beneficie de paralelismo."
 ---
 
-# Agent Teams — Orquestracao Multi-Agent Nativa
+# Agent Teams - Orquestracao Multi-Agent Nativa
 
 Tarefa recebida: $ARGUMENTS
 
 ---
 
-## STOP — GATE DE ADERENCIA (LEIA ANTES DE QUALQUER COISA)
+## STOP - GATE DE ADERENCIA (LEIA ANTES DE QUALQUER COISA)
 
 As ferramentas `TeamCreate`, `TaskCreate`, `TaskUpdate`, `SendMessage`, `TeamDelete`
 sao **deferred tools** no Claude Code. Elas NAO aparecem no schema inicial da
-sessao — se voce tentar chamar direto, recebe `InputValidationError` e cai
+sessao - se voce tentar chamar direto, recebe `InputValidationError` e cai
 silenciosamente no Agent tool normal (subagents isolados, SEM time, SEM
 comunicacao). Foi exatamente isso que aconteceu nas tentativas anteriores
 quando "agent-teams nao rodou times de verdade".
@@ -28,11 +28,11 @@ quando "agent-teams nao rodou times de verdade".
 
    Apos esse call, as 6 ferramentas ficam disponiveis ate o fim da sessao.
 
-2. **Confirmar env var ativa** (so se houver duvida): `grep CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS .claude/settings.json` — deve retornar `"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"`. Se ausente, parar e avisar usuario.
+2. **Confirmar env var ativa** (so se houver duvida): `grep CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS .claude/settings.json` - deve retornar `"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"`. Se ausente, parar e avisar usuario.
 
 3. **NUNCA usar Agent tool sem team_name** dentro do fluxo desta skill. Isso reverte pra subagent isolado.
 
-### Anti-padrao (codigo ERRADO — NAO faca isso)
+### Anti-padrao (codigo ERRADO - NAO faca isso)
 
 ```
 # ERRADO: spawn paralelo sem time, vira 3 subagents isolados sem comunicacao
@@ -68,11 +68,11 @@ restante da skill vira teatro.
 ## COMO FUNCIONA
 
 Agent Teams usa as ferramentas nativas do Claude Code:
-- **TeamCreate** — cria o time + task list compartilhada
-- **Agent tool** com `team_name` + `name` — spawna teammates que entram no time
-- **TaskCreate/TaskUpdate** — gerencia tasks compartilhadas com dependencias
-- **SendMessage** — comunicacao direta entre teammates (peer-to-peer)
-- **TeamDelete** — cleanup ao final
+- **TeamCreate** - cria o time + task list compartilhada
+- **Agent tool** com `team_name` + `name` - spawna teammates que entram no time
+- **TaskCreate/TaskUpdate** - gerencia tasks compartilhadas com dependencias
+- **SendMessage** - comunicacao direta entre teammates (peer-to-peer)
+- **TeamDelete** - cleanup ao final
 
 **Voce (lead) coordena.** Teammates sao instancias Claude independentes com contexto proprio.
 
@@ -113,14 +113,14 @@ Antes de criar o time:
 Apresentar ao usuario neste formato ANTES de executar:
 
 ```
-## Plano de Execucao — Agent Teams
+## Plano de Execucao - Agent Teams
 
 **Tarefa:** [descricao]
 **Padrao:** [parallel/pipeline/competing/specialist/review]
 **Risco:** [baixo/medio/alto]
 **Arquivos afetados:** [N arquivos]
-**Modelo:** opus em todos os teammates (padrao do projeto)
-**Custo estimado:** [N teammates opus x contexto = ~Nx tokens — custo alto por escolha de qualidade]
+**Modelo:** opus em todos os teammates (padrao)
+**Custo estimado:** [N teammates opus x contexto = ~Nx tokens - custo alto por escolha de qualidade]
 
 ### Time
 | # | Teammate | Tipo | Dominio | Arquivos |
@@ -131,9 +131,9 @@ Apresentar ao usuario neste formato ANTES de executar:
 ### Tasks (com dependencias)
 | # | Task | Owner | Depende de |
 |---|------|-------|------------|
-| 1 | [descricao] | [teammate] | — |
+| 1 | [descricao] | [teammate] | - |
 | 2 | [descricao] | [teammate] | Task 1 |
-| 3 | [descricao] | [teammate] | — |
+| 3 | [descricao] | [teammate] | - |
 
 ### Quality Gate
 | Validacao | Como |
@@ -153,28 +153,29 @@ Apresentar ao usuario neste formato ANTES de executar:
 - Quality gate **obrigatorio** ao final
 - Se risco alto: adicionar teammate arquiteto na fase de design
 - **5-6 tasks por teammate** e o ideal
-- **PADRAO DESTE PROJETO: opus em TODOS os teammates** (`model: "opus"`)
-  - Decisao do usuario (Gleidson): prioriza qualidade de raciocinio sobre custo
-  - A versao exata (4.8/4.7) NAO e selecionavel por teammate — herda o opus da sessao atual
-  - Para usar 4.7 em todos, rodar a sessao inteira em 4.7 (`/model`) antes de orquestrar
+- **PADRAO: opus em TODOS os teammates** (`model: "opus"`)
+  - Prioriza qualidade de raciocinio sobre custo
+  - A versao exata (4.8/4.7) NAO e selecionavel por teammate - herda o opus da sessao atual
+  - Para usar uma versao especifica em todos, rodar a sessao inteira nessa versao (`/model`) antes de orquestrar
   - Custo escala linearmente com N teammates opus em paralelo (limite de 5 mantido)
+  - Se custo for restricao explicita do usuario, ai sim cair pra sonnet nos executores
 
 ---
 
 ## FASE 3: EXECUCAO (Apos aprovacao do usuario)
 
-### Passo 1 — Criar o time
+### Passo 1 - Criar o time
 ```
 TeamCreate: { team_name: "[nome-descritivo]", description: "[objetivo]" }
 ```
 
-### Passo 2 — Criar tasks com dependencias
+### Passo 2 - Criar tasks com dependencias
 ```
 TaskCreate para cada task do plano
 TaskUpdate com addBlockedBy para definir dependencias
 ```
 
-### Passo 3 — Spawnar teammates
+### Passo 3 - Spawnar teammates
 Spawnar teammates da mesma onda em PARALELO (multiplos Agent calls no mesmo bloco):
 ```
 Agent tool: {
@@ -182,7 +183,7 @@ Agent tool: {
   team_name: "[nome-do-time]",
   name: "[nome-do-teammate]",
   subagent_type: "[tipo]",
-  model: "opus"   // PADRAO DESTE PROJETO: opus em TODOS os teammates (decisao do usuario)
+  model: "opus"   // PADRAO: opus em TODOS os teammates (versao herda da sessao)
 }
 ```
 
@@ -215,13 +216,13 @@ Projeto: [stack, framework, patterns relevantes]
 - Ao terminar: TaskUpdate status completed + mensagem ao lead
 ```
 
-### Passo 4 — Monitorar
+### Passo 4 - Monitorar
 - Mensagens de teammates chegam automaticamente (nao precisa poll)
 - Se teammate ficar idle: verificar se completou a task
 - Se teammate travar: SendMessage com orientacao
 - Se conflito detectado: intervir e redirecionar
 
-### Passo 5 — Quality Gate
+### Passo 5 - Quality Gate
 Apos todos teammates completarem:
 1. Verificar que todas tasks estao completed
 2. Build: verificar que compila sem erros
@@ -229,7 +230,7 @@ Apos todos teammates completarem:
 4. Health check: curl endpoints se alterou backend
 5. Testes: rodar se existirem
 
-### Passo 6 — Cleanup
+### Passo 6 - Cleanup
 ```
 SendMessage to "*": { type: "shutdown_request" }
 [Aguardar todos teammates confirmarem shutdown]
@@ -241,7 +242,7 @@ TeamDelete
 ## FASE 4: RELATORIO FINAL
 
 ```
-## Resultado — Agent Teams
+## Resultado - Agent Teams
 
 **Time:** [nome]
 **Duracao:** [tempo aproximado]

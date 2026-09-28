@@ -45,7 +45,11 @@ Depois, atualize cada um com base no trabalho realizado nesta sessao:
 
 ### 6. Persistir no pgvector (se MCP aios-memory disponivel)
 
-Apos atualizar os arquivos Markdown, persista as mudancas no banco vetorial:
+Apos atualizar os arquivos Markdown, persista as mudancas no banco vetorial.
+Sem este passo o conhecimento novo NAO aparece na busca contextual das proximas
+sessoes (os hooks contextual-memory/reinject-memory buscam no pgvector, nao no
+Markdown). Antes de cada `store_memory`, faca um `search_memories` rapido com o
+titulo/tema para nao duplicar memoria ja existente.
 
 1. Se ainda nao ha sessao aberta, chame `start_session` (MCP tool do aios-memory)
 2. Para cada **decisao** nova: `store_memory` com `memory_type: 'decision'`, `importance: 'high'`
@@ -57,6 +61,13 @@ Apos atualizar os arquivos Markdown, persista as mudancas no banco vetorial:
 
 Se o MCP aios-memory nao estiver disponivel, pule silenciosamente.
 Os arquivos Markdown continuam como source of truth; pgvector e camada de aceleracao.
+
+Troubleshooting: se `store_memory`/`search_memories` retornar "permission denied for
+table memories", as tabelas do banco de memoria (memories, memory_queries,
+memory_sessions) precisam de owner/grant para o usuario configurado no MCP. Como
+superuser do Postgres: `ALTER TABLE <tabela> OWNER TO <usuario_do_mcp>;` (ou
+`GRANT ALL ON <tabela> TO <usuario_do_mcp>;`). Sem isso o store falha E o hook
+contextual falha silenciosamente (try/catch + exit 0).
 
 ### Regras
 - Use somente ASCII (sem acentos nos arquivos de memoria)
