@@ -1,0 +1,330 @@
+{
+ "titulo": "Perfil de atleta (exemplo)",
+ "formato": "9:16",
+ "fps": 60,
+ "marca": "SUA MARCA",
+ "rotulo": "Atalanta · Serie A",
+ "logo_cor": "assets/escudos/800.png",
+ "musica": {
+  "arquivo": "assets/musica.mp3",
+  "inicio": 0,
+  "bpm": 80.75,
+  "subdivisao": 2
+ },
+ "fundo_video": "assets/fundo.mp4",
+ "fundo_ate_cena": 1,
+ "cenas": [
+  {
+   "tipo": "titulo",
+   "batidas": 12,
+   "legenda": "Perfil do jogador",
+   "linhas": [
+    "Nikola",
+    "*Krstović.*"
+   ]
+  },
+  {
+   "tipo": "destaque",
+   "batidas": 16,
+   "rotulo": "Perfil",
+   "palavra": "Krstović",
+   "imagem": "assets/jogador.png",
+   "numero": {
+    "rotulo": "Valor de mercado",
+    "valor": 30,
+    "prefixo": "€ ",
+    "sufixo": "mi"
+   },
+   "etiquetas": [
+    "Centroavante",
+    "Montenegro",
+    "26 anos",
+    "1,85 m"
+   ]
+  },
+  {
+   "tipo": "grafico_linha",
+   "batidas": 16,
+   "rotulo": "Valor",
+   "titulo": "De *€ 50 mil* / a *€ 30 mi.*",
+   "legenda": "Valor de mercado",
+   "fonte": "Fonte: Transfermarkt",
+   "formato_valor": "euro_mi",
+   "serie": [
+    {
+     "data": "26/08/2016",
+     "valor": 0.05
+    },
+    {
+     "data": "31/03/2017",
+     "valor": 0.05
+    },
+    {
+     "data": "17/09/2017",
+     "valor": 0.125
+    },
+    {
+     "data": "31/03/2018",
+     "valor": 0.375
+    },
+    {
+     "data": "01/10/2018",
+     "valor": 0.35
+    },
+    {
+     "data": "05/04/2019",
+     "valor": 0.4
+    },
+    {
+     "data": "28/10/2019",
+     "valor": 0.6
+    },
+    {
+     "data": "08/04/2020",
+     "valor": 0.525
+    },
+    {
+     "data": "21/06/2020",
+     "valor": 0.3
+    },
+    {
+     "data": "22/12/2020",
+     "valor": 0.5
+    },
+    {
+     "data": "12/06/2021",
+     "valor": 0.5
+    },
+    {
+     "data": "26/12/2021",
+     "valor": 0.5
+    },
+    {
+     "data": "23/06/2022",
+     "valor": 0.55
+    },
+    {
+     "data": "16/12/2022",
+     "valor": 1.0
+    },
+    {
+     "data": "21/06/2023",
+     "valor": 2.2
+    },
+    {
+     "data": "11/10/2023",
+     "valor": 5.0
+    },
+    {
+     "data": "20/12/2023",
+     "valor": 5.0
+    },
+    {
+     "data": "05/06/2024",
+     "valor": 6.0
+    },
+    {
+     "data": "18/12/2024",
+     "valor": 6.0
+    },
+    {
+     "data": "25/03/2025",
+     "valor": 14.0
+    },
+    {
+     "data": "17/06/2025",
+     "valor": 15.0
+    },
+    {
+     "data": "07/10/2025",
+     "valor": 24.0
+    },
+    {
+     "data": "23/12/2025",
+     "valor": 20.0
+    },
+    {
+     "data": "24/03/2026",
+     "valor": 25.0
+    },
+    {
+     "data": "29/05/2026",
+     "valor": 30.0
+    }
+   ],
+   "marcos": [
+    {
+     "data": "01/07/2016",
+     "icone": "assets/escudos/1004.png"
+    },
+    {
+     "data": "25/02/2019",
+     "icone": "assets/escudos/159.png"
+    },
+    {
+     "data": "04/09/2021",
+     "icone": "assets/escudos/4529.png"
+    },
+    {
+     "data": "18/08/2023",
+     "icone": "assets/escudos/1005.png"
+    },
+    {
+     "data": "20/08/2025",
+     "icone": "assets/escudos/800.png"
+    }
+   ]
+  },
+  {
+   "tipo": "linha_tempo",
+   "batidas": 14,
+   "rotulo": "Trajetória",
+   "titulo": "A *trajetória.*",
+   "itens": [
+    {
+     "ano": "2016",
+     "nome": "Zeta",
+     "valor": "Base",
+     "icone": "assets/escudos/1004.png"
+    },
+    {
+     "ano": "2019",
+     "nome": "Estrela Vermelha",
+     "valor": "€ 300 mil",
+     "icone": "assets/escudos/159.png"
+    },
+    {
+     "ano": "2021",
+     "nome": "DAC",
+     "valor": "€ 400 mil",
+     "icone": "assets/escudos/4529.png"
+    },
+    {
+     "ano": "2023",
+     "nome": "Lecce",
+     "valor": "€ 8,15 mi",
+     "icone": "assets/escudos/1005.png"
+    },
+    {
+     "ano": "2025",
+     "nome": "Atalanta",
+     "valor": "€ 25 mi",
+     "icone": "assets/escudos/800.png"
+    }
+   ]
+  },
+  {
+   "tipo": "radar",
+   "batidas": 14,
+   "rotulo": "Atributos",
+   "titulo": "Perfil *técnico.*",
+   "legenda": "Atributos Sofascore · 0 a 100",
+   "itens": [
+    [
+     "Ataque",
+     73
+    ],
+    [
+     "Técnica",
+     52
+    ],
+    [
+     "Criatividade",
+     52
+    ],
+    [
+     "Tática",
+     48
+    ],
+    [
+     "Defesa",
+     27
+    ]
+   ]
+  },
+  {
+   "tipo": "video_palavras",
+   "rotulo": "Lances",
+   "etiqueta": "ATALANTA · SERIE A",
+   "clipes": [
+    {
+     "palavra": "Condução.",
+     "video": "assets/drible.mp4",
+     "batidas": 6,
+     "indice": "01 / 03"
+    },
+    {
+     "palavra": "Finalização.",
+     "video": "assets/finalizacao.mp4",
+     "batidas": 8,
+     "indice": "02 / 03",
+     "alinhamento": "100% 50%",
+     "congelar_em": 2.1,
+     "anel": {
+      "x": 702,
+      "y": 721,
+      "r": 190,
+      "texto": "KRSTOVIĆ · CENTROAVANTE"
+     }
+    }
+   ]
+  },
+  {
+   "tipo": "texto_video",
+   "batidas": 4,
+   "rotulo": "Lances",
+   "texto": "GOL",
+   "video": "assets/golmask.mp4",
+   "transicao": "flash"
+  },
+  {
+   "tipo": "video_palavras",
+   "rotulo": "Lances",
+   "etiqueta": "ATALANTA · SERIE A",
+   "transicao": "flash",
+   "clipes": [
+    {
+     "palavra": "*Gol.*",
+     "video": "assets/gol.mp4",
+     "batidas": 8,
+     "indice": "03 / 03",
+     "lento_em": 1.2
+    }
+   ]
+  },
+  {
+   "tipo": "numeros",
+   "batidas": 12,
+   "rotulo": "Temporada",
+   "titulo": "Temporada / *26/27.*",
+   "legenda": "Serie A · até a última coleta",
+   "itens": [
+    [
+     "Jogos",
+     "3"
+    ],
+    [
+     "Minutos",
+     "97"
+    ],
+    [
+     "Gols",
+     "1",
+     true
+    ],
+    [
+     "Nota",
+     "6,6"
+    ]
+   ]
+  },
+  {
+   "tipo": "assinatura",
+   "batidas": 10,
+   "rotulo": "",
+   "video": "assets/comemora.mp4",
+   "titulo": "*Krstović.*",
+   "fonte": "Dados: Sofascore · Transfermarkt"
+  }
+ ]
+}

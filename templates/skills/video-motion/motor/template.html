@@ -1,0 +1,329 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8">
+<style>
+  @font-face { font-family: "Inter Tight"; src: url("assets/fonts/InterTight.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "JB Mono"; src: url("assets/fonts/JetBrainsMono.ttf"); font-weight: 100 800; }
+  :root { --acc: #2a7fff; --ink: #f4f4f3; --mut: #8a8a92; --bg: #09090b; --card: #141417; --line: rgba(255,255,255,.1); }
+  html, body { margin: 0; background: var(--bg); }
+  #root { position: relative; width: {{W}}px; height: {{H}}px; overflow: hidden; background: var(--bg); font-family: "Inter Tight", sans-serif; color: var(--ink); }
+  .clip { position: absolute; inset: 0; }
+  #mundo { position: absolute; inset: 0; transform-origin: 50% 45%; }
+  #fundo { position: absolute; inset: -40px; width: calc(100% + 80px); height: calc(100% + 80px); object-fit: cover; opacity: .38; }
+  .glow { position: absolute; border-radius: 50%; pointer-events: none; }
+  #g1 { width: 1400px; height: 1400px; left: -300px; top: 1100px; background: radial-gradient(circle, color-mix(in srgb, var(--acc) 60%, transparent) 0%, transparent 60%); opacity: .5; }
+  #g2 { width: 900px; height: 900px; left: 520px; top: -260px; background: radial-gradient(circle, color-mix(in srgb, var(--acc) 40%, transparent) 0%, transparent 62%); opacity: .35; }
+  #grain { position: absolute; left: -64px; top: -64px; width: calc(100% + 128px); height: calc(100% + 128px); background: url("assets/grain.png"); opacity: .075; mix-blend-mode: overlay; pointer-events: none; }
+  .topo { position: absolute; left: 66px; right: 66px; top: 150px; display: flex; justify-content: space-between; font: 500 23px "JB Mono", monospace; letter-spacing: .1em; color: var(--mut); text-transform: uppercase; }
+  .topo b { color: var(--ink); font-weight: 700; }
+  .topo .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--acc); margin-right: 12px; vertical-align: 2px; }
+  .h { position: absolute; left: 66px; right: 66px; font-weight: 600; letter-spacing: -.05em; line-height: .95; font-variation-settings: "wght" 600; }
+  .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .1em; margin-bottom: -.1em; }
+  .w > i { display: inline-block; font-style: normal; }
+  .acc { color: var(--acc); }
+  .cap { position: absolute; left: 66px; font: 500 24px "JB Mono", monospace; letter-spacing: .09em; color: var(--mut); text-transform: uppercase; white-space: nowrap; }
+  .cap::before { content: ""; display: inline-block; width: 34px; height: 2px; background: var(--acc); margin-right: 14px; vertical-align: 7px; }
+  /* destaque */
+  .par { position: absolute; inset: 0; perspective: 1400px; } .par3d { position: absolute; inset: 0; transform-style: preserve-3d; }
+  .gigante { position: absolute; left: 0; right: 0; top: 600px; text-align: center; font-weight: 800; letter-spacing: -.06em; line-height: .85; white-space: nowrap; }
+  .gigante .l { display: inline-block; } .gigante .o { color: transparent; -webkit-text-stroke: 3px rgba(255,255,255,.55); }
+  .figura { position: absolute; left: 50%; bottom: -10px; width: 1000px; margin-left: -500px; filter: contrast(1.06) saturate(1.08); }
+  .sombra { position: absolute; left: 50%; bottom: 0; width: 900px; height: 500px; margin-left: -450px; background: radial-gradient(ellipse at 50% 100%, rgba(0,0,0,.75), transparent 70%); }
+  .chips { position: absolute; left: 66px; right: 66px; top: 1370px; }
+  .chip { display: inline-block; font: 600 25px "JB Mono", monospace; letter-spacing: .07em; padding: 14px 24px; border-radius: 999px; border: 1.5px solid rgba(255,255,255,.22); background: rgba(10,10,12,.6); margin: 0 10px 12px 0; white-space: nowrap; }
+  .chip.on { background: var(--acc); border-color: transparent; color: #fff; }
+  .pilula { position: absolute; right: 66px; top: 330px; text-align: right; padding: 22px 30px; border-radius: 26px; background: rgba(20,20,23,.85); border: 1.5px solid var(--line); }
+  .pilula .k { font: 500 21px "JB Mono", monospace; letter-spacing: .1em; color: var(--mut); text-transform: uppercase; }
+  .pilula .v { font-size: 92px; font-weight: 500; letter-spacing: -.05em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .pilula .v small { font-size: .45em; color: var(--mut); margin-left: 6px; }
+  /* grafico */
+  .gnum { position: absolute; right: 66px; top: 640px; font-size: 120px; font-weight: 500; letter-spacing: -.06em; font-variant-numeric: tabular-nums; text-align: right; line-height: 1; }
+  .gano { position: absolute; right: 66px; top: 770px; font: 500 26px "JB Mono", monospace; color: var(--mut); letter-spacing: .1em; }
+  .marco { position: absolute; width: 74px; height: 74px; margin: -37px 0 0 -37px; border-radius: 50%; background: #fff; display: grid; place-items: center; box-shadow: 0 0 0 6px var(--bg), 0 10px 30px rgba(0,0,0,.6); }
+  .marco img { width: 50px; height: 56px; object-fit: contain; }
+  /* linha do tempo */
+  .linhaT { position: absolute; left: 136px; width: 4px; background: linear-gradient(rgba(255,255,255,.25), var(--acc)); transform-origin: top; }
+  .tr { position: absolute; left: 66px; right: 66px; display: grid; grid-template-columns: 140px 1fr auto; align-items: center; gap: 26px; }
+  .tr .e { width: 140px; height: 140px; border-radius: 34px; background: #f4f4f3; display: grid; place-items: center; overflow: hidden; }
+  .tr .e img { width: 96px; height: 108px; object-fit: contain; } .tr .e span { color: #111; font-weight: 800; font-size: 54px; }
+  .tr .ano { font: 600 24px "JB Mono", monospace; color: var(--mut); letter-spacing: .1em; }
+  .tr .cl { font-size: 58px; font-weight: 600; letter-spacing: -.04em; line-height: 1; }
+  .tr .fee { font: 600 28px "JB Mono", monospace; padding: 12px 20px; border-radius: 999px; border: 1.5px solid var(--line); white-space: nowrap; }
+  .tr.fim .e { box-shadow: 0 0 0 6px var(--acc), 0 0 50px var(--acc); } .tr.fim .fee { background: var(--acc); border-color: transparent; color: #fff; }
+  /* radar e barras */
+  .rv { position: absolute; transform: translate(-50%, -50%); text-align: center; }
+  .rv .n { font: 500 22px "JB Mono", monospace; letter-spacing: .08em; color: var(--mut); text-transform: uppercase; }
+  .rv .v { font-size: 66px; font-weight: 500; letter-spacing: -.05em; font-variant-numeric: tabular-nums; line-height: 1; }
+  .rv.top .v, .rv.top .n { color: var(--acc); }
+  .bar { position: absolute; left: 66px; right: 66px; display: grid; grid-template-columns: 300px 1fr 130px; align-items: center; gap: 26px; }
+  .bar .n { font-size: 44px; font-weight: 500; letter-spacing: -.03em; }
+  .bar .trk { height: 26px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden; }
+  .bar .fi { height: 100%; width: 100%; border-radius: 999px; background: rgba(255,255,255,.82); transform-origin: left center; }
+  .bar.top .fi { background: linear-gradient(90deg, var(--acc), color-mix(in srgb, var(--acc) 60%, white)); box-shadow: 0 0 30px var(--acc); }
+  .bar .v { text-align: right; font-size: 64px; font-weight: 500; letter-spacing: -.05em; font-variant-numeric: tabular-nums; } .bar.top .v { color: var(--acc); }
+  /* video */
+  .card { position: absolute; border-radius: 40px; overflow: hidden; background: var(--card); box-shadow: 0 40px 90px -30px rgba(0,0,0,.9), 0 0 0 1.5px rgba(255,255,255,.08); }
+  .card video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .idx { position: absolute; right: 66px; font: 600 26px "JB Mono", monospace; color: var(--mut); letter-spacing: .1em; }
+  .tagcard { position: absolute; left: 30px; bottom: 30px; font: 600 22px "JB Mono", monospace; letter-spacing: .08em; padding: 10px 18px; border-radius: 999px; background: rgba(0,0,0,.6); color: #fff; }
+  .spot { position: absolute; inset: 0; pointer-events: none; }
+  .anel { position: absolute; border-radius: 50%; border: 5px solid var(--acc); box-shadow: 0 0 40px var(--acc), inset 0 0 30px color-mix(in srgb, var(--acc) 50%, transparent); }
+  .anelTag { position: absolute; font: 700 24px "JB Mono", monospace; letter-spacing: .08em; padding: 10px 18px; border-radius: 999px; background: var(--acc); color: #fff; white-space: nowrap; }
+  .lento { position: absolute; right: 30px; top: 30px; font: 700 22px "JB Mono", monospace; letter-spacing: .08em; padding: 10px 18px; border-radius: 999px; background: #fff; color: #000; }
+  .golbox { position: absolute; left: 0; top: 520px; width: 100%; height: 1000px; background: #000; mix-blend-mode: screen; }
+  .golbox video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: saturate(1.2) contrast(1.1); }
+  .golt { position: absolute; inset: 0; background: #000; color: #fff; mix-blend-mode: multiply; display: flex; align-items: center; justify-content: center; font-weight: 900; letter-spacing: -.06em; line-height: 1; white-space: nowrap; }
+  /* numeros */
+  .box { position: absolute; width: 456px; height: 360px; border-radius: 36px; background: var(--card); border: 1.5px solid var(--line); padding: 36px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; }
+  .box .v { font-size: 150px; font-weight: 500; letter-spacing: -.06em; line-height: .9; font-variant-numeric: tabular-nums; }
+  .box .k { font: 500 24px "JB Mono", monospace; letter-spacing: .1em; color: var(--mut); text-transform: uppercase; }
+  .box.top { background: var(--acc); border-color: transparent; } .box.top .k { color: rgba(255,255,255,.85); }
+  /* mockup */
+  .celular { position: absolute; left: 50%; top: 520px; width: 600px; height: 1220px; margin-left: -300px; border-radius: 86px; background: #000; box-shadow: 0 0 0 14px #1d1d21, 0 0 0 16px rgba(255,255,255,.12), 0 60px 120px -40px rgba(0,0,0,.95); overflow: hidden; }
+  .celular::after { content: ""; position: absolute; left: 50%; top: 22px; width: 170px; height: 46px; margin-left: -85px; border-radius: 999px; background: #000; }
+  .notebook { position: absolute; left: 50%; top: 640px; width: 980px; height: 620px; margin-left: -490px; border-radius: 26px 26px 6px 6px; background: #000; box-shadow: 0 0 0 12px #1d1d21, 0 60px 120px -40px rgba(0,0,0,.95); overflow: hidden; }
+  .notebook::after { content: ""; position: absolute; left: -70px; right: -70px; bottom: -42px; height: 30px; border-radius: 0 0 30px 30px; background: #2a2a2f; }
+  .tela { position: absolute; left: 0; top: 0; width: 100%; }
+  .marca { position: absolute; left: 0; right: 0; text-align: center; font-weight: 800; font-size: 64px; letter-spacing: .2em; white-space: nowrap; }
+  #wipe, #wipe2 { position: absolute; top: -200px; left: 0; width: 1700px; height: 2400px; transform: translateX(-1900px) skewX(-14deg); }
+  #wipe { background: var(--acc); } #wipe2 { background: #f4f4f3; }
+  #flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+</style></head>
+<body>
+<div id="root" data-composition-id="root" data-width="{{W}}" data-height="{{H}}" data-fps="{{FPS}}" data-start="0" data-duration="{{TOTAL}}">
+  <audio id="trilha" data-timeline-role="music" data-start="0" data-duration="{{TOTAL}}" src="assets/trilha.wav"></audio>
+  <svg width="0" height="0" style="position:absolute"><filter id="mb" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur id="mbBlur" stdDeviation="0 0"/></filter></svg>
+  <div id="mundo">
+    <!--FUNDO-->
+    <div class="glow" id="g1"></div><div class="glow" id="g2"></div>
+<!--CENAS-->
+<!--MIDIA-->
+  </div>
+  <div class="topo"><span><span class="dot"></span><b id="marcaTopo"></b></span><span id="topoDir"></span></div>
+  <div id="grain"></div><div id="wipe"></div><div id="wipe2"></div><div id="flash"></div>
+
+  <script src="gsap.min.js"></script>
+  <script>
+    // Renderizador generico do /video-motion. Todos os tempos vem calculados do montar.py (mesmos do som).
+    const D = /*DADOS*/{};
+    const B = D.B, TECLA = D.tecla, $ = (id) => document.getElementById(id);
+    document.documentElement.style.setProperty("--acc", D.cor);
+    $("marcaTopo").textContent = D.marca || "";
+    const tl = gsap.timeline({ paused: true });
+
+    // ---------- utilitarios
+    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    function frase(el, txt) {         // *palavra* = cor de destaque; " / " = quebra de linha
+      el.innerHTML = txt.split(" ").map((p) => (p === "/" ? "<br>" : `<span class="w"><i class="${p.startsWith("*") ? "acc" : ""}">${esc(p.replace(/\*/g, ""))}</i></span>`)).join(" ");
+      return el.querySelectorAll(".w > i");
+    }
+    const entra = (els, t0, passo) => els.forEach((w, i) => tl.from(w, { yPercent: 115, duration: .55, ease: "power4.out" }, t0 + i * passo));
+    function digita(el, txt, t0) {
+      const o = { n: 0 }; el.textContent = "";
+      tl.to(o, { n: txt.length, duration: txt.length * TECLA, ease: "none", onUpdate: () => (el.textContent = txt.slice(0, Math.floor(o.n + 1e-6))) }, t0);
+    }
+    const borrao = (t0) => tl.fromTo("#mbBlur", { attr: { stdDeviation: "26 0" } }, { attr: { stdDeviation: "0 0" }, duration: .28, ease: "power2.out", immediateRender: false }, t0);
+    function tremida(t0, f) { [12, -10, 8, -6, 4, -2, 0].forEach((v, i) => tl.to("#mundo", { x: v * (f || 1), y: -v * .6 * (f || 1), duration: .035, ease: "none" }, t0 + i * .035)); }
+    function pesoPulsa(el, t0, n) { for (let i = 0; i < n; i++) tl.fromTo(el, { fontVariationSettings: '"wght" 800' }, { fontVariationSettings: '"wght" 600', duration: B * 1.6, ease: "power2.out", immediateRender: false }, t0 + i * B * 2); }
+    const rotulo = (t, txt) => tl.set("#topoDir", { textContent: txt || "" }, t);
+    const janela = (el, a, b) => tl.set(el, { autoAlpha: 0 }, 0).set(el, { autoAlpha: 1 }, a).set(el, { autoAlpha: 0 }, b);
+    const num = (s) => parseFloat(String(s).replace(",", "."));
+    const fmtValor = (v, f) => {
+      if (f === "euro_mi" || f === "real_mi" || f === "dolar_mi") { const s = { euro_mi: "€", real_mi: "R$", dolar_mi: "US$" }[f]; return v < 1 ? `${s} ${Math.round(v * 1000)} mil` : `${s} ${v % 1 ? v.toFixed(1).replace(".", ",") : v} mi`; }
+      if (f === "porcento") return `${Math.round(v)}%`;
+      return v % 1 ? v.toFixed(1).replace(".", ",") : String(Math.round(v));
+    };
+    function el(html, pai) { const d = document.createElement("div"); d.innerHTML = html; const n = d.firstElementChild; pai.appendChild(n); return n; }
+    function titulo(c, i, top, size) { if (!c.titulo) return; const h = el(`<div class="h" style="top:${top || 290}px;font-size:${size || 140}px"></div>`, $("c" + i)); entra(frase(h, c.titulo), c.t + .15, B); return h; }
+    function legenda(c, i, top) { if (!c.legenda) return; const l = el(`<div class="cap" style="top:${top}px">${esc(c.legenda)}</div>`, $("c" + i)); tl.from(l, { opacity: 0, x: -40, duration: .5 }, c.t + B * 2); return l; }
+
+    // ---------- vida continua
+    tl.fromTo("#mundo", { scale: 1 }, { scale: 1.06, duration: D.total, ease: "none" }, 0);
+    tl.fromTo("#g1", { x: -100, y: 80 }, { x: 260, y: -420, duration: D.total, ease: "sine.inOut" }, 0);
+    tl.fromTo("#g2", { x: 60 }, { x: -320, y: 300, duration: D.total, ease: "sine.inOut" }, 0);
+    tl.to("#grain", { x: 47, y: -31, duration: 1 / 15, ease: "steps(1)", repeat: Math.ceil(D.total * 15), yoyo: true }, 0);
+    tl.from(".topo", { opacity: 0, y: -20, duration: .6, ease: "power3.out" }, .1);
+
+    // ---------- cenas
+    const R = {};
+    R.titulo = (c, i) => {
+      if (c.legenda) { const l = el(`<div class="cap" style="top:880px">${esc(c.legenda)}</div>`, $("c" + i)); tl.from(l, { opacity: 0, x: -40, duration: .5, ease: "power3.out" }, c.t + .15); }
+      const h = el(`<div class="h" style="top:950px;font-size:${c.tamanho || 196}px"></div>`, $("c" + i));
+      h.innerHTML = c.linhas.map((ln) => `<div><span class="w"><i class="${ln.startsWith("*") ? "acc" : ""}" style="filter:url(#mb)">${esc(ln.replace(/\*/g, ""))}</i></span></div>`).join("");
+      const ws = h.querySelectorAll("i");
+      ws.forEach((w, k) => {
+        const tk = c.tLinhas[k];
+        if (k < ws.length - 1) { tl.from(w, { x: 260, opacity: 0, duration: .5, ease: "power4.out" }, tk); borrao(tk); }
+        else { tl.from(w, { yPercent: 115, duration: .6, ease: "power4.out" }, tk); tremida(tk, .8); }
+      });
+      tl.fromTo(h, { scale: 1 }, { scale: 1.08, duration: c.dur - (c.tLinhas[c.tLinhas.length - 1] - c.t), ease: "none" }, c.tLinhas[c.tLinhas.length - 1]);
+    };
+    R.destaque = (c, i) => {
+      const box = $("c" + i), fim = c.t + c.dur, palavra = (c.palavra || "").toUpperCase();
+      const letras = () => palavra.split("").map((l) => `<span class="l">${esc(l)}</span>`).join("");
+      const par = el(`<div class="par"><div class="par3d"><div class="gigante" style="font-size:${c.tamanho_palavra || Math.min(260, Math.floor(1700 / Math.max(4, palavra.length)))}px"><div style="filter:url(#mb)">${letras()}</div><div class="o">${letras()}</div></div><div class="sombra"></div>${c.imagem ? `<img class="figura" src="${esc(c.imagem)}" alt="">` : ""}</div></div>`, box);
+      const g = par.querySelector(".gigante"), fig = par.querySelector(".figura");
+      tl.from(g.querySelectorAll("div:first-child .l"), { yPercent: 120, opacity: 0, duration: .5, stagger: .035, ease: "power4.out" }, c.t + .25);
+      tl.from(g.querySelectorAll(".o .l"), { yPercent: -120, opacity: 0, duration: .5, stagger: .035, ease: "power4.out" }, c.t + .4);
+      tl.fromTo(par.querySelector(".par3d"), { rotationY: 7, rotationX: -2 }, { rotationY: -7, rotationX: 2, duration: c.dur, ease: "sine.inOut" }, c.t);
+      tl.fromTo(g, { x: 60, z: -220 }, { x: -110, z: -220, duration: c.dur, ease: "none" }, c.t);
+      if ($("fundo")) tl.fromTo("#fundo", { x: 0 }, { x: -70, duration: c.dur, ease: "none", immediateRender: false }, c.t);
+      if (fig) {
+        tl.from(fig, { y: 700, scale: .92, duration: 1.0, ease: "power4.out" }, c.tImagem);
+        tl.fromTo(fig, { x: -20, scale: 1, z: 80 }, { x: 40, scale: 1.05, z: 80, duration: fim - c.tImagem - 1, ease: "none", immediateRender: false }, c.tImagem + 1);
+        tl.from(par.querySelector(".sombra"), { opacity: 0, duration: .8 }, c.tImagem);
+        tremida(c.tImagem + .35, 1.2);
+      }
+      if (c.numero) {
+        const n = c.numero, p = el(`<div class="pilula"><div class="k">${esc(n.rotulo || "")}</div><div class="v"></div></div>`, box), v = p.querySelector(".v"), o = { x: 0 };
+        const mostra = () => (v.innerHTML = `${esc(n.prefixo || "")}${fmtValor(o.x, n.formato)}<small>${esc(n.sufixo || "")}</small>`); mostra();
+        tl.from(p, { x: 140, opacity: 0, duration: .5, ease: "power3.out" }, c.tNumero);
+        tl.to(o, { x: num(n.valor), duration: 1.12, ease: "power2.out", onUpdate: mostra }, c.tNumero);
+      }
+      if ((c.etiquetas || []).length) {
+        const ch = el(`<div class="chips">${c.etiquetas.map((e, k) => `<span class="chip${k === 0 ? " on" : ""}"><b class="tx"></b></span>`).join("")}</div>`, box);
+        ch.querySelectorAll(".chip").forEach((sp, k) => { tl.from(sp, { opacity: 0, y: 30, scale: .9, duration: .3, ease: "back.out(2)" }, c.tEtiquetas[k]); digita(sp.querySelector(".tx"), c.etiquetas[k].toUpperCase(), c.tEtiquetas[k] + .05); });
+      }
+    };
+    R.grafico_linha = (c, i) => {
+      const box = $("c" + i); titulo(c, i, 290, c.tamanho || 120);
+      if (c.legenda) { const l = el(`<div class="cap" style="top:560px"></div>`, box); digita(l, c.legenda.toUpperCase(), c.t + .2); }
+      const gNum = el(`<div class="gnum"></div>`, box), gAno = el(`<div class="gano"></div>`, box);
+      const W = 948, H = 760, padB = 70, s = c.serie;
+      const dt = (x) => { const [d, m, y] = x.split("/").map(Number); return Date.UTC(y, m - 1, d); };
+      const t0d = dt(s[0].data), t1d = dt(s[s.length - 1].data), vmax = Math.max(...s.map((p) => p.valor));
+      const X = (x) => Math.min(W - 20, Math.max(20, ((dt(x) - t0d) / (t1d - t0d)) * (W - 40) + 20)), Y = (v) => H - padB - (v / vmax) * (H - padB - 40);
+      const pts = s.map((p) => [X(p.data), Y(p.valor)]);
+      const linha = "M" + pts.map((p) => p.map((n) => n.toFixed(1)).join(" ")).join(" L ");
+      const area = linha + ` L ${pts[pts.length - 1][0].toFixed(1)} ${H - padB} L ${pts[0][0].toFixed(1)} ${H - padB} Z`;
+      const a0 = new Date(t0d).getUTCFullYear(), a1 = new Date(t1d).getUTCFullYear(), pa = Math.max(1, Math.ceil((a1 - a0) / 5));
+      let anos = ""; for (let a = a0 + 1; a <= a1; a += pa) { const x = X(`01/01/${a}`); anos += `<text x="${x}" y="${H - 22}" fill="#8a8a92" font-family="JB Mono" font-size="22" text-anchor="middle">${a}</text><line x1="${x}" y1="40" x2="${x}" y2="${H - padB}" stroke="rgba(255,255,255,.06)"/>`; }
+      const svg = el(`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="position:absolute;left:66px;top:760px"><defs><linearGradient id="ga${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${D.cor}" stop-opacity=".45"/><stop offset="1" stop-color="${D.cor}" stop-opacity="0"/></linearGradient><clipPath id="gc${i}"><rect id="gr${i}" x="0" y="0" width="0" height="${H}"/></clipPath></defs>${anos}<line x1="0" y1="${H - padB}" x2="${W}" y2="${H - padB}" stroke="rgba(255,255,255,.25)" stroke-width="2"/><g clip-path="url(#gc${i})"><path d="${area}" fill="url(#ga${i})"/><path d="${linha}" fill="none" stroke="${D.cor}" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/></g><circle id="gp${i}" r="14" fill="#fff" stroke="${D.cor}" stroke-width="6"/></svg>`, box);
+      const gp = { x: 20 };
+      const em = (x) => { for (let k = 1; k < pts.length; k++) if (x <= pts[k][0]) { const a = pts[k - 1], b = pts[k], f = (x - a[0]) / ((b[0] - a[0]) || 1); return [s[k - 1].valor + (s[k].valor - s[k - 1].valor) * f, a[1] + (b[1] - a[1]) * f, k]; } return [s[s.length - 1].valor, pts[pts.length - 1][1], s.length - 1]; };
+      const des = () => { const [v, y, k] = em(gp.x); $("gr" + i).setAttribute("width", gp.x); $("gp" + i).setAttribute("cx", gp.x); $("gp" + i).setAttribute("cy", y); gNum.textContent = fmtValor(Math.round(v * 20) / 20, c.formato_valor); gAno.textContent = s[Math.max(0, k - 1)].data.slice(6); };
+      des(); tl.to(gp, { x: W - 20, duration: c.durDesenho, ease: "none", onUpdate: des }, c.tDesenho);
+      tl.from([svg, gNum, gAno], { opacity: 0, duration: .4 }, c.tDesenho - .2);
+      (c.marcos || []).forEach((m, k) => { const x = X(m.data); const mk = el(`<div class="marco" style="left:${66 + x}px;top:${760 + em(x)[1]}px">${m.icone ? `<img src="${esc(m.icone)}" alt="">` : ""}</div>`, box); tl.from(mk, { scale: 0, opacity: 0, duration: .35, ease: "back.out(3)" }, m.t); });
+      tl.fromTo(gNum, { scale: 1, color: "#f4f4f3" }, { scale: 1.08, color: D.cor, duration: .25, yoyo: true, repeat: 1, transformOrigin: "100% 50%", immediateRender: false }, c.t + 12 * B);
+      if (c.fonte) { const f = el(`<div class="cap" style="top:1560px">${esc(c.fonte)}</div>`, box); tl.from(f, { opacity: 0, duration: .4 }, c.tDesenho); }
+    };
+    R.linha_tempo = (c, i) => {
+      const box = $("c" + i); titulo(c, i, 290, c.tamanho || 140);
+      const n = c.itens.length, y0 = 560, passo = Math.min(205, Math.floor(1050 / Math.max(1, n - 1)));
+      const ln = el(`<div class="linhaT" style="top:${y0 + 70}px;height:${(n - 1) * passo}px"></div>`, box);
+      tl.from(ln, { scaleY: 0, duration: B * 2.2 * (n - 1), ease: "none" }, c.t + B * 2);
+      c.itens.forEach((it, k) => {
+        const r = el(`<div class="tr${k === n - 1 ? " fim" : ""}" style="top:${y0 + k * passo}px"><div class="e">${it.icone ? `<img src="${esc(it.icone)}" alt="">` : `<span>${esc((it.nome || "?")[0])}</span>`}</div><div><div class="ano">${esc(it.ano || "")}</div><div class="cl">${esc(it.nome || "")}</div></div><span class="fee"></span></div>`, box);
+        tl.from(r, { opacity: 0, x: -60, duration: .4, ease: "power3.out" }, c.tItens[k]);
+        tl.from(r.querySelector(".e"), { scale: .5, rotation: -10, duration: .45, ease: "back.out(2.5)" }, c.tItens[k]);
+        if (it.valor) digita(r.querySelector(".fee"), it.valor.toUpperCase(), c.tItens[k] + .25); else r.querySelector(".fee").remove();
+      });
+    };
+    R.radar = (c, i) => {
+      const box = $("c" + i); const h = titulo(c, i, 290, c.tamanho || 140); if (h) pesoPulsa(h, c.t + B * 2, 5); legenda(c, i, 500);
+      const it = c.itens, cx = 540, cy = 470, Rr = 330, N = it.length, max = c.maximo || 100;
+      const ang = (k) => -Math.PI / 2 + (k * 2 * Math.PI) / N, P = (k, r) => [cx + Math.cos(ang(k)) * r, cy + Math.sin(ang(k)) * r];
+      let g = ""; [.33, .66, 1].forEach((f) => (g += `<polygon points="${it.map((_, k) => P(k, Rr * f).join(",")).join(" ")}" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="2"/>`));
+      it.forEach((_, k) => (g += `<line x1="${cx}" y1="${cy}" x2="${P(k, Rr)[0]}" y2="${P(k, Rr)[1]}" stroke="rgba(255,255,255,.18)" stroke-width="2"/>`));
+      el(`<svg width="1080" height="1000" viewBox="0 0 1080 1000" style="position:absolute;left:0;top:640px">${g}<polygon id="rp${i}" fill="${D.cor}" fill-opacity=".28" stroke="${D.cor}" stroke-width="6" stroke-linejoin="round"/>${it.map((_, k) => `<circle id="rc${i}_${k}" r="11" fill="#fff"/>`).join("")}</svg>`, box);
+      const rv = it.map(() => ({ v: 0 }));
+      const poly = () => { $("rp" + i).setAttribute("points", rv.map((o, k) => P(k, (Rr * o.v) / max).join(",")).join(" ")); rv.forEach((o, k) => { const p = P(k, (Rr * o.v) / max); $(`rc${i}_${k}`).setAttribute("cx", p[0]); $(`rc${i}_${k}`).setAttribute("cy", p[1]); }); };
+      poly(); const topV = Math.max(...it.map((a) => a[1]));
+      it.forEach(([k, v], j) => {
+        const p = P(j, Rr + 95), d = el(`<div class="rv${v === topV && j === it.findIndex((a) => a[1] === topV) ? " top" : ""}" style="left:${p[0]}px;top:${640 + p[1]}px"><div class="v">0</div><div class="n">${esc(k)}</div></div>`, box);
+        tl.from(d, { opacity: 0, scale: .7, duration: .35, ease: "back.out(2)" }, c.tItens[j]);
+        tl.to(rv[j], { v: v, duration: .9, ease: "power3.out", onUpdate: () => { poly(); d.querySelector(".v").textContent = Math.round(rv[j].v); } }, c.tItens[j]);
+      });
+    };
+    R.barras = (c, i) => {
+      const box = $("c" + i); const h = titulo(c, i, 300, c.tamanho || 150); if (h) pesoPulsa(h, c.t + B * 2, 4); legenda(c, i, 520);
+      const max = c.maximo || 100, topV = Math.max(...c.itens.map((a) => a[1]));
+      c.itens.forEach(([k, v], j) => {
+        const b = el(`<div class="bar${v === topV && j === c.itens.findIndex((a) => a[1] === topV) ? " top" : ""}" style="top:${700 + j * 190}px"><span class="n">${esc(k)}</span><div class="trk"><div class="fi"></div></div><span class="v">0</span></div>`, box), o = { x: 0 };
+        tl.from(b, { opacity: 0, x: -50, duration: .4, ease: "power3.out" }, c.tItens[j]);
+        tl.fromTo(b.querySelector(".fi"), { scaleX: 0 }, { scaleX: v / max, duration: 1, ease: "power3.out" }, c.tItens[j] + .05);
+        tl.to(o, { x: v, duration: 1, ease: "power3.out", onUpdate: () => (b.querySelector(".v").textContent = Math.round(o.x)) }, c.tItens[j] + .05);
+      });
+    };
+    R.video_palavras = (c, i) => {
+      const card = $(`c${i}card`), fim = c.t + c.dur;
+      janela(card, c.t, fim);
+      $(`c${i}tag`).textContent = c.etiqueta || ""; if (!c.etiqueta) $(`c${i}tag`).remove();
+      else tl.fromTo(`#c${i}tag`, { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: .4, immediateRender: false }, c.t + .6);
+      tl.from(card, { y: 900, duration: .9, ease: "power4.out", immediateRender: false }, c.t);
+      ["spot", "anel", "anelTag", "lento"].forEach((k) => tl.set(`#c${i}${k}`, { autoAlpha: 0 }, 0));
+      c.clipes.forEach((cl, k) => {
+        entra(frase($(`c${i}p${k}`), cl.palavra), cl.t + .03, 0);
+        tl.from(`#c${i}x${k}`, { opacity: 0, x: 30, duration: .3 }, cl.t + .1);
+        tl.fromTo(card, { scale: 1.07, rotation: k % 2 ? -1.2 : 1.2 }, { scale: 1, rotation: 0, duration: .7, ease: "power3.out", immediateRender: false }, cl.t);
+        if (k > 0) tl.fromTo("#flash", { opacity: .8 }, { opacity: 0, duration: .28, ease: "power2.out", immediateRender: false }, cl.t);
+        if (cl.anel && cl.congelar_em != null) {
+          const an = cl.anel, tf = cl.t + cl.congelar_em;
+          $(`c${i}spot`).style.background = `radial-gradient(circle at ${an.x}px ${an.y}px, transparent ${an.r - 10}px, rgba(0,0,0,.72) ${an.r + 30}px)`;
+          Object.assign($(`c${i}anel`).style, { left: an.x - an.r + "px", top: an.y - an.r + "px", width: an.r * 2 + "px", height: an.r * 2 + "px" });
+          Object.assign($(`c${i}anelTag`).style, { left: Math.max(20, Math.min(an.x - 140, 948 - 360)) + "px", top: Math.max(20, an.y - an.r - 80) + "px" });
+          $(`c${i}anelTag`).textContent = an.texto || "";
+          tl.fromTo(`#c${i}spot`, { autoAlpha: 0 }, { autoAlpha: 1, duration: .25, immediateRender: false }, tf);
+          tl.fromTo(`#c${i}anel`, { autoAlpha: 0, scale: 1.8 }, { autoAlpha: 1, scale: 1, duration: .45, ease: "back.out(2)", immediateRender: false }, tf);
+          tl.to(`#c${i}anel`, { scale: 1.06, duration: .25, yoyo: true, repeat: 1, ease: "sine.inOut" }, tf + .45);
+          if (an.texto) tl.fromTo(`#c${i}anelTag`, { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: .35, immediateRender: false }, tf + .15);
+          tl.set([`#c${i}spot`, `#c${i}anel`, `#c${i}anelTag`], { autoAlpha: 0 }, cl.t + cl.dur);
+          tl.fromTo("#flash", { opacity: .6 }, { opacity: 0, duration: .2, immediateRender: false }, tf);
+        }
+        if (cl.lento_em != null) {
+          tl.fromTo(`#c${i}lento`, { autoAlpha: 0, x: 30 }, { autoAlpha: 1, x: 0, duration: .3, immediateRender: false }, cl.t + cl.lento_em).set(`#c${i}lento`, { autoAlpha: 0 }, cl.t + cl.dur);
+          tl.fromTo(card, { scale: 1 }, { scale: 1.05, duration: cl.dur - cl.lento_em, ease: "none", immediateRender: false }, cl.t + cl.lento_em);
+        }
+      });
+    };
+    R.texto_video = (c, i) => {
+      janela(`#c${i}box`, c.t, c.t + c.dur);
+      tl.from(`#c${i}txt`, { scale: 1.6, duration: .5, ease: "power4.out" }, c.t);
+      tl.fromTo(`#c${i}txt`, { scale: 1 }, { scale: 1.12, duration: Math.max(.1, c.dur - .5), ease: "none", immediateRender: false }, c.t + .5);
+      tremida(c.t, 1.4);
+    };
+    R.numeros = (c, i) => {
+      const box = $("c" + i); const h = titulo(c, i, 290, c.tamanho || 150); if (h) pesoPulsa(h, c.t + B * 2, 3); legenda(c, i, 640);
+      c.itens.forEach(([k, v, destaque], j) => {
+        const b = el(`<div class="box${destaque ? " top" : ""}" style="left:${66 + (j % 2) * 492}px;top:${720 + Math.floor(j / 2) * 396}px"><span class="v">0</span><span class="k">${esc(k)}</span></div>`, box), o = { x: 0 };
+        tl.from(b, { opacity: 0, y: 60, scale: .94, duration: .5, ease: "back.out(1.6)" }, c.tItens[j]);
+        tl.to(o, { x: num(v), duration: .9, ease: "power2.out", onUpdate: () => (b.querySelector(".v").textContent = String(v).includes(",") ? o.x.toFixed(1).replace(".", ",") : Math.round(o.x)) }, c.tItens[j] + .05);
+      });
+    };
+    R.mockup = (c, i) => {
+      const box = $("c" + i); titulo(c, i, 290, c.tamanho || 120);
+      const ap = el(`<div class="${c.aparelho === "notebook" ? "notebook" : "celular"}"><img class="tela" src="${esc(c.imagem)}" alt=""></div>`, box), tela = ap.querySelector(".tela");
+      tl.from(ap, { y: 1100, rotation: c.aparelho === "notebook" ? 0 : 8, duration: .9, ease: "power4.out" }, c.tAparelho);
+      tl.fromTo(ap, { rotationY: -10 }, { rotationY: 6, duration: c.dur, ease: "sine.inOut", transformPerspective: 1600 }, c.t);
+      if (c.rolagem > 0) tl.to(tela, { y: -c.rolagem, duration: Math.max(.5, c.t + c.dur - c.tRolagem - .4), ease: "power1.inOut" }, c.tRolagem);
+      (c.etiquetas || []).forEach((e, k) => {
+        const lado = k % 2 ? "right:40px" : "left:40px", top = 760 + k * 210;
+        const ch = el(`<span class="chip${k === 0 ? " on" : ""}" style="position:absolute;${lado};top:${top}px;box-shadow:0 20px 40px rgba(0,0,0,.6)"><b class="tx"></b></span>`, box);
+        tl.from(ch, { opacity: 0, scale: .6, y: 30, duration: .35, ease: "back.out(2.5)" }, c.tEtiquetas[k]);
+        digita(ch.querySelector(".tx"), e.toUpperCase(), c.tEtiquetas[k] + .2);
+      });
+    };
+    R.assinatura = (c, i) => {
+      const box = $("c" + i);
+      if ($(`c${i}card`)) { janela(`#c${i}card`, c.t, c.t + c.videoDur); tl.from(`#c${i}card`, { y: 500, scale: .9, duration: .8, ease: "power4.out", immediateRender: false }, c.t); tl.to(`#c${i}card`, { opacity: 0, y: -40, duration: .3, ease: "power2.in" }, c.t + c.videoDur - .3); }
+      const h = el(`<div class="h" style="top:${$(`c${i}card`) ? 1150 : 760}px;font-size:${c.tamanho || 170}px;text-align:center"></div>`, box); entra(frase(h, c.titulo || ""), c.t + 2 * B, 0);
+      const m = el(`<div class="marca" style="top:${$(`c${i}card`) ? 1440 : 1050}px"></div>`, box); digita(m, (c.marca || D.marca || "").toUpperCase(), c.tMarca);
+      if (c.fonte) { const f = el(`<div class="cap" style="top:${$(`c${i}card`) ? 1560 : 1170}px;left:0;right:0;text-align:center">${esc(c.fonte)}</div>`, box); tl.from(f, { opacity: 0, duration: .5 }, c.t + 6 * B); }
+    };
+
+    if (D.fundoAte) tl.to("#fundo", { opacity: 0, duration: .4 }, D.fundoAte - .4);
+    D.cenas.forEach((c, i) => {
+      rotulo(c.t, c.rotulo != null ? c.rotulo : (i === 0 ? D.rotulo : ""));
+      if (c.transicao === "lamina") {
+        tl.fromTo("#wipe", { x: -1900 }, { x: 1300, duration: .62, ease: "power3.inOut", immediateRender: false }, c.t - .31);
+        tl.fromTo("#wipe2", { x: -1900 }, { x: 1300, duration: .62, ease: "power3.inOut", immediateRender: false }, c.t - .23);
+      } else if (c.transicao === "flash") tl.fromTo("#flash", { opacity: .85 }, { opacity: 0, duration: .28, immediateRender: false }, c.t);
+      R[c.tipo](c, i);
+    });
+    tl.to({}, { duration: .01 }, D.total - .01);
+    window.__timelines = window.__timelines || {};
+    window.__timelines.root = tl;
+  </script>
+</div>
+</body></html>
