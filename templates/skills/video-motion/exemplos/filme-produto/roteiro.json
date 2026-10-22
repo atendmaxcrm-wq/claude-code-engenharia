@@ -1,0 +1,178 @@
+{
+ "titulo": "Filme de produto (exemplo)",
+ "formato": "9:16",
+ "formatos": [
+  "9:16",
+  "16:9"
+ ],
+ "fps": 30,
+ "rotulo": "Laboratório de IA",
+ "musica": {
+  "sintetizar": true,
+  "bpm": 120,
+  "clima": "energico",
+  "tom": "A",
+  "modo": "menor"
+ },
+ "cenas": [
+  {
+   "tipo": "titulo",
+   "batidas": 8,
+   "legenda": "Novuum Lab",
+   "linhas": [
+    "Inteligência",
+    "que trabalha",
+    "*por você.*"
+   ],
+   "passo": 1
+  },
+  {
+   "tipo": "ui_produto",
+   "titulo": "Do pedido ao *agente.*",
+   "estados": [
+    {
+     "batidas": 4,
+     "forma": {
+      "w": 620,
+      "h": 120,
+      "raio": 60,
+      "fundo": "acc"
+     },
+     "conteudo": {
+      "texto": "Falar com o laboratório",
+      "tamanho": 42
+     },
+     "acao": {
+      "tipo": "clique",
+      "x": 0.72,
+      "y": 0.6
+     }
+    },
+    {
+     "batidas": 6,
+     "forma": {
+      "w": 900,
+      "h": 170,
+      "raio": 28,
+      "fundo": "#f5f2eb"
+     },
+     "conteudo": {
+      "campo": "O que você quer automatizar?",
+      "digitar": "Atender leads no WhatsApp"
+     },
+     "acao": {
+      "tipo": "clique"
+     },
+     "nota": "Você descreve o problema"
+    },
+    {
+     "batidas": 3,
+     "forma": {
+      "w": 170,
+      "h": 170,
+      "raio": 85,
+      "fundo": "#f5f2eb"
+     },
+     "conteudo": {
+      "icone": "carregando"
+     }
+    },
+    {
+     "batidas": 3,
+     "forma": {
+      "w": 170,
+      "h": 170,
+      "raio": 85,
+      "fundo": "acc"
+     },
+     "conteudo": {
+      "icone": "check"
+     },
+     "nota": "A gente constrói do zero"
+    },
+    {
+     "batidas": 8,
+     "forma": {
+      "w": 940,
+      "h": 760,
+      "raio": 36,
+      "fundo": "cartao"
+     },
+     "conteudo": {
+      "imagem": "assets/marca/prints/scroll-000.png",
+      "recorte": [
+       0,
+       0,
+       1920,
+       1080
+      ],
+      "rolagem": 0,
+      "alinhar": "esquerda"
+     },
+     "nota": "e coloca no ar"
+    },
+    {
+     "batidas": 8,
+     "forma": {
+      "w": 900,
+      "h": 420,
+      "raio": 36,
+      "fundo": "cartao"
+     },
+     "conteudo": {
+      "titulo": "Nasce um agente que decide sozinho.",
+      "texto": "Feito do zero. Nunca de template."
+     }
+    }
+   ]
+  },
+  {
+   "tipo": "livre",
+   "batidas": 8,
+   "arquivo": "cenas/sinal.js",
+   "sons": [
+    {
+     "batida": 0,
+     "som": "hit"
+    },
+    {
+     "batida": 2,
+     "som": "pop"
+    },
+    {
+     "batida": 4,
+     "som": "pop"
+    },
+    {
+     "batida": 6,
+     "som": "hit",
+     "volume": 1
+    }
+   ],
+   "acontece": [
+    {
+     "batida": 0,
+     "texto": "palavra SINAL"
+    },
+    {
+     "batida": 2,
+     "texto": "palavra FORMA"
+    },
+    {
+     "batida": 4,
+     "texto": "palavra AGENTE"
+    },
+    {
+     "batida": 6,
+     "texto": "linha fecha"
+    }
+   ]
+  },
+  {
+   "tipo": "assinatura",
+   "batidas": 8,
+   "titulo": "*Novuum Lab.*",
+   "fonte": "novuumlab.com"
+  }
+ ]
+}

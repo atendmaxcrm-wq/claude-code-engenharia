@@ -1,89 +1,115 @@
 ---
 name: video-motion
-description: Gera vídeos curtos de MOTION GRAPHICS por código (não é edição de cortes nem vídeo gerado por IA) para QUALQUER assunto - perfil de atleta, case de cliente, produto, serviço, dados, notícia, aula - no estilo de reels premium (tipografia cinética, contadores, gráficos se desenhando, radar, linha do tempo com logos, mockup de site em celular, imagem recortada na frente de palavra gigante com paralaxe, vídeo dentro das letras, congelamento com anel de destaque, câmera lenta). Motor próprio sobre HyperFrames (HTML + GSAP -> MP4) que lê um roteiro.json de cenas contadas em BATIDAS da música e gera imagem e trilha juntas: som de teclado por letra, riser, grave, whoosh com pan, impactos, música abaixando sob os efeitos (sidechain) e volume final a -14 LUFS. Renderiza no próprio servidor, custo zero de IA. Use quando o usuário pedir: vídeo em motion, reel animado, motion graphics, animação com dados, "vídeo gerado por código", reels/shorts/stories animados, vídeo de apresentação de jogador/produto/case, "transforma esses números em vídeo", HyperFrames, Remotion-like, kinetic typography.
+description: Gera vídeos curtos de MOTION GRAPHICS por código (não é edição de cortes nem vídeo gerado por IA) para QUALQUER assunto - filme de produto/SaaS com a interface real em movimento, perfil de atleta, case de cliente, serviço, dados, notícia, aula - no estilo de reels e lançamentos premium (tipografia cinética, contêiner de interface que muda de forma conduzido por cursor, contadores, gráficos se desenhando, radar, linha do tempo com logos, mockup de site, imagem recortada na frente de palavra gigante, vídeo dentro das letras, câmera lenta). Motor próprio sobre HyperFrames (HTML + GSAP -> MP4) que lê um roteiro.json de cenas contadas em BATIDAS e gera imagem e trilha juntas (efeitos sonoros sintetizados, trilha original em código ou faixa fornecida, sidechain, -14 LUFS). Trabalha como um estúdio: marca REAL capturada do site, brief de diretor, tabela de batidas aprovada antes do código, loop de crítica com notas por quadro ANTES do render, 9:16/16:9/1:1 do mesmo roteiro e motion blur. Custo zero de IA. Use quando o usuário pedir: vídeo em motion, motion graphics, reel animado, vídeo de lançamento/produto/SaaS, animação de interface, showreel, "vídeo gerado por código", reels/shorts/stories animados, "transforma esses números em vídeo", HyperFrames, Remotion-like, kinetic typography, ou mandar um vídeo de referência e pedir "um assim".
 ---
 
-# /video-motion: reels de motion graphics por código
+# /video-motion: estúdio de motion graphics por código
 
-> Saída: MP4 vertical 1080x1920 (30 ou 60 fps) com trilha mixada. Entrada: um `roteiro.json` com cenas de tipos prontos (`cenas.md`) + material (imagens, vídeos, logos, música). O mesmo motor serve para qualquer assunto: só o roteiro muda.
+> Saída: MP4 1080x1920 (e/ou 1920x1080, 1080x1080) com trilha mixada. Entrada: `roteiro.json` com cenas de tipos prontos (`cenas.md`) ou cenas livres + material real (prints, logo, fontes, vídeos, música).
+> O prompt é 10% do resultado; os outros 90% são o estúdio em volta: regras, marca real, referência, tabela de batidas e revisão em rodadas. Esta skill É esse estúdio.
 
-## Por que funciona (a regra que sustenta a skill)
+## Por que funciona
 
-**Imagem e som saem dos MESMOS tempos.** O `motor/montar.py` calcula, a partir das batidas, quando cada palavra entra, cada número conta e cada letra é digitada; com esses tempos ele escreve a animação (`index.html`) E mixa a trilha (`assets/trilha.wav`). Nunca editar tempos só no HTML: muda o roteiro e roda o motor de novo.
+1. **Imagem e som saem dos MESMOS tempos.** `motor/montar.py` calcula das batidas quando cada coisa acontece e com esses tempos escreve a animação (`index.html`) E mixa a trilha (`assets/trilha.wav`). Nunca editar tempos só no HTML: muda o roteiro e roda o motor.
+2. **Nada de "um prompt só".** Marca vem do site real, a história é aprovada em tabela de batidas, e o vídeo passa por rodadas de crítica com nota ANTES de gastar render.
 
 ## Ferramental (uma vez por máquina)
 
 ```bash
 bash ~/.claude/skills/video-motion/instalar.sh --com-recorte   # node 22, ffmpeg 7, hyperframes fixo, rembg; tudo em ~/.video-motion
-source ~/.video-motion/env.sh                                   # deixa disponível a função hf (= npx hyperframes)
+source ~/.video-motion/env.sh                                   # função hf (= npx hyperframes)
 ```
-Não instala nada no sistema. Motivos (Ubuntu 22.04): node do sistema costuma ser 20 (hyperframes pede 22), ffmpeg 4.4 quebra a mixagem de áudio (`setts=duration`), falta `unzip` para o hyperframes baixar o Chrome (usa o headless shell do Playwright se existir).
+Não instala nada no sistema (node 20 e ffmpeg 4.4 do Ubuntu 22.04 quebram o hyperframes). Python precisa de Pillow e numpy.
 
 ## Processo (siga na ordem)
 
-### 1. Entender o assunto e levantar DADOS REAIS
-- Qual a mensagem em uma frase? Quem assiste? Duração alvo (25 a 45 s).
-- Números, datas, nomes, logos: **só dado real com fonte** (cite a fonte na cena `assinatura` ou em `fonte`). Nunca inventar estatística para encher um contador; se o dado é fraco, use outro tipo de cena.
-- Material: fotos (para recorte), vídeos (lances, telas gravadas, b-roll), prints (mockup), logos/ícones, música.
+### 1. Brief de diretor
+Preencha `modelos/brief-diretor.md` com o usuário: entradas, **direção** (a linguagem visual em 1 ou 2 frases), estrutura em batidas, construção. Se ele não sabe a direção, pergunte a emoção, a referência e o que o espectador tem que lembrar. Mensagem em uma frase, duração 15 a 45 s.
 
-### 2. Montar o roteiro (rascunho de cenas)
-Escolha 6 a 10 cenas em `cenas.md`. Estrutura que funciona:
-`titulo` (gancho) -> `destaque` (quem/o quê) -> 2 a 4 cenas de prova (`grafico_linha`, `linha_tempo`, `radar`/`barras`, `numeros`, `mockup`, `video_palavras`, `texto_video`) -> `assinatura`.
-Alterne densidade: cena cheia de dado, depois cena de impacto (vídeo, palavra grande).
-
-### 3. Detectar a batida e escrever o roteiro.json
+### 2. Marca real (quando há marca/produto)
 ```bash
-mkdir -p projeto/assets && cp musica.mp3 projeto/assets/
-# crie um index.html mínimo só com <audio id="m" data-timeline-role="music" src="assets/musica.mp3"> OU use o bpm conhecido
-hf beats projeto        # -> beats/assets/musica.mp3.json com bpm
+bash ~/.claude/skills/video-motion/capturar_marca.sh https://site.com projeto/     # ~2,5 min
 ```
-Preencha `musica.bpm` e `musica.inicio` (um segundo de batida forte). Trap/hip-hop: o hyperframes costuma dar metade do tempo (ex.: 80) -> use `subdivisao: 2`.
+Gera `marca.json` (lido sozinho pelo motor: marca, cor, paleta, fontes), `marca.md` e `assets/marca/` (fontes do Google Fonts, prints da página, candidatos a logo). **Mostre o `marca.md` ao usuário e liste o que achou ANTES de animar**; complete o que estiver em "Falta" (logo vetorial, prints das telas logadas via Playwright). O kit fica em `~/.video-motion/marcas/<marca>`: o próximo vídeo da mesma marca reaproveita (`--atualizar` recaptura).
+**Nunca redesenhar a interface do produto de imaginação**: recorte e anime o print real (`ui_produto` com `imagem` + `recorte`).
 
-### 4. Mostrar a TABELA DE CENAS ao usuário antes de renderizar
-Rode só o motor (`python3 ~/.claude/skills/video-motion/motor/montar.py projeto`): ele imprime cena, início e batidas. Mostre essa tabela + os dados usados. Render custa minutos; ajuste antes.
-
-### 5. Renderizar e CONFERIR
+### 3. Referência (opcional, quando o usuário manda um vídeo "assim")
 ```bash
-bash ~/.claude/skills/video-motion/renderizar.sh projeto            # final
-bash ~/.claude/skills/video-motion/renderizar.sh projeto --rascunho # rápido, para ajustar
+bash ~/.claude/skills/video-motion/referencia.sh "https://youtube.com/watch?v=..." projeto/ [--de 0:10 --ate 0:40]
 ```
-O script monta, roda o lint (para no 1º ERRO), renderiza com prioridade baixa, gera `out/folha.jpg` (1 quadro/s), mede o volume e cria `out/<nome>-web.mp4` (~2,4 Mbps, cabe em 15 MB para ~45 s).
-**Olhe a folha de quadros sempre** (Read na imagem). Procure: texto estourando a largura, elemento encobrindo outro, cena vazia, quadro errado em vídeo. Extraia quadros pontuais com `ffmpeg -ss T -i out/x.mp4 -frames:v 1 q.png` para conferir de perto.
+Baixa pela Apify (~US$0,006/MB), mede o ritmo (cortes/s, plano médio) e gera folhas de quadros. Olhe as folhas e escreva `referencia.md`: ritmo, transições, tipo de movimento, hierarquia de tipo, uso de cor, o que o som marca; **o que adotar e o que NÃO copiar** (conteúdo, marca e textos da referência nunca).
 
-### 6. Entregar
-Vídeo (ou página com `<video>`) + o que é real/fonte de cada dado + o que foi usado só para estudo (direitos de imagem/música de terceiros são decisão do usuário).
+### 4. Dados e material
+Números, datas, nomes: **só dado real com fonte** (cite em `fonte`). Material: prints reais, fotos para recorte, vídeos, logos, música.
+
+### 5. Roteiro e TABELA DE BATIDAS (aprovar antes de qualquer render)
+Escolha cenas em `cenas.md`. Produto/SaaS: `titulo` (gancho) -> `ui_produto` (a história do uso em 5 a 10 estados) -> `livre` ou prova -> `assinatura`. Atleta/case: `titulo` -> `destaque` -> 2 a 4 cenas de prova -> `assinatura`.
+Som: faixa (`musica.arquivo`, BPM via `hf beats`) ou **trilha original sintetizada** (`musica.sintetizar: true`, `bpm`, `clima`); a sintetizada começa no tempo forte e não precisa de detecção.
+```bash
+python3 ~/.claude/skills/video-motion/motor/montar.py projeto/
+```
+Mostre ao usuário `out/batidas.md`: batida a batida, compasso, cena, o que acontece e o som. Leve a sério os `AVISO` do motor (tempo morto acima de 4 s, cena fora do tempo forte, gancho que só fecha depois de 2 s, cenas iguais seguidas). Ajustar a tabela custa segundos; re-renderizar custa minutos.
+
+### 6. Loop de crítica (OBRIGATÓRIO antes do render)
+```bash
+bash ~/.claude/skills/video-motion/revisar.sh projeto/          # ~1,5 min para 30 s: 1 quadro por batida, sem render
+```
+Olhe (Read) `out/revisao/rN/folha-batidas.jpg` (toda batida; faixa laranja = entra cena) e `folha-celular.jpg` (um quadro por compasso **no tamanho de tela de celular**). Preencha a rodada em `out/revisao.md`, nota 1 a 10, dizendo a batida em que se vê:
+1. **Gancho** nos 2 primeiros segundos
+2. **Leitura no tamanho do celular**
+3. **Qualidade do movimento**
+4. **Variedade** (algo novo a cada 2 a 4 s, sem padrão de IA)
+5. **Fidelidade à marca**
+6. **Sincronia com o som**
+
+Corrija os **3 piores**, rode de novo. **Só renderize quando tudo estiver 8 ou mais.** Não mostre vídeo ao usuário antes disso.
+**Cada formato tem sua rodada** (`revisar.sh projeto/ --formato 16:9`): o que funciona na vertical quebra na horizontal (no teste, a lâmina de transição ficava presa cobrindo a direita só no 16:9).
+
+### 7. Renderizar e conferir
+```bash
+bash ~/.claude/skills/video-motion/renderizar.sh projeto/ [--rascunho] [--formato 16:9|1:1|todos] [--motion-blur [4]]
+```
+Monta, lint, render, folha `out/folha.jpg`, LUFS, versão web (~2,4 Mbps). `--formato todos` faz cada item de `roteiro.formatos` (nomes `<projeto>-16x9.mp4`...). `--motion-blur` renderiza N subquadros e mistura (movimento rápido fica liso como câmera; custa N vezes o render: use no final). Com 4 subquadros, o que cruza a tela em menos de 1 s (lâmina) aparece em 3 a 4 faixas escalonadas: para isso use `--motion-blur 8` a 30 fps (limite 240 fps de render). O render recoloca a `trilha.wav` original no MP4 (o mixer do hyperframes tira ~1,5 dB). Olhe a folha sempre.
+
+### 8. Entregar e guardar
+Vídeo + o que é real/fonte de cada dado + o que é só para estudo (direitos de imagem/música de terceiros são do usuário). Se o usuário aprovou, anote no `marca.md` da biblioteca o que funcionou (cena, ritmo, tom) para manter o padrão no próximo vídeo da marca.
+
+## Regras do estúdio (o que separa motion de "vídeo de IA")
+
+**Proibido por padrão:** título centralizado sobre gradiente; tudo entrando com fade; rótulos de canto e molduras sem função; brilho/glow em interface; partículas genéricas; easing que quica; tempo morto.
+**Sempre:** uma fonte de título + uma de interface (as da marca); **uma** cor de destaque; algo novo na tela a cada 2 a 4 s; cena nova no tempo forte; movimento com mola de sobra mínima (`mola()` no template) ou freio forte (`power3/4.out`), nunca linear em entrada.
+O motor já aplica: fundo liso (`estilo.fundo: "brilho"` religa os brilhos), sem glow (`estilo.brilho: true` religa), texto medido com a fonte real e encolhido para caber, avisos de ritmo.
 
 ## Regras de qualidade (aprendidas em produção)
 
 1. **Dado real ou nada.** Contador, gráfico e radar só com número de fonte citável.
-2. **Recorte de pessoa: local, quadro parado e de frente.** `motor/recortar.py video.mp4 saida.png --tempos 12.0,12.2,13.0` testa vários instantes; braço borrado de movimento sai cortado. Pedir "fundo verde" a IA de imagem NÃO funciona com fundo poluído (torcida, multidão).
-3. **Vídeo em cartão vertical recorta o centro.** Se o assunto está na lateral, use `alinhamento: "100% 50%"`. Anel de destaque: marque x/y olhando o quadro congelado com grade (as coordenadas são do cartão 948x1180 depois do recorte).
-4. **Texto gigante tem que caber:** `palavra` longa diminui sozinha, mas confira; `texto_video` com 3 a 5 letras.
-5. **Nada aleatório no JS** (tremida e grão usam sequências fixas): o render paraleliza em vários navegadores e `Math.random` faria cada um ver um vídeo diferente.
-6. **Não anime propriedades de layout** (letterSpacing, width, top): travam no render quadro a quadro; use transform (x, y, scale) e opacity.
-7. **Vídeo com data-start não pode ficar dentro de bloco que também tem data-start** (o motor já põe os vídeos numa camada própria). Se escrever cena nova, siga o padrão.
-8. **Só um .html com data-composition-id na raiz do projeto** (outro html na raiz vira 2ª composição e duplica o áudio).
-9. **`<audio>` sem id sai mudo** (o motor já usa `id="trilha"`).
-10. **Desfoque pesado no navegador é caro**: pré-desfoque vídeos no ffmpeg.
+2. **Recorte de pessoa: local, quadro parado e de frente.** `motor/recortar.py video.mp4 saida.png --tempos 12.0,12.2,13.0`. Pedir "fundo verde" a IA de imagem NÃO funciona com fundo poluído.
+3. **Vídeo em cartão vertical recorta o centro**: `alinhamento: "100% 50%"` se o assunto está na lateral. Print em `ui_produto`: `alinhar: "esquerda"` quando o texto do site está à esquerda.
+4. **Texto tem que caber**: o motor mede com a fonte real, mas fonte larga (Syne, Clash) encolhe muito: prefira linhas curtas (3 a 14 letras) a uma linha longa pequena.
+5. **Nada aleatório no JS** (o render paraleliza em vários navegadores; `Math.random` daria um vídeo por navegador). Nada de CSS transition, setTimeout ou requestAnimationFrame: todo movimento é função do tempo da timeline.
+6. **Não anime propriedades de layout** (letterSpacing, width, top) em HTML: use transform/opacity. Forma que muda de tamanho = atributos de `<rect>` SVG (como no `ui_produto`).
+7. **Vídeo com data-start não pode ficar dentro de bloco que também tem data-start** (o motor põe vídeos numa camada própria).
+8. **Só um .html com data-composition-id na raiz do projeto**; **`<audio>` sem id sai mudo** (o motor usa `id="trilha"`).
+9. **Desfoque pesado no navegador é caro**: pré-desfoque vídeos no ffmpeg.
+10. **Medir no build, nunca em callback** (o lint avisa `gsap_callback_dom_measurement`): o renderer busca quadros fora de ordem.
 
-## Custo e tempo
+## Custo e tempo (4 núcleos, CPU)
 
-- IA: zero (efeitos sonoros sintetizados no ffmpeg, recorte local, gráficos em código).
-- Render (4 núcleos, CPU): ~6 min para 45 s em 1080x1920 (30 ou 60 fps; a captura do navegador domina). `--rascunho` corta bastante.
-- Telemetria do hyperframes desligada no env.sh.
+- IA: zero (efeitos e trilha sintetizados, recorte local, gráficos em código). Apify só para baixar referência do YouTube.
+- `revisar.sh`: ~1,5 min para 30 s (56 quadros). Render: ~5 min por formato para 30 s; `--motion-blur 4` ~4x.
+- Captura de marca: ~2,5 min (uma vez por marca).
 
 ## Arquivos
 
-- `motor/montar.py`: roteiro -> tempos, efeitos sonoros, trilha mixada (-14 LUFS, sidechain), index.html.
-- `motor/template.html`: CSS + renderizador de cada tipo de cena (GSAP, timeline pausada).
-- `motor/recortar.py`: recorte local (rembg) de foto ou quadros de vídeo.
-- Fontes (Inter Tight, JetBrains Mono, licença OFL) e GSAP são baixados pelo `instalar.sh`; a skill só tem texto.
-- `instalar.sh` / `renderizar.sh`: ferramental isolado e pipeline de render + conferência.
-- `cenas.md`: todos os tipos de cena e campos.
-- `exemplos/`: `perfil-atleta` (todos os tipos de dados + vídeos) e `case-site` (mockup + barras). Os arquivos de mídia não acompanham a skill; o README de cada exemplo diz o que colocar em `assets/`.
+- `motor/montar.py`: roteiro (+ `marca.json`) -> tempos, efeitos, trilha (-14 LUFS, sidechain), `index.html`, `out/batidas.md|json`, avisos de ritmo.
+- `motor/template.html`: CSS + renderizador de cada tipo (GSAP, timeline pausada), `mola()`, `ui_produto`, ponte das cenas `livre`.
+- `motor/trilha_sintetica.py`: trilha original (bumbo, chimbal, palma, baixo, pad, arpejo) na grade exata.
+- `motor/folha.py`: folhas do loop de crítica. `motor/marca.py`: captura -> kit de marca. `motor/recortar.py`: recorte local (rembg).
+- `revisar.sh` (loop de crítica), `renderizar.sh` (render final), `capturar_marca.sh`, `referencia.sh`, `instalar.sh`.
+- `modelos/brief-diretor.md`: brief em 4 blocos. `cenas.md`: todos os tipos e campos.
+- `exemplos/`: `perfil-atleta`, `case-site`, `filme-produto` (ui_produto + livre + trilha sintetizada + 9:16/16:9). Mídia não acompanha (a skill só tem texto).
 
-## Adicionando um tipo de cena
+## Cena nova
 
-1. Em `montar.py`: calcule os tempos internos (`c["tAlgo"]`) e os eventos de som (`ev`, `digitar`) no bloco da agenda.
-2. Em `template.html`: crie `R.novo_tipo = (c, i) => {...}` usando só os tempos de `c` (nunca recalcule no JS).
-3. Documente em `cenas.md` e teste com `--rascunho` + folha de quadros.
+- **Uma vez só:** use `tipo: "livre"` (JS próprio no projeto, recebendo os tempos das batidas e os sons declarados no roteiro). Veja `cenas.md`.
+- **Para reusar:** em `montar.py` calcule os tempos internos (`c["tAlgo"]`), os sons (`ev`, `digitar`) e as ações (`acao`, vão para a tabela); em `template.html` crie `R.novo_tipo = (c, i) => {...}` usando só os tempos de `c`; documente em `cenas.md`; teste com `revisar.sh`.

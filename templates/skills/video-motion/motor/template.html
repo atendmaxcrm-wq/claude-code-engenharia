@@ -4,9 +4,9 @@
 <style>
   @font-face { font-family: "Inter Tight"; src: url("assets/fonts/InterTight.ttf"); font-weight: 100 900; }
   @font-face { font-family: "JB Mono"; src: url("assets/fonts/JetBrainsMono.ttf"); font-weight: 100 800; }
-  :root { --acc: #2a7fff; --ink: #f4f4f3; --mut: #8a8a92; --bg: #09090b; --card: #141417; --line: rgba(255,255,255,.1); }
+  :root { --acc: #2a7fff; --ink: #f4f4f3; --mut: #8a8a92; --bg: #09090b; --card: #141417; --line: rgba(255,255,255,.1); --f-tit: "Inter Tight", sans-serif; --f-ui: "JB Mono", monospace; }
   html, body { margin: 0; background: var(--bg); }
-  #root { position: relative; width: {{W}}px; height: {{H}}px; overflow: hidden; background: var(--bg); font-family: "Inter Tight", sans-serif; color: var(--ink); }
+  #root { position: relative; width: {{W}}px; height: {{H}}px; overflow: hidden; background: var(--bg); font-family: var(--f-tit); color: var(--ink); }
   .clip { position: absolute; inset: 0; }
   #mundo { position: absolute; inset: 0; transform-origin: 50% 45%; }
   #fundo { position: absolute; inset: -40px; width: calc(100% + 80px); height: calc(100% + 80px); object-fit: cover; opacity: .38; }
@@ -14,14 +14,14 @@
   #g1 { width: 1400px; height: 1400px; left: -300px; top: 1100px; background: radial-gradient(circle, color-mix(in srgb, var(--acc) 60%, transparent) 0%, transparent 60%); opacity: .5; }
   #g2 { width: 900px; height: 900px; left: 520px; top: -260px; background: radial-gradient(circle, color-mix(in srgb, var(--acc) 40%, transparent) 0%, transparent 62%); opacity: .35; }
   #grain { position: absolute; left: -64px; top: -64px; width: calc(100% + 128px); height: calc(100% + 128px); background: url("assets/grain.png"); opacity: .075; mix-blend-mode: overlay; pointer-events: none; }
-  .topo { position: absolute; left: 66px; right: 66px; top: 150px; display: flex; justify-content: space-between; font: 500 23px "JB Mono", monospace; letter-spacing: .1em; color: var(--mut); text-transform: uppercase; }
+  .topo { position: absolute; left: 66px; right: 66px; top: 150px; display: flex; justify-content: space-between; font: 500 23px var(--f-ui); letter-spacing: .1em; color: var(--mut); text-transform: uppercase; }
   .topo b { color: var(--ink); font-weight: 700; }
   .topo .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--acc); margin-right: 12px; vertical-align: 2px; }
   .h { position: absolute; left: 66px; right: 66px; font-weight: 600; letter-spacing: -.05em; line-height: .95; font-variation-settings: "wght" 600; }
   .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .1em; margin-bottom: -.1em; }
   .w > i { display: inline-block; font-style: normal; }
   .acc { color: var(--acc); }
-  .cap { position: absolute; left: 66px; font: 500 24px "JB Mono", monospace; letter-spacing: .09em; color: var(--mut); text-transform: uppercase; white-space: nowrap; }
+  .cap { position: absolute; left: 66px; font: 500 24px var(--f-ui); letter-spacing: .09em; color: var(--mut); text-transform: uppercase; white-space: nowrap; }
   .cap::before { content: ""; display: inline-block; width: 34px; height: 2px; background: var(--acc); margin-right: 14px; vertical-align: 7px; }
   /* destaque */
   .par { position: absolute; inset: 0; perspective: 1400px; } .par3d { position: absolute; inset: 0; transform-style: preserve-3d; }
@@ -30,15 +30,15 @@
   .figura { position: absolute; left: 50%; bottom: -10px; width: 1000px; margin-left: -500px; filter: contrast(1.06) saturate(1.08); }
   .sombra { position: absolute; left: 50%; bottom: 0; width: 900px; height: 500px; margin-left: -450px; background: radial-gradient(ellipse at 50% 100%, rgba(0,0,0,.75), transparent 70%); }
   .chips { position: absolute; left: 66px; right: 66px; top: 1370px; }
-  .chip { display: inline-block; font: 600 25px "JB Mono", monospace; letter-spacing: .07em; padding: 14px 24px; border-radius: 999px; border: 1.5px solid rgba(255,255,255,.22); background: rgba(10,10,12,.6); margin: 0 10px 12px 0; white-space: nowrap; }
+  .chip { display: inline-block; font: 600 25px var(--f-ui); letter-spacing: .07em; padding: 14px 24px; border-radius: 999px; border: 1.5px solid rgba(255,255,255,.22); background: rgba(10,10,12,.6); margin: 0 10px 12px 0; white-space: nowrap; }
   .chip.on { background: var(--acc); border-color: transparent; color: #fff; }
   .pilula { position: absolute; right: 66px; top: 330px; text-align: right; padding: 22px 30px; border-radius: 26px; background: rgba(20,20,23,.85); border: 1.5px solid var(--line); }
-  .pilula .k { font: 500 21px "JB Mono", monospace; letter-spacing: .1em; color: var(--mut); text-transform: uppercase; }
+  .pilula .k { font: 500 21px var(--f-ui); letter-spacing: .1em; color: var(--mut); text-transform: uppercase; }
   .pilula .v { font-size: 92px; font-weight: 500; letter-spacing: -.05em; line-height: 1; font-variant-numeric: tabular-nums; }
   .pilula .v small { font-size: .45em; color: var(--mut); margin-left: 6px; }
   /* grafico */
   .gnum { position: absolute; right: 66px; top: 640px; font-size: 120px; font-weight: 500; letter-spacing: -.06em; font-variant-numeric: tabular-nums; text-align: right; line-height: 1; }
-  .gano { position: absolute; right: 66px; top: 770px; font: 500 26px "JB Mono", monospace; color: var(--mut); letter-spacing: .1em; }
+  .gano { position: absolute; right: 66px; top: 770px; font: 500 26px var(--f-ui); color: var(--mut); letter-spacing: .1em; }
   .marco { position: absolute; width: 74px; height: 74px; margin: -37px 0 0 -37px; border-radius: 50%; background: #fff; display: grid; place-items: center; box-shadow: 0 0 0 6px var(--bg), 0 10px 30px rgba(0,0,0,.6); }
   .marco img { width: 50px; height: 56px; object-fit: contain; }
   /* linha do tempo */
@@ -46,13 +46,13 @@
   .tr { position: absolute; left: 66px; right: 66px; display: grid; grid-template-columns: 140px 1fr auto; align-items: center; gap: 26px; }
   .tr .e { width: 140px; height: 140px; border-radius: 34px; background: #f4f4f3; display: grid; place-items: center; overflow: hidden; }
   .tr .e img { width: 96px; height: 108px; object-fit: contain; } .tr .e span { color: #111; font-weight: 800; font-size: 54px; }
-  .tr .ano { font: 600 24px "JB Mono", monospace; color: var(--mut); letter-spacing: .1em; }
+  .tr .ano { font: 600 24px var(--f-ui); color: var(--mut); letter-spacing: .1em; }
   .tr .cl { font-size: 58px; font-weight: 600; letter-spacing: -.04em; line-height: 1; }
-  .tr .fee { font: 600 28px "JB Mono", monospace; padding: 12px 20px; border-radius: 999px; border: 1.5px solid var(--line); white-space: nowrap; }
+  .tr .fee { font: 600 28px var(--f-ui); padding: 12px 20px; border-radius: 999px; border: 1.5px solid var(--line); white-space: nowrap; }
   .tr.fim .e { box-shadow: 0 0 0 6px var(--acc), 0 0 50px var(--acc); } .tr.fim .fee { background: var(--acc); border-color: transparent; color: #fff; }
   /* radar e barras */
   .rv { position: absolute; transform: translate(-50%, -50%); text-align: center; }
-  .rv .n { font: 500 22px "JB Mono", monospace; letter-spacing: .08em; color: var(--mut); text-transform: uppercase; }
+  .rv .n { font: 500 22px var(--f-ui); letter-spacing: .08em; color: var(--mut); text-transform: uppercase; }
   .rv .v { font-size: 66px; font-weight: 500; letter-spacing: -.05em; font-variant-numeric: tabular-nums; line-height: 1; }
   .rv.top .v, .rv.top .n { color: var(--acc); }
   .bar { position: absolute; left: 66px; right: 66px; display: grid; grid-template-columns: 300px 1fr 130px; align-items: center; gap: 26px; }
@@ -64,19 +64,19 @@
   /* video */
   .card { position: absolute; border-radius: 40px; overflow: hidden; background: var(--card); box-shadow: 0 40px 90px -30px rgba(0,0,0,.9), 0 0 0 1.5px rgba(255,255,255,.08); }
   .card video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .idx { position: absolute; right: 66px; font: 600 26px "JB Mono", monospace; color: var(--mut); letter-spacing: .1em; }
-  .tagcard { position: absolute; left: 30px; bottom: 30px; font: 600 22px "JB Mono", monospace; letter-spacing: .08em; padding: 10px 18px; border-radius: 999px; background: rgba(0,0,0,.6); color: #fff; }
+  .idx { position: absolute; right: 66px; font: 600 26px var(--f-ui); color: var(--mut); letter-spacing: .1em; }
+  .tagcard { position: absolute; left: 30px; bottom: 30px; font: 600 22px var(--f-ui); letter-spacing: .08em; padding: 10px 18px; border-radius: 999px; background: rgba(0,0,0,.6); color: #fff; }
   .spot { position: absolute; inset: 0; pointer-events: none; }
   .anel { position: absolute; border-radius: 50%; border: 5px solid var(--acc); box-shadow: 0 0 40px var(--acc), inset 0 0 30px color-mix(in srgb, var(--acc) 50%, transparent); }
-  .anelTag { position: absolute; font: 700 24px "JB Mono", monospace; letter-spacing: .08em; padding: 10px 18px; border-radius: 999px; background: var(--acc); color: #fff; white-space: nowrap; }
-  .lento { position: absolute; right: 30px; top: 30px; font: 700 22px "JB Mono", monospace; letter-spacing: .08em; padding: 10px 18px; border-radius: 999px; background: #fff; color: #000; }
+  .anelTag { position: absolute; font: 700 24px var(--f-ui); letter-spacing: .08em; padding: 10px 18px; border-radius: 999px; background: var(--acc); color: #fff; white-space: nowrap; }
+  .lento { position: absolute; right: 30px; top: 30px; font: 700 22px var(--f-ui); letter-spacing: .08em; padding: 10px 18px; border-radius: 999px; background: #fff; color: #000; }
   .golbox { position: absolute; left: 0; top: 520px; width: 100%; height: 1000px; background: #000; mix-blend-mode: screen; }
   .golbox video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: saturate(1.2) contrast(1.1); }
   .golt { position: absolute; inset: 0; background: #000; color: #fff; mix-blend-mode: multiply; display: flex; align-items: center; justify-content: center; font-weight: 900; letter-spacing: -.06em; line-height: 1; white-space: nowrap; }
   /* numeros */
   .box { position: absolute; width: 456px; height: 360px; border-radius: 36px; background: var(--card); border: 1.5px solid var(--line); padding: 36px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; }
   .box .v { font-size: 150px; font-weight: 500; letter-spacing: -.06em; line-height: .9; font-variant-numeric: tabular-nums; }
-  .box .k { font: 500 24px "JB Mono", monospace; letter-spacing: .1em; color: var(--mut); text-transform: uppercase; }
+  .box .k { font: 500 24px var(--f-ui); letter-spacing: .1em; color: var(--mut); text-transform: uppercase; }
   .box.top { background: var(--acc); border-color: transparent; } .box.top .k { color: rgba(255,255,255,.85); }
   /* mockup */
   .celular { position: absolute; left: 50%; top: 520px; width: 600px; height: 1220px; margin-left: -300px; border-radius: 86px; background: #000; box-shadow: 0 0 0 14px #1d1d21, 0 0 0 16px rgba(255,255,255,.12), 0 60px 120px -40px rgba(0,0,0,.95); overflow: hidden; }
@@ -88,6 +88,26 @@
   #wipe, #wipe2 { position: absolute; top: -200px; left: 0; width: 1700px; height: 2400px; transform: translateX(-1900px) skewX(-14deg); }
   #wipe { background: var(--acc); } #wipe2 { background: #f4f4f3; }
   #flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+  /* ui_produto: um conteiner que muda de forma (svg rect) + conteudo recortado por ele + cursor */
+  .uiSvg { position: absolute; left: 0; top: 0; overflow: visible; }
+  .uiCt { position: absolute; left: 0; top: 0; display: flex; align-items: center; justify-content: center; text-align: center; box-sizing: border-box; }
+  .uiCt .btn { font: 600 var(--fs, 44px) var(--f-tit); letter-spacing: -.02em; white-space: nowrap; }
+  .uiCt .campo { width: 100%; padding: 0 42px; box-sizing: border-box; text-align: left; }
+  .uiCt .campo .k { font: 500 30px var(--f-ui); letter-spacing: .08em; text-transform: uppercase; opacity: .55; margin-bottom: 8px; }
+  .uiCt .campo .v { font: 500 var(--fs, 54px) var(--f-tit); letter-spacing: -.02em; white-space: nowrap; }
+  .uiCt .campo .v::after { content: ""; display: inline-block; width: 3px; height: 1em; background: currentColor; margin-left: 4px; vertical-align: -.12em; }
+  .uiCt .lista { width: 100%; padding: 0 48px; box-sizing: border-box; text-align: left; }
+  .uiCt .lista div { font: 500 var(--fs, 42px) var(--f-tit); letter-spacing: -.02em; padding: 18px 0; border-bottom: 1.5px solid currentColor; border-color: color-mix(in srgb, currentColor 14%, transparent); white-space: nowrap; }
+  .uiCt .lista div::before { content: ""; display: inline-block; width: 22px; height: 22px; border-radius: 7px; background: var(--acc); margin-right: 22px; vertical-align: 1px; }
+  .uiCt .card2 { width: 100%; padding: 0 52px; box-sizing: border-box; text-align: left; }
+  .uiCt .card2 .t { font: 650 var(--fs, 64px) var(--f-tit); letter-spacing: -.04em; line-height: 1; }
+  .uiCt .card2 .x { font: 500 40px var(--f-tit); opacity: .62; margin-top: 18px; line-height: 1.25; }
+  .uiCt .img { position: absolute; inset: 0; background-repeat: no-repeat; }
+  .uiNota { position: absolute; left: 0; right: 0; text-align: center; font: 500 34px var(--f-ui); letter-spacing: .09em; text-transform: uppercase; color: var(--mut); }
+  .uiCt .enviar { position: absolute; right: 22px; top: 50%; width: 84px; height: 84px; margin-top: -42px; border-radius: 50%; background: var(--acc); display: grid; place-items: center; }
+  .cursor { position: absolute; left: 0; top: 0; width: 52px; height: 52px; transform-origin: 6px 4px; filter: drop-shadow(0 6px 12px rgba(0,0,0,.45)); }
+  .onda { position: absolute; left: 0; top: 0; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%; border: 3px solid var(--acc); }
+/*ESTILO*/
 </style></head>
 <body>
 <div id="root" data-composition-id="root" data-width="{{W}}" data-height="{{H}}" data-fps="{{FPS}}" data-start="0" data-duration="{{TOTAL}}">
@@ -108,6 +128,11 @@
     const D = /*DADOS*/{};
     const B = D.B, TECLA = D.tecla, $ = (id) => document.getElementById(id);
     document.documentElement.style.setProperty("--acc", D.cor);
+    const W = D.W || 1080, H = D.H || 1920, VERT = H > W, MX = VERT ? 66 : Math.round(W * .06);   // margem lateral
+    const LW = Math.round(Math.max(W, H) * .9);        // lamina de transicao: larga o bastante pra cobrir o quadro inclinada e sair inteira
+    ["wipe", "wipe2"].forEach((id) => Object.assign($(id).style, { width: LW + "px", height: H + 480 + "px", top: "-240px" }));
+    gsap.set(["#wipe", "#wipe2"], { x: -LW - 300, skewX: -14 });
+    if (!VERT) { const tp = document.querySelector(".topo"); tp.style.top = "56px"; tp.style.left = tp.style.right = MX + "px"; }
     $("marcaTopo").textContent = D.marca || "";
     const tl = gsap.timeline({ paused: true });
 
@@ -125,6 +150,8 @@
     const borrao = (t0) => tl.fromTo("#mbBlur", { attr: { stdDeviation: "26 0" } }, { attr: { stdDeviation: "0 0" }, duration: .28, ease: "power2.out", immediateRender: false }, t0);
     function tremida(t0, f) { [12, -10, 8, -6, 4, -2, 0].forEach((v, i) => tl.to("#mundo", { x: v * (f || 1), y: -v * .6 * (f || 1), duration: .035, ease: "none" }, t0 + i * .035)); }
     function pesoPulsa(el, t0, n) { for (let i = 0; i < n; i++) tl.fromTo(el, { fontVariationSettings: '"wght" 800' }, { fontVariationSettings: '"wght" 600', duration: B * 1.6, ease: "power2.out", immediateRender: false }, t0 + i * B * 2); }
+    // mola em forma fechada (sem estado entre quadros): amortecimento 0.78 = sobra de ~2%, assenta no fim da duracao
+    const mola = (z = .78) => { const wd = Math.sqrt(1 - z * z); return (p) => (p >= 1 ? 1 : 1 - Math.exp(-z * p * 6.5) * (Math.cos(wd * p * 6.5) + (z / wd) * Math.sin(wd * p * 6.5))); };
     const rotulo = (t, txt) => tl.set("#topoDir", { textContent: txt || "" }, t);
     const janela = (el, a, b) => tl.set(el, { autoAlpha: 0 }, 0).set(el, { autoAlpha: 1 }, a).set(el, { autoAlpha: 0 }, b);
     const num = (s) => parseFloat(String(s).replace(",", "."));
@@ -147,8 +174,9 @@
     // ---------- cenas
     const R = {};
     R.titulo = (c, i) => {
-      if (c.legenda) { const l = el(`<div class="cap" style="top:880px">${esc(c.legenda)}</div>`, $("c" + i)); tl.from(l, { opacity: 0, x: -40, duration: .5, ease: "power3.out" }, c.t + .15); }
-      const h = el(`<div class="h" style="top:950px;font-size:${c.tamanho || 196}px"></div>`, $("c" + i));
+      const ty = Math.round(H * (VERT ? .495 : .36));
+      if (c.legenda) { const l = el(`<div class="cap" style="top:${ty - 70}px;left:${MX}px">${esc(c.legenda)}</div>`, $("c" + i)); tl.from(l, { opacity: 0, x: -40, duration: .5, ease: "power3.out" }, c.t + .15); }
+      const h = el(`<div class="h" style="top:${ty}px;left:${MX}px;right:${MX}px;font-size:${c.tamanho || 196}px"></div>`, $("c" + i));
       h.innerHTML = c.linhas.map((ln) => `<div><span class="w"><i class="${ln.startsWith("*") ? "acc" : ""}" style="filter:url(#mb)">${esc(ln.replace(/\*/g, ""))}</i></span></div>`).join("");
       const ws = h.querySelectorAll("i");
       ws.forEach((w, k) => {
@@ -307,17 +335,101 @@
     R.assinatura = (c, i) => {
       const box = $("c" + i);
       if ($(`c${i}card`)) { janela(`#c${i}card`, c.t, c.t + c.videoDur); tl.from(`#c${i}card`, { y: 500, scale: .9, duration: .8, ease: "power4.out", immediateRender: false }, c.t); tl.to(`#c${i}card`, { opacity: 0, y: -40, duration: .3, ease: "power2.in" }, c.t + c.videoDur - .3); }
-      const h = el(`<div class="h" style="top:${$(`c${i}card`) ? 1150 : 760}px;font-size:${c.tamanho || 170}px;text-align:center"></div>`, box); entra(frase(h, c.titulo || ""), c.t + 2 * B, 0);
-      const m = el(`<div class="marca" style="top:${$(`c${i}card`) ? 1440 : 1050}px"></div>`, box); digita(m, (c.marca || D.marca || "").toUpperCase(), c.tMarca);
-      if (c.fonte) { const f = el(`<div class="cap" style="top:${$(`c${i}card`) ? 1560 : 1170}px;left:0;right:0;text-align:center">${esc(c.fonte)}</div>`, box); tl.from(f, { opacity: 0, duration: .5 }, c.t + 6 * B); }
+      const cv = !!$(`c${i}card`), y = (v) => Math.round(cv ? v : (v / 1920) * H + (VERT ? 0 : -40));
+      const h = el(`<div class="h" style="top:${y(cv ? 1150 : 760)}px;left:${MX}px;right:${MX}px;font-size:${c.tamanho || 170}px;text-align:center"></div>`, box); entra(frase(h, c.titulo || ""), c.t + 2 * B, 0);
+      const linhasT = (c.titulo || "").split(" / ").length, yM = Math.max(y(cv ? 1440 : 1050), y(cv ? 1150 : 760) + (c.tamanho || 170) * (.95 * linhasT + .35));
+      const m = el(`<div class="marca" style="top:${yM}px;font-size:${c.tamanho_marca || 64}px"></div>`, box); digita(m, (c.marca || D.marca || "").toUpperCase(), c.tMarca);
+      if (c.fonte) { const f = el(`<div class="cap" style="top:${Math.round(yM + (c.tamanho_marca || 64) * 1.9)}px;left:0;right:0;text-align:center">${esc(c.fonte)}</div>`, box); tl.from(f, { opacity: 0, duration: .5 }, c.t + 6 * B); }
     };
+
+    R.ui_produto = (c, i) => {
+      const box = $("c" + i), ES = c.estados, M = mola(), MS = mola(.9);
+      const hT = c.titulo ? titulo(c, i, VERT ? 290 : 70, c.tamanho || (VERT ? 120 : 96)) : null;
+      if (hT && !VERT) { hT.style.textAlign = "center"; hT.style.left = hT.style.right = MX + "px"; }
+      const cx = W / 2, cy = Math.round(c.centro_y || (c.titulo ? (VERT ? H * .56 : H * .58) : H / 2));
+      const lum = (hex) => { const m = String(hex).match(/^#?([0-9a-f]{6})$/i); if (!m) return 0; const n = parseInt(m[1], 16); return ((n >> 16) * .299 + ((n >> 8) & 255) * .587 + (n & 255) * .114) / 255; };
+      const corDe = (f) => (f === "acc" ? D.cor : f === "cartao" ? getComputedStyle(document.documentElement).getPropertyValue("--card").trim() || "#141417" : f || "#ffffff");
+      const ret = (f) => ({ x: cx - f.w / 2, y: cy - f.h / 2, width: f.w, height: f.h, rx: Math.min(f.raio ?? 28, f.h / 2, f.w / 2) });
+      const ns = "http://www.w3.org/2000/svg", f0 = ES[0].forma;
+      const svg = el(`<svg class="uiSvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><defs><clipPath id="uiclip${i}" clipPathUnits="userSpaceOnUse"><rect id="uicr${i}"/></clipPath><filter id="uish${i}" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="30" stdDeviation="34" flood-opacity=".5"/></filter></defs><rect id="uir${i}" filter="url(#uish${i})"/></svg>`, box);
+      const camada = el(`<div style="position:absolute;inset:0;clip-path:url(#uiclip${i})"></div>`, box);
+      const r = $("uir" + i), cr = $("uicr" + i);
+      const aplica = (o) => { for (const k of ["x", "y", "width", "height", "rx"]) { r.setAttribute(k, o[k]); cr.setAttribute(k, o[k]); } r.setAttribute("ry", o.rx); cr.setAttribute("ry", o.rx); };
+      const forma = Object.assign(ret(f0), { cor: corDe(f0.fundo) }); aplica(forma); r.setAttribute("fill", forma.cor);
+      tl.fromTo(forma, { width: 0, height: 0, x: cx, y: cy }, { ...ret(f0), duration: .7, ease: M, onUpdate: () => aplica(forma) }, c.t + .15);
+      ES.forEach((e, k) => {
+        const f = e.forma, ct = e.conteudo || {}, cor = corDe(f.fundo), tinta = ct.cor || (lum(cor) > .55 ? "#111113" : "#f6f6f4");
+        if (k) {
+          const de = ret(ES[k - 1].forma), para = ret(f);
+          tl.fromTo(forma, { ...de }, { ...para, duration: Math.min(.7, e.dur), ease: M, onUpdate: () => aplica(forma), immediateRender: false }, e.t);
+          tl.to(r, { attr: { fill: cor }, duration: .35, ease: "power2.out" }, e.t);
+        }
+        // conteudo do estado: entra depois que a mudanca de forma comeca, sai atras de um desfoque curto
+        const R2 = ret(f), lay = el(`<div class="uiCt" style="left:${R2.x}px;top:${R2.y}px;width:${R2.width}px;height:${R2.height}px;color:${tinta};--fs:${ct.tamanho ? ct.tamanho + "px" : "unset"}"></div>`, camada);
+        if (!ct.tamanho) lay.style.removeProperty("--fs");
+        if (ct.imagem) {
+          const [rx, ry, rw, rh] = ct.recorte || [0, 0, ct.iw, Math.round((ct.iw * R2.height) / R2.width)], esc2 = R2.width / rw;
+          const im = el(`<div class="img" style="background-image:url('${esc(ct.imagem)}');background-size:${ct.iw * esc2}px ${ct.ih * esc2}px;background-position:${-rx * esc2}px ${-ry * esc2}px"></div>`, lay);
+          if (ct.rolagem) tl.to(im, { y: -ct.rolagem * esc2, duration: Math.max(.4, e.dur - B * 1.5), ease: "power1.inOut" }, e.t + B);
+          if (ct.rolagem) im.style.height = `${R2.height + ct.rolagem * esc2}px`;
+        } else if (ct.campo != null || ct.digitar) {
+          const v = el(`<div class="campo"><div class="k">${esc(ct.campo || "")}</div><div class="v"></div></div>`, lay).querySelector(".v");
+          if (e.acao) el(`<div class="enviar"><svg width="40" height="40" viewBox="0 0 100 100"><path d="M24 50 H74 M54 30 L74 50 L54 70" fill="none" stroke="${lum(D.cor) > .55 ? "#111" : "#fff"}" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`, lay);
+          if (ct.digitar) digita(v, ct.digitar, e.tDigitar);
+        } else if (ct.lista) {
+          const ls = el(`<div class="lista">${ct.lista.map((x) => `<div>${esc(x)}</div>`).join("")}</div>`, lay);
+          ls.querySelectorAll("div").forEach((d, j) => tl.from(d, { opacity: 0, x: -30, duration: .35, ease: MS }, e.tLista[j]));
+        } else if (ct.icone) {
+          const ic = { carregando: `<circle cx="50" cy="50" r="34" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-dasharray="150 400"/>`,
+            check: `<path d="M28 52 L44 68 L74 34" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>`,
+            x: `<path d="M32 32 L68 68 M68 32 L32 68" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>`,
+            seta: `<path d="M28 50 H70 M52 30 L72 50 L52 70" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>` }[ct.icone] || "";
+          const sz = Math.min(R2.width, R2.height) * .62, g = el(`<svg width="${sz}" height="${sz}" viewBox="0 0 100 100">${ic}</svg>`, lay);
+          if (ct.icone === "carregando") tl.fromTo(g, { rotation: 0 }, { rotation: 360 * Math.max(1, Math.round(e.dur / .8)), duration: e.dur, ease: "none", transformOrigin: "50% 50%" }, e.t);
+          else tl.to(g.querySelector("path"), { attr: { "stroke-dashoffset": 0 }, duration: .45, ease: "power3.out" }, e.t + .2);
+        } else if (ct.titulo) {
+          el(`<div class="card2"><div class="t">${esc(ct.titulo)}</div>${ct.texto ? `<div class="x">${esc(ct.texto)}</div>` : ""}</div>`, lay);
+        } else if (ct.texto) el(`<div class="btn">${esc(ct.texto)}</div>`, lay);
+        tl.set(lay, { autoAlpha: 0 }, 0);
+        tl.fromTo(lay, { autoAlpha: 0, y: 14, filter: "blur(10px)" }, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: .38, ease: "power3.out", immediateRender: false }, e.t + (k ? .12 : .45));
+        if (k < ES.length - 1) tl.to(lay, { autoAlpha: 0, filter: "blur(10px)", duration: .16, ease: "power2.in" }, e.t + e.dur - .02);
+        else tl.to(lay, { autoAlpha: 0, duration: .2 }, c.t + c.dur - .2);
+        if (e.nota) { const nt = el(`<div class="uiNota" style="top:${Math.min(H - 120, cy + f.h / 2 + 60)}px">${esc(e.nota)}</div>`, box); janela(nt, e.t + .3, e.t + e.dur); tl.from(nt, { y: 20, duration: .35, ease: "power3.out" }, e.t + .3); }
+      });
+      tl.to(forma, { width: 0, height: 0, x: cx, y: cy, rx: 0, duration: .3, ease: "power3.in", onUpdate: () => aplica(forma) }, c.t + c.dur - .3);
+      // cursor: vai ate o alvo da acao com mola e clica colado na batida da troca de estado
+      const comAcao = ES.filter((e) => e.acao && e.acao.tipo !== "nenhuma");
+      if (comAcao.length) {
+        const cur = el(`<svg class="cursor" viewBox="0 0 52 52"><path d="M6 4 L6 40 L16 31 L23 47 L30 44 L23 28 L37 28 Z" fill="#fff" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/></svg>`, box);
+        let px = W * .8, py = H * .9; tl.set(cur, { x: px, y: py, autoAlpha: 0 }, 0);
+        tl.to(cur, { autoAlpha: 1, duration: .25 }, comAcao[0].tAcao - B * 1.6);
+        comAcao.forEach((e) => {
+          const g = ret(e.forma), envia = e.conteudo && (e.conteudo.campo != null || e.conteudo.digitar) && e.acao.x == null;
+          const tx = (envia ? g.x + g.width - 64 : g.x + g.width * (e.acao.x ?? .5)) - 6, ty = g.y + g.height * (e.acao.y ?? .5) - 4;
+          const ida = Math.min(B * 1.4, e.dur * .7);
+          tl.fromTo(cur, { x: px, y: py }, { x: tx, y: ty, duration: ida, ease: MS, immediateRender: false }, e.tAcao - ida - .04);
+          if ((e.acao.tipo || "clique") === "clique") {
+            tl.to(cur, { scale: .82, duration: .06, yoyo: true, repeat: 1, ease: "power2.out" }, e.tAcao - .02);
+            const on = el(`<div class="onda"></div>`, box); tl.set(on, { x: tx + 6, y: ty + 4, autoAlpha: 0, scale: .2 }, 0);
+            tl.fromTo(on, { autoAlpha: .9, scale: .2 }, { autoAlpha: 0, scale: 1.3, duration: .45, ease: "power2.out", immediateRender: false }, e.tAcao);
+          }
+          px = tx; py = ty;
+        });
+        tl.to(cur, { autoAlpha: 0, duration: .25 }, c.t + c.dur - .3);
+      }
+    };
+    // cena livre: funcao (c, i, ctx) escrita no projeto; usa SO os tempos de c (c.t, c.dur, c.tBatidas) pra ficar na batida
+    const LIVRES = {
+/*LIVRES*/
+    };
+    R.livre = (c, i) => LIVRES[i](c, i, { tl, el, $, esc, frase, entra, digita, borrao, tremida, mola, janela, W, H, B, MX, VERT, cor: D.cor, box: $("c" + i) });
 
     if (D.fundoAte) tl.to("#fundo", { opacity: 0, duration: .4 }, D.fundoAte - .4);
     D.cenas.forEach((c, i) => {
       rotulo(c.t, c.rotulo != null ? c.rotulo : (i === 0 ? D.rotulo : ""));
       if (c.transicao === "lamina") {
-        tl.fromTo("#wipe", { x: -1900 }, { x: 1300, duration: .62, ease: "power3.inOut", immediateRender: false }, c.t - .31);
-        tl.fromTo("#wipe2", { x: -1900 }, { x: 1300, duration: .62, ease: "power3.inOut", immediateRender: false }, c.t - .23);
+        tl.fromTo("#wipe", { x: -LW - 300 }, { x: W + 300, duration: .62, ease: "power3.inOut", immediateRender: false }, c.t - .31);
+        tl.fromTo("#wipe2", { x: -LW - 300 }, { x: W + 300, duration: .62, ease: "power3.inOut", immediateRender: false }, c.t - .23);
       } else if (c.transicao === "flash") tl.fromTo("#flash", { opacity: .85 }, { opacity: 0, duration: .28, immediateRender: false }, c.t);
       R[c.tipo](c, i);
     });
