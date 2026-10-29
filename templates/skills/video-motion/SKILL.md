@@ -16,7 +16,7 @@ description: Gera vídeos curtos de MOTION GRAPHICS por código (não é ediçã
 ## Ferramental (uma vez por máquina)
 
 ```bash
-bash ~/.claude/skills/video-motion/instalar.sh --com-recorte   # node 22, ffmpeg 7, hyperframes fixo, rembg; tudo em ~/.video-motion
+bash .claude/skills/video-motion/instalar.sh --com-recorte   # node 22, ffmpeg 7, hyperframes fixo, rembg; tudo em ~/.video-motion
 source ~/.video-motion/env.sh                                   # função hf (= npx hyperframes)
 ```
 Não instala nada no sistema (node 20 e ffmpeg 4.4 do Ubuntu 22.04 quebram o hyperframes). Python precisa de Pillow e numpy.
@@ -28,14 +28,14 @@ Preencha `modelos/brief-diretor.md` com o usuário: entradas, **direção** (a l
 
 ### 2. Marca real (quando há marca/produto)
 ```bash
-bash ~/.claude/skills/video-motion/capturar_marca.sh https://site.com projeto/     # ~2,5 min
+bash .claude/skills/video-motion/capturar_marca.sh https://site.com projeto/     # ~2,5 min
 ```
 Gera `marca.json` (lido sozinho pelo motor: marca, cor, paleta, fontes), `marca.md` e `assets/marca/` (fontes do Google Fonts, prints da página, candidatos a logo). **Mostre o `marca.md` ao usuário e liste o que achou ANTES de animar**; complete o que estiver em "Falta" (logo vetorial, prints das telas logadas via Playwright). O kit fica em `~/.video-motion/marcas/<marca>`: o próximo vídeo da mesma marca reaproveita (`--atualizar` recaptura).
 **Nunca redesenhar a interface do produto de imaginação**: recorte e anime o print real (`ui_produto` com `imagem` + `recorte`).
 
 ### 3. Referência (opcional, quando o usuário manda um vídeo "assim")
 ```bash
-bash ~/.claude/skills/video-motion/referencia.sh "https://youtube.com/watch?v=..." projeto/ [--de 0:10 --ate 0:40]
+bash .claude/skills/video-motion/referencia.sh "https://youtube.com/watch?v=..." projeto/ [--de 0:10 --ate 0:40]
 ```
 Baixa pela Apify (~US$0,006/MB), mede o ritmo (cortes/s, plano médio) e gera folhas de quadros. Olhe as folhas e escreva `referencia.md`: ritmo, transições, tipo de movimento, hierarquia de tipo, uso de cor, o que o som marca; **o que adotar e o que NÃO copiar** (conteúdo, marca e textos da referência nunca).
 
@@ -46,13 +46,13 @@ Números, datas, nomes: **só dado real com fonte** (cite em `fonte`). Material:
 Escolha cenas em `cenas.md`. Produto/SaaS: `titulo` (gancho) -> `ui_produto` (a história do uso em 5 a 10 estados) -> `livre` ou prova -> `assinatura`. Atleta/case: `titulo` -> `destaque` -> 2 a 4 cenas de prova -> `assinatura`.
 Som: faixa (`musica.arquivo`, BPM via `hf beats`) ou **trilha original sintetizada** (`musica.sintetizar: true`, `bpm`, `clima`); a sintetizada começa no tempo forte e não precisa de detecção.
 ```bash
-python3 ~/.claude/skills/video-motion/motor/montar.py projeto/
+python3 .claude/skills/video-motion/motor/montar.py projeto/
 ```
 Mostre ao usuário `out/batidas.md`: batida a batida, compasso, cena, o que acontece e o som. Leve a sério os `AVISO` do motor (tempo morto acima de 4 s, cena fora do tempo forte, gancho que só fecha depois de 2 s, cenas iguais seguidas). Ajustar a tabela custa segundos; re-renderizar custa minutos.
 
 ### 6. Loop de crítica (OBRIGATÓRIO antes do render)
 ```bash
-bash ~/.claude/skills/video-motion/revisar.sh projeto/          # ~1,5 min para 30 s: 1 quadro por batida, sem render
+bash .claude/skills/video-motion/revisar.sh projeto/          # ~1,5 min para 30 s: 1 quadro por batida, sem render
 ```
 Olhe (Read) `out/revisao/rN/folha-batidas.jpg` (toda batida; faixa laranja = entra cena) e `folha-celular.jpg` (um quadro por compasso **no tamanho de tela de celular**). Preencha a rodada em `out/revisao.md`, nota 1 a 10, dizendo a batida em que se vê:
 1. **Gancho** nos 2 primeiros segundos
@@ -67,7 +67,7 @@ Corrija os **3 piores**, rode de novo. **Só renderize quando tudo estiver 8 ou 
 
 ### 7. Renderizar e conferir
 ```bash
-bash ~/.claude/skills/video-motion/renderizar.sh projeto/ [--rascunho] [--formato 16:9|1:1|todos] [--motion-blur [4]]
+bash .claude/skills/video-motion/renderizar.sh projeto/ [--rascunho] [--formato 16:9|1:1|todos] [--motion-blur [4]]
 ```
 Monta, lint, render, folha `out/folha.jpg`, LUFS, versão web (~2,4 Mbps). `--formato todos` faz cada item de `roteiro.formatos` (nomes `<projeto>-16x9.mp4`...). `--motion-blur` renderiza N subquadros e mistura (movimento rápido fica liso como câmera; custa N vezes o render: use no final). Com 4 subquadros, o que cruza a tela em menos de 1 s (lâmina) aparece em 3 a 4 faixas escalonadas: para isso use `--motion-blur 8` a 30 fps (limite 240 fps de render). O render recoloca a `trilha.wav` original no MP4 (o mixer do hyperframes tira ~1,5 dB). Olhe a folha sempre.
 
