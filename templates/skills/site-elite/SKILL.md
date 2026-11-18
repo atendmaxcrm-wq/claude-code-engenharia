@@ -152,7 +152,7 @@ Se o usuario lista 10 coisas, retorne: "Escolhe UMA. As outras sao tempero, nao 
 
 #### Entregavel da Fase 0
 
-Documento curto (markdown, ~30 linhas) com as 4 respostas. Salvar em `/root/teste-aios/aios-core/apps/{projeto}/VIBE.md` ou onde fizer sentido. Esse doc alimenta Fase 1.
+Documento curto (markdown, ~30 linhas) com as 4 respostas. Salvar em `<pasta-do-projeto>/VIBE.md`. Esse doc alimenta Fase 1.
 
 ---
 
@@ -165,6 +165,9 @@ Documento curto (markdown, ~30 linhas) com as 4 respostas. Salvar em `/root/test
 - URL ao vivo (preferido - permite scraping de CSS computado)
 - Screenshot (PNG/JPG)
 - Multiplas refs (max 3 - mais que isso vira franken-design)
+- **Estilo do Refero** (`styles.refero.design`, design systems de sites reais feitos para agente): `python3 .claude/skills/site-elite/scripts/refero.py <url-do-estilo> DESIGN-ref.md` baixa o DESIGN.md pronto (cores com papel, tipografia com substituto Google Fonts, espacamento, raios, sombras, do's/don'ts, CSS). Ponto de partida excelente: o distiller completa o que faltar (motion, background).
+- Onde garimpar: Awwwards, Godly, Refero Styles, Land-book, Mobbin (app), Dribbble (so visual); componentes de interacao prontos em 21st.dev (copiar o prompt do componente e integrar, em vez de inventar shader/cursor do zero); tipografia em Fonts In Use e Typewolf.
+- **Adequacao ao negocio antes do estilo:** e-commerce e venda direta = direto e funcional (ex.: thestudiobyjuliegranger.com); agencia/portfolio/marca = pode ser imersivo (ex.: illoca.unseen.co). Animacao que esconde o CTA derruba conversao.
 
 #### Processo
 
@@ -331,6 +334,12 @@ Consultar `07-quality-gates.md` para checklist completo. Resumo:
 - [ ] Site reconhecivel se voce remover o logo? (teste do logo)
 - [ ] Site se distingue de 10 sites Lovable lado a lado?
 
+- [ ] **Loop de critica contra a referencia** (quando ha referencia concreta): skill `loop-de-design` (do Felipe Borges, instalada): um construtor + 3 criticos independentes ate cumprir o pedido, seguir o DESIGN.md e vencer a comparacao visual lado a lado. Modelos copiam bem a imagem e mal o scroll/camadas: o loop e onde isso se acerta.
+- [ ] **Mobile verificado de verdade** (a maior parte do acesso no Brasil e celular): screenshots em 390x844 de cada secao rolando, efeito de scroll funcionando no toque.
+- [ ] **Copy sem tique de IA**: skill `super-copy` (scanner como visitante apressado + reescrita Ogilvy/Caples/Cialdini + relatorio antes/depois).
+- [ ] **Imagens/videos do site** gerados e aplicados no lugar (Higgsfield MCP etc.): skill `gerar-imagem` (le o layout, decide o que gerar e em que tamanho, entrega inventario). Com Higgsfield, gere a imagem primeiro e so anime depois de aprovada (economiza credito).
+- [ ] **Polimento final (os ultimos 10%)**: o 1o prompt entrega ~90%; peca 3 variacoes curtas a partir da referencia, escolha uma e faca o acabamento numa conversa separada. Uma skill de design por projeto: `impeccable` (manual, `/impeccable audit|polish|critique`) OU outra, nunca duas juntas (conflitam).
+
 #### Lighthouse target
 
 - Performance: 90+
@@ -349,7 +358,7 @@ Consultar `07-quality-gates.md` para checklist completo. Resumo:
 
 ```bash
 # Build de producao
-cd /root/teste-aios/aios-core/apps/{projeto}
+cd <pasta-do-projeto>
 npm run build
 npm run start  # NUNCA next dev pra acesso externo
 
@@ -461,6 +470,9 @@ Estou criando wizard/diagnostico/quiz
 - `/safari-check` — validacao Safari iOS/macOS
 - `/frontend-design` — guidelines oficiais Anthropic (referencia base)
 - `/text-humanizer` — humanizar copy gerado por IA
+- `loop-de-design`, `super-copy`, `gerar-imagem` — do Felipe Borges (canal @FelipeBorgesFalaIA), instaladas 30/10/2026: loop construtor + 3 criticos, copy que converte, imagens/videos do site
+- `scrollar` (manual: `/scrollar` ou ler o SKILL.md) — landing de scrollytelling sobre motor proprio (scrollcraft.js), fotografa a propria rolagem para verificar; alternativa a `/site-elite-cinema` quando o site inteiro e a experiencia de rolagem, nao so o hero
+- `impeccable` (manual) — vocabulario de design do pbakaus/impeccable (audit, critique, polish, bolder, quieter, typeset...); instalado SEM o hook global
 
 ---
 

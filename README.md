@@ -1,6 +1,6 @@
 # Claude Code Engenharia
 
-Sistema de engenharia profissional para Claude Code -- memoria persistente com pgvector, hooks de protecao, 19 skills, agentes especializados e workflows automaticos.
+Sistema de engenharia profissional para Claude Code -- memoria persistente com pgvector, hooks de protecao, 56 skills, agentes especializados e workflows automaticos.
 
 Construido ao longo de 50+ sessoes de desenvolvimento real. Custo: ~R$ 0,10/mes.
 
@@ -13,7 +13,7 @@ Claude Code Engenharia organiza todo o conhecimento, protecoes e automacoes do s
 | Pilar | O que faz |
 |-------|-----------|
 | **Memoria** | Armazena decisoes, padroes e gotchas em pgvector com busca semantica automatica |
-| **Skills** | 19 skills especializadas que ensinam Claude a executar tarefas complexas com consistencia |
+| **Skills** | 56 skills especializadas que ensinam Claude a executar tarefas complexas com consistencia |
 | **Commands** | 10 comandos padronizados para workflows recorrentes (commit, review, deploy, etc.) |
 | **Rules** | 5 regras com roteador inteligente que ativa apenas as regras relevantes por contexto |
 | **Hooks** | 3 hooks de protecao que interceptam comandos perigosos e injetam contexto automaticamente |
@@ -28,7 +28,7 @@ O resultado: Claude Code que lembra do projeto entre sessoes, segue padroes sem 
 |---------|-----------|
 | Memoria contextual | Busca pgvector automatica a cada mensagem -- contexto relevante injetado sem intervencao |
 | 3 hooks de protecao | `block-destructive` (bloqueia git push --force, rm -rf), `contextual-memory` (busca automatica), `reinject-memory` (reinjeta apos compactacao) |
-| 19 skills organizadas | 4 categorias: core, frontend, backend, workflow -- cada skill e um diretorio com SKILL.md + exemplos |
+| 56 skills | cada skill e um diretorio com SKILL.md + scripts/exemplos; + 11 de terceiros por instalador separado |
 | 10 commands | Workflows padronizados: /commit, /review-pr, /deploy, /atualizar-memoria, entre outros |
 | 4 agentes especializados | dev (implementacao), reviewer (code review), investigador (debug), arquiteto (decisoes tecnicas) |
 | 5 rules com roteador | Roteador inteligente ativa apenas regras relevantes por tipo de arquivo ou contexto |
@@ -88,6 +88,21 @@ test -f "$TARGET_PROJECT_DIR/CLAUDE.md" && echo "CLAUDE.md OK"
 ```
 
 Se algum desses nao existir, a instalacao falhou silenciosamente — investigue os logs do `install.js` ao inves de reportar sucesso.
+
+---
+
+## Atualizar uma VPS que ja tem o CCE
+
+O `install.js` sem `--force` pula tudo que ja existe (nao atualiza skill nenhuma) e com `--force` sobrescreve `CLAUDE.md`, `memoria/` e settings com os templates. Para trazer so as skills novas/atualizadas sem mexer no resto:
+
+```bash
+git clone https://github.com/atendmaxcrm-wq/claude-code-engenharia.git /tmp/cce && cd /tmp/cce
+node scripts/atualizar-skills.js --dir /root            # previa
+node scripts/atualizar-skills.js --dir /root --apply    # backup .tar.gz + copia
+bash terceiros/instalar.sh /root/.claude/skills         # skills de terceiros (opcional)
+```
+
+Skills que so existem na maquina ficam intactas. Reinicie o Claude Code depois. No modulo `full`, o passo 8 do `/atualizar-memoria` usa `node memory/scripts/importar-auto-memoria.js` (leva as auto-memorias do Claude Code para o pgvector).
 
 ---
 
@@ -196,27 +211,77 @@ CLAUDE.md                      # Instrucoes do projeto (modulo standard+)
 
 ## Skills incluidas
 
-| Categoria | Skill | O que faz |
-|-----------|-------|-----------|
-| **Core** | error-handling | Padroes de tratamento de erro consistentes |
-| **Core** | testing | Estrategias de teste (unit, integration, e2e) |
-| **Core** | code-review | Checklist de review automatizado |
-| **Core** | refactoring | Tecnicas de refatoracao segura |
-| **Core** | documentation | Geracao de docs tecnicos |
-| **Frontend** | component-design | Arquitetura de componentes React |
-| **Frontend** | styling | Padroes CSS/Tailwind |
-| **Frontend** | accessibility | Checklist WCAG e a11y |
-| **Frontend** | performance | Otimizacao de bundle e rendering |
-| **Frontend** | animation | GSAP, Framer Motion, scroll-driven |
-| **Backend** | api-design | RESTful patterns e versionamento |
-| **Backend** | database | Queries, migrations, indices |
-| **Backend** | auth | Autenticacao e autorizacao |
-| **Backend** | caching | Estrategias de cache |
-| **Backend** | monitoring | Logs, metricas, alertas |
-| **Workflow** | git-workflow | Branch strategy e conventional commits |
-| **Workflow** | ci-cd | Pipelines de build e deploy |
-| **Workflow** | debugging | Metodologia sistematica de debug |
-| **Workflow** | ai-prompt-builder | Construcao de system prompts para agentes IA |
+56 skills, instaladas em `.claude/skills/` da raiz escolhida (lista gerada do manifesto do instalador):
+
+| Skill | O que faz |
+|-------|-----------|
+| `agent-teams` | Orquestracao multi-agent com Agent Teams nativo do Claude Code. |
+| `ai-agent-prompt-builder` | Cria system prompts e bases de conhecimento de nível profissional para agentes de IA conversacionais (WhatsApp, chatbots, atendimento,... |
+| `ai-agent-prompt-builder-gemini` | Cria system prompts e bases de conhecimento profissionais para agentes de IA conversacionais (WhatsApp, atendimento, vendas,... |
+| `analise-impacto` | Analise obrigatoria antes de editar arquivos core. |
+| `api-patterns` | Padroes de endpoints da API. |
+| `atualizar-memoria` | Atualizar arquivos de memoria do projeto com mudancas da sessao. |
+| `auditar-fidelidade` | Auditoria EXAUSTIVA de fidelidade e completude entre uma REFERENCIA (mockup HTML/SPA, print, video ou site) e um app JA IMPLEMENTADO,... |
+| `capturar-logica-saas` | Captura a LOGICA e a UX de um SaaS de referencia (sistema logado, atras de credenciais) e produz um BLUEPRINT navegavel - "como... |
+| `clonar-design` | Extrair design system completo de um site (cores, tipografia, animacoes, layout, screenshots, video). |
+| `clonar-site` | Reconstruir um site inteiro pixel-perfect como projeto Next.js moderno. |
+| `codar-em-ondas` | Pipeline de CODIGO em ondas (o motor que constroi o sistema real, irmao da pipeline-fiel que faz os mockups). |
+| `code-review` | Checklist de revisao de codigo. |
+| `commit` | Commits convencionais. |
+| `component-builder` | Como criar componentes neste projeto. |
+| `create-pr` | Pull requests com descricoes claras. |
+| `criacao-form` | Cria formulario/diagnostico interativo com wizard carousel, rating por estrelas, analise por IA com streaming e pagina de resultado rica. |
+| `database-query` | Padroes de queries SQL e schema PostgreSQL. |
+| `deploy` | Deploy completo (restart PM2 + verificacao). |
+| `design-system` | Padroes visuais do projeto. |
+| `entrega-verificada` | Ciclo de entrega verificada - monta uma SPEC com todo o plano, executa em ETAPAS, testa cada etapa em CÓDIGO e apertando os botões... |
+| `extrair-design-imagem` | Extrai um design system completo (cores com hex + papel, tipografia hierarquica, tokens, combos de contraste, decisoes notaveis) a... |
+| `frontend-design` | Design UI excepcional, nao-generico. |
+| `gsap-animations` | Implementa animacoes avancadas com GSAP (100% gratuito) e AnimeJS. |
+| `interaction-patterns` | Como as coisas se movem. |
+| `investigar-bug` | Investigar e diagnosticar um bug reportado no sistema. |
+| `migrar-componente` | Migrar lib ou refatorar implementacao de componente. |
+| `modern-ui-design` | Principios universais de design moderno. |
+| `notebooklm` | Controla o Google NotebookLM pela linha de comando (biblioteca nao oficial notebooklm-py) - cria notebooks, adiciona fontes (URL, PDF,... |
+| `nova-feature` | Planejar e implementar nova feature com analise de impacto. |
+| `performance-audit` | Auditoria de performance. |
+| `pesquisar-tech` | Pesquisar e avaliar tecnologias/libs antes de implementar. |
+| `pipeline-fiel` | Pipeline completo e opinado para replicar um sistema em MOCKUPS fieis, modulo a modulo em ONDAS. |
+| `planejar-feature` | Workflow de 6 fases para planejar features, com suporte a Agent Teams para features grandes. |
+| `postgres-best-practices` | PostgreSQL otimizado. |
+| `proposta-workana` | Cria propostas vencedoras para projetos do Workana. |
+| `rea` | Instala e opera o REA (rea-agents, https://github.com/morluto/rea, MIT) no projeto para engenharia reversa - pacote/binario, app... |
+| `react-best-practices` | 57 regras de performance React. |
+| `replicar-operador-trade` | Pipeline validado para replicar o METODO de um operador de mercado (trader/day trade/opcoes) que ensina em video/Instagram,... |
+| `replicar-sistema` | Pipeline completo para replicar o design de qualquer sistema a partir de foto/print OU VIDEO (screen recording) e construir um sistema... |
+| `resumo-sessao` | Gerar resumo completo da sessao de trabalho atual. |
+| `safari-check` | Auditoria de compatibilidade Safari iOS/macOS. |
+| `scraping` | Fazer scraping completo de um site (texto + imagens + videos + base de conhecimento). |
+| `scraping-insta` | Baixa posts/reels de um perfil Instagram, transcreve com Whisper, analisa hooks/estrutura/CTAs e destila um padrao viral replicavel. |
+| `site-3d` | Criar sites 3D premium nivel Awwwards (cena/objeto 3D protagonista que reage a scroll e mouse), com React Three Fiber + drei +... |
+| `site-elite` | Criar sites premium nivel Asimov/Linear/Vercel/Aura.build. |
+| `site-elite-cinema` | Adiciona camada cinematografica ao /site-elite. |
+| `spec-plan` | Cria design tecnico versionado (specs/<slug>/design.md) a partir de requirements.md ja existente. |
+| `spec-specify` | Cria spec de requisitos versionada (specs/<slug>/requirements.md) ANTES de qualquer codigo ou decisao tecnica. |
+| `systematic-debugging` | Debug sistematico em 4 fases. |
+| `test-driven-development` | RED-GREEN-REFACTOR. |
+| `testar-agente` | Testa um agente de IA nosso de ponta a ponta com persona simulado, leitura do resultado GRAVADO e juizes independentes contra gabarito. |
+| `text-humanizer` | Reescreve textos gerados por IA para soar naturais e humanos, evitando detecção por ferramentas como GPTZero, Turnitin, Originality.ai e... |
+| `upgrade-visual` | Transforma qualquer sistema com 'cara de sistema' em produto premium. |
+| `verification-before-completion` | Proibe dizer "pronto" sem evidencia. |
+| `video-motion` | Gera vídeos curtos de MOTION GRAPHICS por código (não é edição de cortes nem vídeo gerado por IA) para QUALQUER assunto - filme de... |
+| `yt-search` | Busca videos no YouTube pelo terminal e devolve lista estruturada (titulo, canal, views, duracao, data, URL), com filtro de recencia. |
+
+### Skills de terceiros (instalador separado)
+
+Usamos tambem 11 skills de outros autores (Felipe Borges / @FelipeBorgesFalaIA e `pbakaus/impeccable`): `reel`, `criador-de-carrosseis-simples`, `gerar-imagem`, `super-copy`, `loop-de-design` (automaticas) e `motion-graphics`, `motion-por-referencia`, `prompts-de-motion`, `scrollar`, `showreel-interface`, `impeccable` (manuais: `disable-model-invocation`, chame com `/nome`). O codigo delas **nao fica neste repo** (algumas nao tem licenca publicada): o script baixa cada uma do repo oficial no commit fixado em `terceiros/skills.tsv` e aplica so os nossos ajustes.
+
+```bash
+bash terceiros/instalar.sh /root/.claude/skills            # todas
+bash terceiros/instalar.sh /root/.claude/skills reel        # so algumas
+bash terceiros/instalar.sh /root/.claude/skills --com-whisper-gemini   # + whisper-cli que transcreve pelo Gemini (a /reel usa)
+ATUALIZAR=1 bash terceiros/instalar.sh /root/.claude/skills # pega o HEAD atual de cada repo
+```
 
 ---
 

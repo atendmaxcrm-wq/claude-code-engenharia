@@ -1,6 +1,6 @@
 ---
 name: ai-agent-prompt-builder-gemini
-description: "Cria system prompts e bases de conhecimento de nível profissional para agentes de IA conversacionais (WhatsApp, chatbots, atendimento, vendas, agendamento) otimizados para modelos Google Gemini 3 — especialmente Gemini 3.1 Flash-Lite. Use esta skill sempre que o usuário quiser criar, analisar, melhorar, reestruturar ou MIGRAR prompts de agente para rodar em Gemini. Ativa em: prompts de agente Gemini, migração GPT → Gemini, system prompts para Gemini Flash, Gemini Flash-Lite, otimização de agentes que falham em chamar tools no Gemini, agentes que repetem o nome de tools como texto em vez de invocá-las, agentes que deixam de chamar uma tool quando deveriam, agentes que ficam verbosos demais, agentes Gemini que ignoram regras absolutas. Também ativa quando o usuário menciona modelos Gemini 3, gemini-3-flash, gemini-3.1-flash-lite, thinking levels, ou compara comportamento Gemini vs GPT em produção."
+description: "Cria system prompts e bases de conhecimento profissionais para agentes de IA conversacionais (WhatsApp, atendimento, vendas, agendamento) otimizados para Google Gemini 3 — especialmente Gemini 3.1 Flash-Lite. Use sempre que o usuário quiser criar, analisar, melhorar ou MIGRAR prompts de agente para Gemini. Ativa em: prompts de agente Gemini, migração GPT → Gemini, agentes que deixam de chamar tools quando deveriam, que escrevem o nome da tool como texto, verbosos demais, ou que ignoram regras absolutas. Ativa quando o usuário menciona Gemini 3, gemini-3.1-flash-lite, thinking levels, ou compara Gemini vs GPT em produção. Ativa também para a camada comercial: agente que 'soa como IA/robô' ou tem 'cara de IA', quebra de objeções, insistência/persistência comercial, humanizar conversa, agente que recita a KB como script, ou que promete capacidade que não tem (ex: 'ver horários' sem tool de agenda)."
 ---
 
 # AI Agent Prompt Builder (Gemini-Optimized)
@@ -9,7 +9,7 @@ Cria e otimiza system prompts e bases de conhecimento para agentes de IA convers
 
 Esta skill é a versão Gemini da `ai-agent-prompt-builder` (GPT). O **núcleo é o mesmo** — construir o menor conjunto de tokens de alto sinal que maximize o resultado, separando prompt (princípios) de KB (fatos). O que muda são as inversões específicas do Gemini abaixo. A configuração de API/deploy fica num apêndice no fim, pra não inflar o núcleo.
 
-> **Nota de calibragem (versão revisada).** As recomendações aqui foram validadas contra a documentação oficial do Google (guia de prompting do Gemini 3, docs de function calling) e contra um caso real em produção (agente Raquel, ver "Lições Aprendidas"). Onde a prática contradiz o folclore, a prática venceu — em especial sobre notação de tool, que era superdimensionada.
+> **Nota de calibragem (versão revisada).** As recomendações aqui foram validadas contra a documentação oficial do Google (guia de prompting do Gemini 3, docs de function calling) e contra um caso real em produção (agente Raquel, ver "Lições Aprendidas"). Onde a prática contradiz o folclore, a prática venceu — em especial sobre notação de tool, que era superdimensionada, e sobre a tool `think`, que na prática da AtendMax é padrão porque melhora o desempenho em raciocínio (datas, cálculos, repensar), não algo a descartar (ver §6 e apêndice).
 
 ## Por que uma skill separada da versão GPT
 
@@ -48,6 +48,8 @@ A KB é agnóstica de modelo, então a arquitetura de base de conhecimento é co
 | Criar/reestruturar a base de conhecimento de um agente Gemini | `references/knowledge-base-architecture.md` |
 | **Diagnosticar bug de retrieval (agente Gemini erra dado que está na KB)** | `references/knowledge-base-architecture.md` seção 7 (Chunking Semântico) |
 | Build completo (prompt + KB) | Este `SKILL.md` (prompt) + `references/knowledge-base-architecture.md` (KB) |
+| **Agente comercial/vendas: objeções, insistência, naturalidade ("cara de IA")** | `references/persuasao-e-naturalidade.md` |
+| Agente recita a KB como script, solta lead na 1ª objeção, ou promete capacidade que não tem | `references/persuasao-e-naturalidade.md` §§ 1, 2 e 4 |
 
 O conteúdo de prompt (constraints no fim, persona contida, gatilho de tool, etc.) é específico do Gemini e vive **neste** `SKILL.md`. A arquitetura de KB e a configuração de embeddings vivem na referência e no apêndice de deploy. Não duplique regra entre eles.
 
@@ -73,7 +75,7 @@ Gemini 3.1 Flash-Lite suporta `thinking_level: minimal | low | medium | high`. *
 - Q&A simples, classificação: `minimal`/`low`.
 - Agente conversacional pesado em tool e instrução (a maioria dos casos AtendMax): **teste `low` ou `medium`** — o raciocínio extra melhora seleção de tool e aderência a regra; o custo é latência.
 
-A tool `think` explícita não obriga `minimal`: o raciocínio nativo do Gemini pode até substituí-la. Vale testar dropar a `think` e subir o `thinking_level`, em vez de manter a tool e forçar `minimal`.
+**Padrão AtendMax: a tool `think` é padrão no N8N.** Na stack de produção da AtendMax (N8N), o fluxo declara uma tool `think` explícita por um motivo de desempenho: um passo de raciocínio antes de responder melhora justamente as tarefas onde o Flash-Lite mais tropeça, cálculo de datas, contas em geral, e qualquer decisão que se beneficia do modelo repensar antes de agir (seleção de tool, decisão de escalar, aderência a regra). É um scratchpad: o modelo pensa em voz alta ali, erra menos no reflexo. Um caso concreto desse ganho é a sub-chamada, a `think` obriga o agente a classificar o assunto ("é papo ou virou operacional/sério?") antes de decidir chamar `transfere`/`chamar_humano`. Ela não substitui o `thinking_level`: os dois convivem. Declare a `think` e rode em `low`, subindo pra `medium` se ainda faltar raciocínio em algum caso. O ponto de nunca fixar `minimal` segue firme, porque `minimal` derruba o próprio ganho que a `think` traz. Gatilho da `think` na descrição da função: usar antes de um cálculo (data, conta), antes de decidir escalar, e antes de compor uma fala factual; não usar num "oi" ou papo trivial que não pede raciocínio.
 
 ### 7. Temperature 1.0
 Não baixe a temperature pra "deixar determinístico". No Gemini 3, temperature abaixo de 1.0 causa loops e degradação (oficial). Determinismo vem de instruções claras, não de temperature.
@@ -100,6 +102,7 @@ Não use "nunca calcule" nem "não infira" de forma ampla — isso faz o Gemini 
 - Injete os valores prontos no contexto (Data, Hora, dia da semana, Data+15, dia da semana do +15) e mande **usar esses valores** pra raciocinar: "Use a Data e a Data+15 fornecidas; não calcule datas de cabeça."
 - Para casos de borda, dê a regra explícita: "Se a data piso cair em sábado ou domingo, avance para o próximo dia útil **antes** de oferecer."
 - Quando possível, prefira que a **tool** devolva o dado já mastigado (intervalos livres + dia da semana prontos), em vez de pedir cálculo ao modelo.
+- Um passo de `think` antes de responder ajuda o modelo a raciocinar sobre esses valores (conferir o dia da semana, aplicar a regra de pular fim de semana, revisar uma conta) em vez de responder no reflexo. É um dos motivos de a `think` ser padrão na AtendMax (ver §6).
 
 ## Padrão de Exemplos com Tools
 
@@ -153,7 +156,7 @@ A ordem importa. Sequência que melhor performa em Gemini 3.1 Flash-Lite:
 [curto, funcional, sem teatralidade]
 
 # Tom de Voz
-[se quer respostas conversacionais, peça aqui — Gemini default é seco]
+[se quer respostas conversacionais, peça aqui — Gemini default é seco. Em agente comercial de WhatsApp, inclua a sub-seção "Como NÃO soar robô" — ver Camada Comercial]
 
 # Saudações / Convenções de Linguagem
 [fatos rápidos: horários, formato de saudação]
@@ -165,7 +168,7 @@ A ordem importa. Sequência que melhor performa em Gemini 3.1 Flash-Lite:
 [etapas em alto nível, princípios não scripts]
 
 # Princípios de Decisão
-[heurísticas, frameworks de classificação]
+[heurísticas, frameworks de classificação; em agente comercial: framework de objeções (validar → contextualizar → teto de 3 → sem fabricar) e tom por ICP]
 
 # Exemplos
 [2-3 conversas canônicas no padrão anti-roleplay]
@@ -205,6 +208,18 @@ Tratamento de falha: o que fazer se a tool retornar erro.
 ```
 
 Tanto o `QUANDO usar` (combate sub-chamada) quanto o `QUANDO NÃO usar` (combate sobre-chamada) importam mais no Gemini que no GPT. Para tools de escalação (`transfere`) e de consulta (`info_*`), capriche no `QUANDO usar` com gatilhos concretos — é o que faz o modelo disparar quando deve.
+
+**Tools acopladas:** quando duas tools devem SEMPRE disparar juntas (ex.: resumo + transferência), coloque cross-reference nas DUAS descriptions ("sempre que chamar esta, chame também X") e espelhe nas Regras Invioláveis. Se o acoplamento for crítico ("o resumo nunca pode faltar"), encadeie a segunda no fluxo do N8N em vez de confiar no LLM — determinístico ganha. Detalhe em `references/persuasao-e-naturalidade.md` §5.
+
+## Camada Comercial: Objeções, Insistência e Naturalidade
+
+Para agentes de venda/conversão (SDR, pré-atendimento, reativação), a estrutura acima não basta — o que separa um agente que converte de um bot que responde é a camada comercial. O detalhe completo (frameworks, formatos de KB, checklist) está em `references/persuasao-e-naturalidade.md`; leia antes de construir agente comercial. Resumo dos cinco pilares:
+
+1. **Quebra de objeções:** validar antes de contornar → **contextualizar no cenário que o lead trouxe** (nunca frase de manual) → teto de **3 tentativas** com ângulos diferentes (soltar na 1ª é erro; insistir além de 3 também) → **nunca fabricar** pra convencer (desconto/urgência/"agendei" falsos) → ler sinal de saída real. Codifique em Princípios de Decisão + Invioláveis + **1 exemplo multi-turno mostrando as 3 tentativas e o encerramento**.
+2. **KB como matéria-prima, não script:** princípios de contorno no PROMPT; **ângulos** (não scripts fechados) na KB; a fala é montada fresca no contexto. Regra explícita: "nunca recite o script da KB palavra por palavra". Script pronto na KB + Flash-Lite = recitação robótica.
+3. **Anti-"cara de IA":** os padrões que entregam IA no WhatsApp — nome do lead em toda mensagem, aberturas formulaicas ("Entendido/Perfeito" todo turno), linguagem de folheto, validações empilhadas, travessão/em-dash, 4-6 balões por turno. Codifique como seção "Como NÃO soar robô" no Tom de Voz + espelho nas Invioláveis + demonstração nos exemplos. (E cheque o split de balões no N8N — pipeline também causa isso.)
+4. **Limites de capacidade honestos:** para cada capacidade que o agente NÃO tem (ex.: agenda), proíba **a linguagem que a implica** ("vou ver os horários"), não só a ação. Padrão substituto: colher preferência como insumo + handoff com papel claro ("a secretária que cuida da agenda te retorna").
+5. **Persona comercial saudável:** mentalidade na identidade ("comissionada por conversão, mas pressão não converte — você vende cuidando") + tom por ICP com sinais de identificação e um exemplo por registro. Em vertical médica: nunca explorar insegurança/vergonha/medo como alavanca.
 
 ## Workflow de Criação ou Migração
 
@@ -261,6 +276,10 @@ Reprovou em 1, 2 ou 3 → estrutural (gatilho de tool, regra no fim, thinking_le
 | Erra cálculo de data / dia da semana | "Não calcule" amplo demais, ou modelo calculando de cabeça | Injetar valores prontos + mandar usá-los; regra de pular fim de semana; idealmente tool devolve dado mastigado |
 | Usa contexto obsoleto (ex: id de agendamento cancelado) | **Dado sujo injetado** — Gemini usa fielmente o que recebe | Limpar a origem do dado (backend), não o prompt; o Gemini não ignora dado obsoleto como o GPT |
 | Erra dado factual que está na KB | **Bug de retrieval**, não de prompt | `references/knowledge-base-architecture.md` seção 7. NÃO reforçar regra no prompt — só infla tokens |
+| **Soa robótico / "cara de IA"** (nome em toda msg, "Entendido/Perfeito" todo turno, linguagem de folheto) | Falta de anti-padrões de naturalidade no prompt (e/ou split de balões no N8N) | Seção "Como NÃO soar robô" no Tom de Voz + espelho nas Invioláveis + exemplos que demonstram; checar split no N8N. `references/persuasao-e-naturalidade.md` §3 |
+| Solta o lead na 1ª objeção OU insiste sem parar | Sem framework de persistência com teto | Framework validar → contextualizar → teto de 3 + exemplo multi-turno das 3 tentativas. §1 do reference |
+| Responde objeção com frase de manual / recita a KB palavra por palavra | KB com script fechado + sem regra de composição | Converter seções OBJEÇÃO pra ângulos; regra "não recite a KB"; §2 do reference |
+| Diz que vai "ver horários / consultar disponibilidade" sem ter tool de agenda | Capacidade implicada não proibida (proibiu a ação, não a linguagem) | Proibir a linguagem que implica a capacidade + padrão de handoff com papel claro; §4 do reference |
 
 ## Anti-Padrões Específicos do Gemini
 
@@ -271,7 +290,9 @@ Reprovou em 1, 2 ou 3 → estrutural (gatilho de tool, regra no fim, thinking_le
 5. **Constraints negativos no início.** Mais ignorados que no fim (oficial).
 6. **Temperature abaixada.** Determinismo via instrução, não temperature.
 7. **Instruções abertas demais.** "Não infira" / "não chute" sem qualificação faz o Gemini travar em dedução básica. Prefira "Use apenas as informações de info_* e da conversa atual para suas deduções".
-8. **Fixar `thinking_level: minimal` em agente pesado em tool.** Minimal reduz chamada de tool e raciocínio — pode ser a causa de sub-chamada e de erro de data. Teste low/medium nesses casos.
+8. **Fixar `thinking_level: minimal` em agente pesado em tool.** Minimal reduz chamada de tool e raciocínio — pode ser a causa de sub-chamada e de erro de data, e derruba a utilidade da tool `think`. Teste low/medium nesses casos.
+9. **Scripts fechados de objeção na KB.** "Script Principal" pronto na KB + Flash-Lite = o agente cola o script e soa decorado. Use ângulos de contorno na KB e componha a fala no contexto do lead (`references/persuasao-e-naturalidade.md` §2).
+10. **Proibir a ação mas não a linguagem.** "Você não acessa a agenda" sem proibir "vou ver os horários" deixa o agente implicar a capacidade que não tem. Proíba a linguagem que implica (§4 do reference).
 
 ## Checklist de Qualidade Pre-Deploy
 
@@ -284,8 +305,14 @@ Reprovou em 1, 2 ou 3 → estrutural (gatilho de tool, regra no fim, thinking_le
 - [ ] Persona é funcional, não teatral
 - [ ] Não há ALL CAPS abusivo nem "não infira" amplo
 - [ ] `thinking_level` adequado ao agente (não `minimal` por padrão em agente pesado em tool)
+- [ ] Tool `think` declarada como padrão no N8N (melhora raciocínio: datas, cálculos, repensar antes de escalar/agir); roda junto com o `thinking_level`, não no lugar dele
 - [ ] Temperature em default (1.0)
 - [ ] N8N tratando thought signatures (ver apêndice)
+- [ ] **(Agente comercial)** Framework de objeções presente: validar → contextualizar no cenário do lead → teto de 3 → sem fabricar → sinal de saída (+ exemplo multi-turno das 3 tentativas)
+- [ ] **(Agente comercial)** Seções OBJEÇÃO da KB em formato de **ângulos** (não script fechado) + regra "não recite a KB" no prompt
+- [ ] **(Agente comercial)** Checklist anti-"cara de IA" aplicado (nome só na 1ª msg/empatia, sem aberturas formulaicas, sem folheto, sem em-dash) e demonstrado nos exemplos
+- [ ] Capacidades que o agente NÃO tem estão mapeadas com a **linguagem que as implica proibida** (ex: "vou ver os horários" sem tool de agenda)
+- [ ] Tools acopladas com cross-reference nas duas descriptions (ou encadeadas deterministicamente no N8N)
 - [ ] Testado pelo menos 6 conversas reais cobrindo os casos difíceis antes de promover
 
 ## Lições Aprendidas (Casos Reais AtendMax)
@@ -301,6 +328,18 @@ Agente pesado em tool (~13 tools: agenda, RAG, transfere, notificações, cancel
 5. **Bug de pipeline ≠ bug de modelo.** Uma mensagem que misturava texto + link de PDF foi roteada errada por um Switch single-path no N8N — nada a ver com o prompt nem com o Gemini.
 
 **Lição genérica:** migrar da AtendMax de GPT pra Gemini é **ajuste estrutural** (regras no fim, gatilho de tool, thinking_level, formato consistente), não reescrita do zero nem caça a colchetes. Valide os casos difíceis (escalação condicional, raciocínio de data, encadeamento de tools) antes de promover.
+
+### Caso agente de clínica médica — agente comercial nativo Gemini + teste em conversa real
+
+Agente de pré-atendimento/conversão (nutrologia) construído nativo pra Gemini 3.1 Flash-Lite com a estrutura desta skill. O teste em conversa real passou nas regras duras (consultou KB antes do preço, transferiu no momento certo) mas expôs a camada que faltava:
+
+1. **"Cara de IA" mesmo com prompt estruturado.** Nome do lead em quase toda mensagem, turnos abrindo com "Entendido/Entendi/Perfeito", linguagem de folheto ("divisor de águas", "excelente ponto de partida") e 4-6 balões por turno. Regra de tom genérica não previne; foi preciso codificar os **anti-padrões explícitos** + demonstrar nos exemplos. → virou o §3 do reference.
+2. **Capacidade implicada.** O agente (sem tool de agenda) ofereceu "ver os horários disponíveis". Proibir a ação não bastou — foi preciso proibir a **linguagem** e dar o padrão substituto (colher preferência + handoff com papel claro). → §4.
+3. **Recitação da KB.** Scripts fechados de objeção na KB saíam palavra por palavra. Correção: ângulos na KB + regra "não recite" + composição no contexto. → §2 (e o kb-template foi atualizado).
+4. **Framework de persistência é portável entre nichos.** O framework maduro de um agente de academia (validar → contextualizar → teto de 3 → sem fabricar) portou pra vertical médica com um guardrail extra: nunca explorar insegurança/vergonha/medo do paciente como alavanca. → §1 e §6.
+5. **Tools acopladas.** Resumo + transferência deviam sempre disparar juntas; cross-reference nas duas descriptions resolveu, com encadeamento no N8N como opção determinística. → §5.
+
+**Lição genérica:** a estrutura Gemini (regras no fim, gatilhos, thinking) garante *obediência*; a camada comercial (`references/persuasao-e-naturalidade.md`) garante *conversão e naturalidade*. Agente de venda precisa das duas — e o teste de conversa real é o que revela a segunda.
 
 ## Quando NÃO usar Gemini 3.1 Flash-Lite
 
@@ -339,6 +378,7 @@ Isto não é prompt — é a config de API/infra que faz o prompt funcionar. Man
 - `thinking_level`: comece em `low`; suba pra `medium` se houver sub-chamada de tool ou erro de data; `minimal` só pra fluxos simples e latência crítica. (Não fixe `minimal` por padrão em agente pesado em tool.)
 - `temperature`: default `1.0`. Não baixe (causa loops).
 - Se usar a camada de compatibilidade OpenAI, o `reasoning_effort` é mapeado automaticamente pra `thinking_level`.
+- Tool `think`: no N8N, declare uma tool `think` explícita como padrão (é o que a AtendMax roda em produção). Melhora o desempenho em tarefas de raciocínio, cálculo de datas, contas em geral, decisões que pedem repensar (seleção de tool, escalação), funcionando como um scratchpad antes da resposta. Roda junto com o `thinking_level`, não no lugar dele.
 
 ### Thought signatures e IDs de função (pegadinha de N8N)
 O Gemini 3 valida thought signatures de forma mais estrita e retorna um `id` único por function call. Para manter contexto em fluxos com várias tools (sequências de agendamento, por exemplo), as signatures e os IDs precisam voltar nas requisições seguintes. Os SDKs oficiais fazem isso sozinhos; verifique se o nó/community node do Gemini no seu N8N trata — versões antigas podem dar erro 400 ou perder contexto entre passos. Não concatene partes que carregam signature.

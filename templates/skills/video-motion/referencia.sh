@@ -41,6 +41,8 @@ de, ate = seg(sys.argv[3]) or 0, seg(sys.argv[4]) or float(sys.argv[2]); dur = a
 gaps = [b - a for a, b in zip([0] + c, c + [dur])]
 print(f"duracao analisada {dur:.1f} s | {len(c)} cortes | {len(c) / dur:.2f} cortes/s | plano medio {dur / (len(c) + 1):.2f} s | mais curto {min(gaps):.2f} s | mais longo {max(gaps):.2f} s")
 PY
+echo "== pericia de movimento (vira as METAS do nosso filme; o render compara sozinho)"
+python3 "$(dirname "$0")/motor/pericia.py" "$D/ref.mp4" --json "$D/pericia.json" | tee "$D/pericia.txt" | grep -vE '^ +[0-9.]+s ' || true
 echo "== folhas de quadros"
 ffmpeg -hide_banner -loglevel error -y "${IN[@]}" -vf "fps=2,scale=240:-2,tile=8x6" -q:v 4 "$D/folha-%02d.jpg"
 ffmpeg -hide_banner -loglevel error -y "${IN[@]}" -vf "select='gt(scene,0.3)',scale=320:-2,tile=6x5" -vsync vfr -frames:v 1 -q:v 4 "$D/cortes.jpg" || true
@@ -49,5 +51,7 @@ cat <<TXT
 PROXIMO PASSO: olhar as folhas (Read) e escrever $P/referencia.md com:
   ritmo (cortes/s acima, onde acelera), transicoes, tipo de movimento e easing (mola, linear, freio forte),
   composicao e hierarquia de tipo, uso de cor, como a interface aparece, o que o som marca.
+  NOMEIE O MECANISMO em uma frase de espectador ("o cursor dirige a tela e ela responde"); se nao der, a referencia e uma
+  sequencia de cenas, nao um filme. Liste o movimento PROIBIDO (vale mais que o permitido) e a politica de camera (fixa/movel).
   Depois: o que ADOTAR no nosso video e o que NAO copiar (conteudo, marca, textos da referencia).
 TXT

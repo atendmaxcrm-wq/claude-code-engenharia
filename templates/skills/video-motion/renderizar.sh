@@ -55,6 +55,9 @@ echo "== 4. conferencia"
 ffmpeg -hide_banner -loglevel error -y -i "$P/out/$NOME.mp4" -vf "fps=1,scale=150:-1,tile=12x5" -frames:v 1 "$P/out/folha${F:+-${F/:/x}}.jpg"
 ffmpeg -hide_banner -nostats -i "$P/out/$NOME.mp4" -af ebur128 -f null - 2>&1 | grep -E ' I:' | tail -1
 ffprobe -v error -show_entries format=duration,size -show_entries stream=width,height,r_frame_rate -of compact=p=0 "$P/out/$NOME.mp4"
+# pericia de movimento (amplitude, quase-parada, picos, % de cortes na batida); com referencia/ref.mp4 roda o TESTE DE ACEITE
+REF=(); [ -s "$P/referencia/ref.mp4" ] && REF=(--contra "$P/referencia/ref.mp4")
+python3 "$SK/motor/pericia.py" "$P/out/$NOME.mp4" --batidas "$P/out/batidas.json" --json "$P/out/pericia${F:+-${F/:/x}}.json" "${REF[@]}" | grep -vE '^ +[0-9.]+s ' || echo "AVISO: reprovou no teste de aceite (ver acima); diga isso ao entregar"
 
 echo "== 5. versao web"
 ffmpeg -hide_banner -loglevel error -y -i "$P/out/$NOME.mp4" -c:v libx264 -preset slow -b:v 2350k -maxrate 3200k -bufsize 6000k -pix_fmt yuv420p -c:a aac -b:a 128k -movflags +faststart "$P/out/$NOME-web.mp4"

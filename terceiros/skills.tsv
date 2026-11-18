@@ -1,0 +1,12 @@
+# nome	repo (github)	commit fixado	pasta da skill no repo	modo	licenca
+criador-de-carrosseis-simples	Felpborges/criador-de-carrosseis-simples	0c0323d44ecdf69c501145a27af0796763efaff5	.	auto	sem-licenca-publicada
+gerar-imagem	Felpborges/pipeline-de-sites	5923f6ede7d1df2a57ef2a6f39e0a7ebecb1b45f	gerar-imagem	auto	MIT
+super-copy	Felpborges/pipeline-de-sites	5923f6ede7d1df2a57ef2a6f39e0a7ebecb1b45f	super-copy	auto	MIT
+loop-de-design	Felpborges/loop-de-design	8607b503b9e47b6dca9d83d4c27ab7b887e64145	skills/loop-de-design	auto	MIT
+reel	Felpborges/skill-reel	b9c1222297ce8ff8d15f19f5218afc08cab279bf	.	auto	sem-licenca-publicada
+motion-graphics	Felpborges/motion-graphics	a3259b054e49e15fca07a4a786823701294209ca	skills/motion-graphics	manual	MIT
+motion-por-referencia	Felpborges/motion-por-referencia	6abbfd198233e7346febcf895595ca3f20e5793b	.	manual	MIT
+prompts-de-motion	Felpborges/prompts-de-motion	629cd05958b06eb44ad45c69c365b1ad37456f54	skills/prompts-de-motion	manual	sem-licenca-publicada
+scrollar	Felpborges/scrollar	9598c5763fdb1c3432eb25c8979a523d694436bd	plugins/fala-ia/skills/scrollar	manual	MIT
+showreel-interface	Felpborges/showreel-interface	abd2fcbeb4924b2b6dbd02a73e815e942b95d314	.	manual	sem-licenca-publicada
+impeccable	pbakaus/impeccable	df3a4abe7d0840d5f60324812c432e00b66a4e75	plugin/skills/impeccable	manual	Apache-2.0

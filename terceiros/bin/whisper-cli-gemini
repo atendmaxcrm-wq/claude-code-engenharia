@@ -1,0 +1,98 @@
+#!/usr/bin/env python3
+# whisper-cli de MENTIRA: mesma interface que a skill /reel usa (whisper.cpp), mas quem transcreve e o GEMINI.
+# Transcricao de audio pelo Gemini em vez de Whisper local (sem GPU o whisper.cpp leva ~3x o tempo real).
+# Chave: GEMINI_API_KEY (ou GOOGLE_API_KEY) no ambiente.
+# Modos suportados (os unicos que a /reel chama):
+#   -f a.wav -l pt -nt -np [--prompt P]                       -> texto corrido no stdout
+#   -f a.wav -l pt -ojf -ml 1 -sow -of BASE -np [--prompt P]  -> BASE.json no formato do whisper.cpp, uma palavra por segmento
+# -m/-dtw/-t sao ignorados. Modelo: WHISPER_GEMINI_MODEL (padrao gemini-3.1-flash-lite: no teste de 30/10 contra o whisper
+# large-v3-turbo foi o mais rapido e o mais preciso; 3-flash-preview errava 0,24 s, 2.5-flash 0,72 s).
+# Palavra a palavra: o audio e picotado em trechos de ~10 s cortados em SILENCIO (o erro de tempo do Gemini cresce com a
+# duracao: 30 s inteiros = 0,75 s de erro mediano), em paralelo; desconta o atraso fixo medido (WHISPER_GEMINI_VIES, 0,14 s)
+# Resultado medido (30 s, contra whisper large-v3-turbo com DTW): erro mediano 0,10 s, p90 0,30 s, 30 s de audio em ~5 s.
+# (puxar o inicio para a subida de energia PIOROU: 0,15 s; removido.)
+import base64, json, os, sys, time, urllib.request, wave
+
+a = sys.argv[1:]
+def arg(nome, padrao=None):
+    return a[a.index(nome) + 1] if nome in a and a.index(nome) + 1 < len(a) else padrao
+if "--help" in a or "-h" in a:
+    print("usage: whisper-cli (shim Gemini) -f wav [-nt | -ojf -of base] [--prompt p]"); sys.exit(0)
+wav = arg("-f") or sys.exit("whisper-cli(gemini): falta -f")
+lingua = arg("-l", "pt"); dica = arg("--prompt"); base = arg("-of")
+palavras = "-ojf" in a
+with wave.open(wav) as w: dur = w.getnframes() / w.getframerate()
+
+chave = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or sys.exit("whisper-cli(gemini): defina GEMINI_API_KEY")
+modelo = os.environ.get("WHISPER_GEMINI_MODEL", "gemini-3.1-flash-lite")
+import array, concurrent.futures, io
+
+def pedir(dados, dur_trecho, com_tempo):
+    regra = (f"Transcreva LITERALMENTE a fala deste audio ({lingua}), exatamente como foi dita: mantenha hesitacoes "
+             "(éé, ããã, hum, ah, né), 'pra' e 'tá' como falados, repeticoes, retomadas e falsas largadas. Nao corrija, nao resuma, "
+             "nao invente fala em silencio. Se nao houver fala, devolva vazio.")
+    if dica: regra += f" Grafia de nomes e vicios para referencia: {dica}"
+    if com_tempo:
+        regra += (f" O audio tem {dur_trecho:.2f} s. Devolva SO um JSON: lista de objetos {{\"w\": palavra (com a pontuacao colada), "
+                  "\"s\": inicio em segundos, \"e\": fim em segundos}}, uma entrada por palavra, na ordem, tempos com 2 casas, "
+                  "medidos no audio (o inicio e quando o som da palavra comeca).")
+    else:
+        regra += " Devolva so o texto, sem comentarios."
+    corpo = {"contents": [{"parts": [{"inline_data": {"mime_type": "audio/wav", "data": base64.b64encode(dados).decode()}}, {"text": regra}]}],
+             "generationConfig": {"temperature": 0, **({"responseMimeType": "application/json", "responseSchema": {"type": "ARRAY", "items": {
+                 "type": "OBJECT", "properties": {"w": {"type": "STRING"}, "s": {"type": "NUMBER"}, "e": {"type": "NUMBER"}}, "required": ["w", "s", "e"]}}}
+                 if com_tempo else {})}}
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{modelo}:generateContent?key={chave}"
+    for tentativa in range(5):
+        try:
+            r = json.load(urllib.request.urlopen(urllib.request.Request(url, json.dumps(corpo).encode(), {"Content-Type": "application/json"}), timeout=300))
+            txt = "".join(p.get("text", "") for p in r["candidates"][0]["content"].get("parts", []))
+            if not com_tempo: return txt
+            return json.loads(txt.strip().removeprefix("```json").removesuffix("```") or "[]") or []
+        except Exception as e:
+            if tentativa == 4: sys.exit(f"whisper-cli(gemini): falhou: {e}")
+            time.sleep(3 * (tentativa + 1))
+
+with wave.open(wav) as w:
+    sr, ch, sw = w.getframerate(), w.getnchannels(), w.getsampwidth(); bruto = w.readframes(w.getnframes())
+
+if not palavras:
+    print(" ".join(pedir(open(wav, "rb").read(), dur, False).split())); sys.exit(0)
+
+# energia em janelas de 10 ms (mono 16 bits; o /reel sempre manda 16 kHz mono)
+am = array.array("h", bruto)[::ch] if sw == 2 else array.array("h")
+J = sr // 100
+en = [sum(abs(x) for x in am[k:k + J]) / J for k in range(0, len(am), J)] or [0]
+
+def corte_perto(t):                       # ponto mais quieto entre t-2 e t+2 s
+    a, b = max(0, int((t - 2) * 100)), min(len(en) - 1, int((t + 2) * 100))
+    return min(range(a, b + 1), key=lambda k: en[k]) / 100 if b > a else t
+
+limites, t = [0.0], 0.0
+while dur - t > 13:
+    t = corte_perto(t + 10); limites.append(t)
+limites.append(dur)
+
+def trecho(a, b):
+    buf = io.BytesIO()
+    with wave.open(buf, "wb") as o:
+        o.setnchannels(ch); o.setsampwidth(sw); o.setframerate(sr)
+        o.writeframes(bruto[int(a * sr) * ch * sw:int(b * sr) * ch * sw])
+    lst = [p for p in pedir(buf.getvalue(), b - a, True) if isinstance(p, dict) and p.get("w") and p.get("s") is not None]
+    out = []
+    for k, p in enumerate(lst):                 # fim faltando = comeco da proxima palavra (ou +0,3 s)
+        s0 = float(p["s"]); e0 = p.get("e")
+        e0 = float(e0) if e0 is not None else (float(lst[k + 1]["s"]) if k + 1 < len(lst) else s0 + .3)
+        out.append((s0 + a, e0 + a, str(p["w"]).strip()))
+    return out
+
+with concurrent.futures.ThreadPoolExecutor(8) as ex:
+    partes = list(ex.map(lambda ab: trecho(*ab), zip(limites, limites[1:])))
+
+vies = float(os.environ.get("WHISPER_GEMINI_VIES", "0.14"))
+seg, ant = [], 0.0
+for s0, e0, wd in (p for parte in partes for p in parte):
+    if not wd: continue
+    s = max(ant, min(dur, max(0.0, s0 - vies))); e = max(s + .05, min(dur, e0 - vies))
+    seg.append({"text": " " + wd, "offsets": {"from": int(s * 1000), "to": int(e * 1000)}}); ant = s
+json.dump({"transcription": seg, "fonte": f"gemini:{modelo}", "trechos": limites}, open(base + ".json", "w", encoding="utf-8"), ensure_ascii=False)
