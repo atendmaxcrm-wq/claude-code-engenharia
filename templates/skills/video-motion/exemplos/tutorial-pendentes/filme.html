@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Tutorial Pendentes</title>
+<script src="assets/palavras.js"></script>
+<style>
+@font-face{font-family:Manrope;src:url(assets/fontes/manrope.woff2) format("woff2");font-weight:200 800}
+@font-face{font-family:Inter;src:url(assets/fontes/inter.woff2) format("woff2");font-weight:100 900}
+:root{
+  --acento:#ffd814;--acento-ink:#141417;--pos:#12a150;--pos-bg:rgba(18,161,80,.14);--neg:#c2373c;
+  --warn:#9a6b00;--warn-bg:rgba(232,161,0,.16);--info:#1d6fd1;--info-bg:rgba(29,111,209,.12);
+  --pagina:#eceef1;--folha:#f6f7f9;--card:#fff;--card2:#f2f4f7;--card3:#e9ecf0;--linha:#e3e6eb;--linha2:#d3d8df;
+  --ink:#14161b;--ink2:#3b4049;--sec:#6b7280;--mut:#8a919c;--sombra:0 18px 40px -28px rgba(30,45,70,.35);
+  --cw-azul:#1f93ff;--cw-ink:#1f2d3d;--cw-sec:#6e7c91;--cw-linha:#eaeef3;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0d0e10}
+#palco{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--pagina);font-family:Manrope,sans-serif;color:var(--ink)}
+/* topo */
+#topo{position:absolute;left:64px;right:64px;top:84px;height:200px}
+.tit{position:absolute;left:0;top:0;right:0}
+.tit .p{font-size:30px;font-weight:800;letter-spacing:.14em;color:var(--sec);display:flex;align-items:center;gap:16px}
+.tit .p i{display:inline-block;width:46px;height:12px;border-radius:6px;background:var(--acento)}
+.tit .t{font-size:92px;font-weight:800;letter-spacing:-.035em;line-height:1.02;margin-top:14px}
+/* janela */
+#janela{position:absolute;left:40px;top:300px;width:1000px;height:1250px;border-radius:52px;overflow:hidden;background:#fff;
+  box-shadow:0 40px 90px -40px rgba(20,30,50,.45),0 0 0 1px rgba(20,30,50,.06)}
+#mundo{position:absolute;left:0;top:0;width:480px;height:1400px;transform-origin:0 0}
+.cena{position:absolute;left:0;top:0;width:480px;height:1400px}
+/* legenda */
+#legenda{position:absolute;left:60px;right:60px;top:1590px;height:260px;display:flex;align-items:center;justify-content:center}
+.chunk{position:absolute;left:0;right:0;text-align:center;font-size:56px;font-weight:800;letter-spacing:-.02em;line-height:1.18}
+.w{position:relative;display:inline-block;margin:0 .14em;color:var(--ink)}
+.w b{position:absolute;left:-.12em;right:-.12em;top:.12em;bottom:.02em;background:var(--acento);border-radius:12px;z-index:-1;transform-origin:0 50%}
+.chunk{z-index:1}
+#legenda{isolation:isolate}
+/* cursor */
+#cursor{position:absolute;left:0;top:0;width:0;height:0;z-index:50}
+#cursor svg{position:absolute;left:-6px;top:-4px;width:54px;height:54px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35))}
+.anel{position:absolute;left:-60px;top:-60px;width:120px;height:120px;border-radius:50%;border:8px solid var(--acento);opacity:0}
+/* ===== EVO ===== */
+#cA{background:#f3f5f8;font-family:Inter,sans-serif}
+.evo-top{height:58px;background:#25344a;color:#fff;display:flex;align-items:center;gap:10px;padding:0 16px;font-size:15px;font-weight:700}
+.evo-top span{font-weight:500;color:#b9c4d4;font-size:13px}
+.evo-cab{display:grid;grid-template-columns:1.6fr 1fr .8fr;gap:8px;padding:10px 16px;font-size:10.5px;font-weight:700;color:#5b6b80;letter-spacing:.06em;background:#e6ebf2}
+.evo-lin{display:grid;grid-template-columns:1.6fr 1fr .8fr;gap:8px;padding:11px 16px;font-size:12px;color:#26323f;border-bottom:1px solid #e3e8ef;background:#fff}
+.evo-lin .d{color:#c2373c;font-weight:600}
+#evoRows{position:relative}
+#gancho{position:absolute;left:0;right:0;top:250px;text-align:center}
+#ganchoBadge{display:inline-flex;align-items:center;gap:14px;background:var(--acento);color:var(--acento-ink);font-family:Manrope;font-weight:800;font-size:40px;padding:14px 26px;border-radius:28px;box-shadow:0 20px 40px -18px rgba(120,90,0,.6)}
+#ganchoBadge em{font-style:normal;background:#141417;color:var(--acento);border-radius:16px;padding:2px 14px;font-size:34px}
+/* ===== Chatwoot ===== */
+.cw{font-family:Inter,sans-serif;color:var(--cw-ink)}
+#cB{background:#fff}
+.sb{position:absolute;left:0;top:0;width:250px;height:1400px;background:#fbfcfd;border-right:1px solid var(--cw-linha);padding:14px 10px}
+.sb .conta{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;padding:4px 6px 12px}
+.sb .conta i{width:16px;height:16px;border-radius:50%;border:4px solid var(--cw-azul)}
+.sb .busca{height:34px;border:1px solid var(--cw-linha);border-radius:10px;display:flex;align-items:center;padding:0 10px;font-size:13px;color:var(--cw-sec);margin-bottom:14px}
+.it{display:flex;align-items:center;gap:10px;height:36px;padding:0 8px;border-radius:9px;font-size:13.5px;color:#3c4858;position:relative}
+.it svg{width:17px;height:17px;flex:none;stroke:#5d6b80;fill:none;stroke-width:1.8}
+.it .n{margin-left:auto;font-size:11px;font-weight:600;color:#6e7c91;border:1px solid var(--cw-linha);border-radius:7px;padding:1px 6px}
+.sub{margin-left:18px;border-left:2px solid var(--cw-linha);padding-left:10px}
+.sub .it{height:34px}
+.it.on{background:#eef5ff;color:var(--cw-azul)}
+#itPend{font-weight:700}
+#itPend .bdg{margin-left:auto;min-width:30px;height:22px;border-radius:11px;background:var(--acento);color:#141417;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 7px}
+#itPendBg{position:absolute;inset:0;border-radius:9px;background:#fff6c4;opacity:0}
+.sb .user{position:absolute;left:10px;right:10px;top:640px;display:flex;gap:10px;align-items:center;font-size:13px;font-weight:600}
+.sb .user i{width:32px;height:32px;border-radius:50%;background:#fde3c3;color:#9a5a00;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:12px}
+.sb .user small{display:block;font-weight:400;color:var(--cw-sec);font-size:11px}
+.lista{position:absolute;left:250px;top:0;width:420px;height:1400px;background:#fff}
+.lista h4{font-size:16px;font-weight:600;padding:18px 16px 8px}
+.lista .tabs{display:flex;gap:16px;padding:0 16px 10px;font-size:13px;color:var(--cw-sec);border-bottom:1px solid var(--cw-linha)}
+.lista .tabs b{color:var(--cw-azul);font-weight:600}
+.cv{display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid var(--cw-linha)}
+.av{flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600}
+.cv .av{width:36px;height:36px;font-size:12px}
+.cv small{display:block;color:var(--cw-sec);font-size:11px}
+.cv b{display:block;font-size:13.5px;font-weight:600}
+.cv span{display:block;font-size:12px;color:var(--cw-sec);margin-top:2px}
+/* ===== Pendentes (CRM) ===== */
+#cC{background:var(--pagina);padding:12px;word-spacing:.16em}
+.folha{background:var(--folha);border-radius:30px;padding:22px 20px;min-height:1370px}
+.sobre{font-size:10.5px;font-weight:800;letter-spacing:.12em;color:var(--sec)}
+.titulo{font-size:30px;font-weight:600;letter-spacing:-.03em;margin-top:6px;display:flex;align-items:center;justify-content:space-between}
+.titulo small{font-size:12.5px;font-weight:600;color:var(--ink2)}
+.aviso{margin-top:16px;border-radius:16px;background:var(--warn-bg);color:var(--warn);font-size:13px;font-weight:700;padding:12px 14px}
+.pils{display:flex;gap:8px;margin-top:14px}
+.pil{height:36px;border-radius:18px;padding:0 14px;font-size:13px;font-weight:600;display:flex;align-items:center;border:1px solid var(--linha);background:var(--card);color:var(--ink2);position:relative}
+.pil .on{position:absolute;inset:-1px;border-radius:18px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;opacity:0;font-weight:600}
+.listas{position:relative;margin-top:14px;height:1100px}
+.lp{position:absolute;left:0;right:0;top:0;display:flex;flex-direction:column;gap:9px;list-style:none}
+.row{background:var(--card);border-radius:16px;padding:12px 14px;box-shadow:var(--sombra);position:relative}
+.row .l1{display:flex;align-items:center;gap:10px}
+.row .av{width:34px;height:34px;background:var(--card2);color:var(--ink2);font-size:12px;font-weight:800}
+.row .nm{font-size:14px;font-weight:800;position:relative}
+.bd{display:inline-flex;align-items:center;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:800;position:relative}
+.bd.info{background:var(--info-bg);color:var(--info)}.bd.neu{background:var(--card2);color:var(--ink2)}
+.row .l2{font-size:12px;color:var(--sec);margin:5px 0 0 44px}
+.row .l3{font-size:12px;color:var(--mut);margin:2px 0 0 44px}
+.row .bt{margin:10px 0 0 44px;display:flex}
+.btn{height:38px;border-radius:19px;padding:0 16px;font-size:13.5px;display:inline-flex;align-items:center;justify-content:center;position:relative}
+.btn.sec{border:1px solid var(--linha);background:var(--card);font-weight:600}
+.btn.pri{background:var(--acento);color:var(--acento-ink);font-weight:800}
+.mk{position:absolute;left:-4px;right:-4px;top:55%;height:42%;background:var(--acento);border-radius:4px;z-index:-1;transform-origin:0 50%;transform:scaleX(0)}
+.mkw{position:relative;z-index:0;display:inline-block}
+.nota{position:absolute;font-size:12px;font-weight:800;background:#141417;color:#fff;border-radius:12px;padding:6px 10px;white-space:nowrap;opacity:0}
+.nota:after{content:"";position:absolute;left:16px;bottom:-6px;border:6px solid transparent;border-bottom:0;border-top-color:#141417}
+.vazio{position:absolute;left:0;right:0;top:40px;text-align:center;opacity:0}
+.vazio .ok{width:84px;height:84px;border-radius:50%;background:var(--pos-bg);margin:0 auto 14px;display:flex;align-items:center;justify-content:center}
+.vazio b{font-size:18px}
+.vazio p{font-size:13px;color:var(--sec);margin-top:6px}
+/* ===== Conversa ===== */
+#cD{background:#fff}
+.ch{height:62px;display:flex;align-items:center;gap:10px;padding:0 14px;border-bottom:1px solid var(--cw-linha)}
+.ch .av{width:38px;height:38px;background:#fde4ef;color:#c0306a;font-size:13px}
+.ch b{display:block;font-size:14.5px;font-weight:600}
+.ch small{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--cw-sec)}
+.ch .res{margin-left:auto;height:32px;border:1px solid var(--cw-linha);border-radius:9px;padding:0 12px;font-size:13px;display:flex;align-items:center}
+.ctabs{display:flex;gap:20px;padding:0 16px;border-bottom:1px solid var(--cw-linha);height:42px;align-items:flex-end;font-size:13.5px;color:#4a5668;position:relative}
+.ctabs span{padding-bottom:10px}
+#tabLinha{position:absolute;left:0;bottom:-1px;height:2px;background:var(--cw-azul);transform-origin:0 0}
+.painel{position:absolute;left:0;right:0;top:104px;bottom:0}
+.msgs{position:absolute;inset:0;background:#f7f9fc;padding:18px 14px}
+.bal{max-width:330px;border-radius:14px;padding:10px 13px;font-size:13.5px;line-height:1.4;margin-bottom:10px;position:relative}
+.bal.in{background:#fff;border:1px solid var(--cw-linha)}
+.bal.out{background:#dfeaff;margin-left:auto}
+.bal small{display:block;font-size:10.5px;color:var(--cw-sec);margin-top:4px;text-align:right}
+.bal .tk{color:var(--cw-azul)}
+.vaz{position:absolute;left:0;right:0;top:120px;text-align:center;color:var(--cw-sec);font-size:13px}
+.etq{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--cw-linha);border-radius:20px;padding:6px 12px;font-size:12.5px;color:#3c4858;margin:6px 3px;position:relative}
+.composer{position:absolute;left:10px;right:10px;top:510px;height:118px;border:1px solid var(--cw-linha);border-radius:14px;background:#fff;padding:10px 12px}
+.composer .ph{font-size:12.5px;color:#9aa5b4;margin-top:8px}
+.composer .tool{position:absolute;left:12px;bottom:10px;display:flex;gap:8px}
+.composer .tool i{width:30px;height:30px;border:1px solid var(--cw-linha);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.composer .env{position:absolute;right:12px;bottom:10px;height:30px;border-radius:8px;background:#9fcbff;color:#fff;font-size:12.5px;display:flex;align-items:center;padding:0 12px;font-weight:600}
+#modal{position:absolute;left:14px;right:14px;top:150px;background:#fff;border-radius:16px;box-shadow:0 30px 60px -20px rgba(20,30,50,.45),0 0 0 1px var(--cw-linha);padding:16px;opacity:0}
+#modal h5{font-size:15px;font-weight:600}
+#modal .bs{height:34px;border:1px solid var(--cw-linha);border-radius:9px;margin:12px 0;font-size:12.5px;color:#9aa5b4;display:flex;align-items:center;padding:0 10px}
+.tp{border:1px solid var(--cw-linha);border-radius:12px;padding:10px 12px;margin-bottom:8px;position:relative;background:#fff}
+.tp b{font-size:13px;font-weight:600}
+.tp p{font-size:12px;color:var(--cw-sec);margin-top:4px;line-height:1.35}
+.tp .cat{position:absolute;right:10px;top:10px;font-size:10px;font-weight:700;color:#6e7c91;background:#f1f4f8;border-radius:6px;padding:2px 6px}
+#tpSel{position:absolute;inset:-1px;border-radius:12px;border:2px solid var(--cw-azul);opacity:0}
+#prev{position:absolute;left:16px;right:16px;top:16px;opacity:0}
+#prev .bx{background:#f7f9fc;border-radius:12px;padding:12px;font-size:13px;line-height:1.45;margin:10px 0}
+#prev .var{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--cw-sec);margin-bottom:8px}
+#prev .var i{font-style:normal;flex:1;height:30px;border:1px solid var(--cw-linha);border-radius:8px;display:flex;align-items:center;padding:0 10px;color:var(--cw-ink)}
+#prev .envbtn{display:flex;justify-content:flex-end}
+#prev .envbtn span{height:34px;border-radius:9px;background:var(--cw-azul);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;padding:0 14px;position:relative}
+/* pipeline (CRM dentro da conversa) */
+.pipe{position:absolute;inset:0;background:var(--folha);padding:16px 14px;font-family:Manrope,sans-serif;color:var(--ink);word-spacing:.16em}
+.pipe .kk{font-size:11px;color:var(--sec);font-weight:700}
+.pipe h3{font-size:24px;font-weight:800;letter-spacing:-.02em}
+.pipe .cons{font-size:12px;color:var(--sec)}
+.cardr{background:var(--card);border-radius:20px;border:1px solid var(--linha);padding:14px;margin-top:12px;box-shadow:var(--sombra)}
+.cardr .h{font-size:10.5px;font-weight:800;letter-spacing:.12em;color:var(--sec)}
+.cardr .r{margin-top:10px;opacity:0}
+.cardr .r .k{font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--sec)}
+.cardr .r .v{font-size:13.5px;font-weight:700;margin-top:3px;display:inline-block;position:relative;z-index:0}
+.evi{background:var(--card2);border-radius:12px;padding:8px 10px;margin-top:6px;font-size:12px;opacity:0}
+.evi b{font-weight:800}
+.evi span{color:var(--sec)}
+.campo{height:38px;border:1px solid var(--linha);border-radius:12px;background:var(--card);display:flex;align-items:center;padding:0 12px;font-size:13px;margin-top:6px;position:relative}
+.lab{font-size:12px;font-weight:600;color:var(--sec);margin-top:12px}
+.rad{display:flex;gap:8px;align-items:center;font-size:13px;margin-top:6px}
+.rad i{width:16px;height:16px;border-radius:50%;border:2px solid var(--linha2);position:relative}
+.rad i b{position:absolute;inset:2px;border-radius:50%;background:var(--ink);transform:scale(0)}
+#cal{position:absolute;left:0;top:44px;width:250px;background:#fff;border-radius:14px;box-shadow:0 24px 50px -18px rgba(20,30,50,.5),0 0 0 1px var(--linha);padding:10px;z-index:5;opacity:0;font-size:11.5px}
+#cal .g{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center;margin-top:6px}
+#cal .g span{height:26px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--ink2)}
+#cal .g .x{color:#c3c8d0}
+#cal .g .hj{font-weight:800}
+#dia21{position:relative}
+#dia21 b{position:absolute;inset:0;border-radius:8px;background:var(--ink);transform:scale(0)}
+#dia21 em{position:relative;font-style:normal}
+.okmsg{font-size:13px;line-height:1.45;margin-top:12px;border-radius:14px;background:var(--pos-bg);color:#0d7a3c;padding:10px 12px;font-weight:600;opacity:0}
+/* final */
+#fim{position:absolute;left:0;top:0;width:1080px;height:1920px;background:var(--acento);transform-origin:50% 100%;transform:scaleY(0)}
+#fimTx{position:absolute;left:0;right:0;top:700px;text-align:center;color:#141417}
+#fimTx .a{font-size:150px;font-weight:800;letter-spacing:-.05em;line-height:1}
+#fimTx .b{font-size:40px;font-weight:700;margin-top:30px;color:#3b3200}
+#fimBdg{display:inline-flex;margin-top:60px;align-items:center;gap:14px;background:#141417;color:#fff;border-radius:40px;padding:18px 30px;font-size:38px;font-weight:800}
+#fimBdg i{font-style:normal;background:var(--acento);color:#141417;border-radius:16px;padding:2px 14px}
+</style>
+</head>
+<body>
+<div id="palco">
+  <div id="topo"></div>
+
+  <div id="janela">
+    <div id="mundo">
+
+      <!-- A: a lista do EVO -->
+      <section class="cena" id="cA">
+        <div class="evo-top">EVO <span>Gerencial › Ligações a fazer</span></div>
+        <div class="evo-cab"><div>NOME</div><div>ASSUNTO</div><div>TAREFA</div></div>
+        <div id="evoRows"></div>
+        <div id="gancho"><span id="ganchoBadge">Pendentes <em id="ganchoN">12</em></span></div>
+      </section>
+
+      <!-- B: Chatwoot, menu da esquerda -->
+      <section class="cena cw" id="cB">
+        <aside class="sb">
+          <div class="conta"><i></i>Academia Exemplo</div>
+          <div class="busca">Pesquisar...</div>
+          <div class="it"><svg viewBox="0 0 24 24"><path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 2h6l1-2h5"/></svg>Caixa de Entrada<span class="n">4</span></div>
+          <div class="it"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg>Conversas</div>
+          <div class="sub">
+            <div class="it on" id="itTodas">Todas as conversas</div>
+            <div class="it">Menções</div>
+            <div class="it" id="itNao">Não atendidas</div>
+            <div class="it" id="itPend"><div id="itPendBg"></div><span style="position:relative">Pendentes</span><span class="bdg" id="bdgPend">12</span></div>
+          </div>
+          <div class="it"><svg viewBox="0 0 24 24"><path d="M3 6h7l2 2h9v11H3z"/></svg>Pastas</div>
+          <div class="it"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6"/></svg>Times</div>
+          <div class="it"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/></svg>Canais</div>
+          <div class="it"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/></svg>Etiquetas</div>
+          <div class="user"><i>JM</i><div>Júlia Martins<small>online</small></div></div>
+        </aside>
+        <div class="lista">
+          <h4>Conversas</h4>
+          <div class="tabs"><b>Minhas 8</b><span>Não atribuídas</span></div>
+          <div class="cv"><div class="av" style="background:#e3ecff;color:#3b62c4">MC</div><div><small>Equipe - Atendimento</small><b>Mariana Costa</b><span>Perfeito, Mariana! Te espero.</span></div></div>
+          <div class="cv"><div class="av" style="background:#fde4ef;color:#c0306a">BR</div><div><small>Equipe - Atendimento</small><b>Bianca Rocha</b><span>Amanhã eu passo aí</span></div></div>
+          <div class="cv"><div class="av" style="background:#ddf5e8;color:#1f8a52">FA</div><div><small>Equipe - Atendimento</small><b>Fernanda Alves</b><span>Obrigada!</span></div></div>
+          <div class="cv"><div class="av" style="background:#fff0d9;color:#a2620a">PL</div><div><small>Equipe - Atendimento</small><b>Paula Lima</b><span>Qual o horário de sábado?</span></div></div>
+        </div>
+      </section>
+
+      <!-- C: tela Pendentes -->
+      <section class="cena" id="cC">
+        <div class="folha">
+          <div class="sobre">PENDENTES · JÚLIA MARTINS</div>
+          <div class="titulo">Contatos para chamar <small>Atualizar</small></div>
+          <div class="aviso">Amanhã você tem 9 contatos para chamar.</div>
+          <div class="pils">
+            <div class="pil" id="pHoje"><span id="pHojeTx">Hoje · 12</span><div class="on" id="pHojeOn">Hoje · 12</div></div>
+            <div class="pil" id="pAtr">Atrasados · 7<div class="on" id="pAtrOn">Atrasados · 7</div></div>
+            <div class="pil" id="pAma">Amanhã · 9<div class="on" id="pAmaOn">Amanhã · 9</div></div>
+          </div>
+          <div class="listas">
+            <ol class="lp" id="lHoje"></ol>
+            <ol class="lp" id="lAtr"></ol>
+            <ol class="lp" id="lAma"></ol>
+            <div class="vazio" id="vazio"><div class="ok"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#12a150" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path id="okPath" d="M5 12.5l4.5 4.5L19 7" stroke-dasharray="24" stroke-dashoffset="24"/></svg></div><b>Ninguém para chamar hoje.</b><p>Lista em dia.</p></div>
+          </div>
+          <div class="nota" id="notaNome">quem chamar</div>
+          <div class="nota" id="notaTipo">tipo de cadastro</div>
+          <div class="nota" id="notaAss">assunto</div>
+          <div class="nota" id="notaVolta" style="background:var(--acento);color:#141417">volta em 21/11</div>
+        </div>
+      </section>
+
+      <!-- D: conversa -->
+      <section class="cena cw" id="cD">
+        <div class="ch"><div class="av" id="cAv">MC</div><div><b id="cNome">Mariana Costa</b><small><svg width="12" height="12" viewBox="0 0 24 24" fill="#6e7c91"><circle cx="12" cy="12" r="10"/></svg>Equipe - Atendimento</small></div><div class="res">Resolver</div></div>
+        <div class="ctabs"><span id="tMsg">Mensagens</span><span id="tTpl">Templates</span><span id="tPipe">Pipeline</span><div id="tabLinha"></div></div>
+        <div class="painel">
+          <div class="msgs" id="pMsgs">
+            <div id="chatA">
+              <div class="bal in" id="m1">Oi! Amanhã passo aí pra renovar meu plano 😊<small>09:12</small></div>
+              <div class="bal out" id="m2">Perfeito, Mariana! Já deixo tudo pronto pra ti.<small>09:14 <span class="tk">✓✓</span></small></div>
+              <div class="bal in" id="m3">Combinado!<small>09:15</small></div>
+            </div>
+            <div id="chatB">
+              <div class="vaz" id="vazB">Nenhuma mensagem ainda.<br>
+                <span class="etq" id="etqOf">WhatsApp oficial · Equipe - Atendimento</span><br>
+                <span class="etq" id="etqDona"><span class="mkw">Atribuída a <b>Júlia Martins</b><span class="mk" id="mkDona"></span></span></span>
+              </div>
+              <div class="bal out" id="mTpl" style="position:absolute;right:14px;top:18px;width:330px">Oii, Rafael! Aqui é Júlia, da Exemplo. Vi que tu solicitou atendimento pelo nosso WhatsApp e já vim te ajudar a encontrar o plano ideal.<small>agora <span class="tk" id="tkTpl">✓✓</span></small></div>
+            </div>
+            <div class="composer"><div class="ph">Shift + enter para nova linha.</div>
+              <div class="tool"><i>☺</i><i>📎</i><i id="btWa"><svg width="16" height="16" viewBox="0 0 24 24" fill="#25d366"><path d="M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2z"/></svg></i></div>
+              <div class="env">Enviar</div>
+            </div>
+            <div id="modal">
+              <div id="mLista">
+                <h5>Templates do WhatsApp</h5>
+                <div class="bs">Pesquisar templates</div>
+                <div class="tp" id="tp1"><div id="tpSel"></div><span class="cat">UTILITY</span><b>atendimento_solicitado</b><p>Oii, {{1}}! Aqui é {{2}}, da Exemplo. Vi que tu solicitou atendimento...</p></div>
+                <div class="tp"><span class="cat">UTILITY</span><b>aberto_visita</b><p>Olá, {{1}}! Tudo bem? Aqui é {{2}}, da Academia Exemplo. Para dar continuidade...</p></div>
+                <div class="tp"><span class="cat">UTILITY</span><b>fora_do_horario_1</b><p>Olá, {{1}}! Seu atendimento sobre {{3}} ficou em aberto...</p></div>
+              </div>
+              <div id="prev">
+                <h5 style="font-size:15px;font-weight:600">atendimento_solicitado</h5>
+                <div class="bx">Oii, <b>Rafael</b>! Aqui é <b>Júlia</b>, da Exemplo. Vi que tu solicitou atendimento pelo nosso WhatsApp e já vim te ajudar a encontrar o plano ideal.</div>
+                <div class="var">{{1}}<i>Rafael</i></div>
+                <div class="var">{{2}}<i>Júlia</i></div>
+                <div class="envbtn"><span id="btEnvTpl">Enviar mensagem</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="pipe" id="pPipe">
+            <div style="position:relative" id="pipeIn">
+              <div class="kk">Vendas WhatsApp</div>
+              <h3>Rafael Nunes</h3>
+              <div class="cons">consultora Júlia Martins</div>
+              <div class="cardr" id="cardRel">
+                <div class="h">RELACIONAMENTO</div>
+                <div class="r" id="r1"><div class="k">CARTEIRA NO EVO</div><span class="v">JÚLIA MARTINS<span class="mk" id="mk1"></span></span></div>
+                <div class="r" id="r2"><div class="k">ÚLTIMO ATENDENTE NO CHAT</div><span class="v">Júlia Martins · hoje 10:42<span class="mk" id="mk2"></span></span></div>
+                <div class="r" id="r3"><div class="k">LIGAÇÃO AGENDADA NO EVO</div><span class="v">16/11 · JÚLIA MARTINS · Interesse planos</span></div>
+                <div class="r" id="r4"><div class="k">ÚLTIMOS NO EVO <span class="mkw">· HISTÓRICO<span class="mk" id="mk4"></span></span></div>
+                  <div class="evi" id="e1"><b>JÚLIA MARTINS</b> <span>· 09/11 · Ligação</span><br>Interesse planos · agendado para 16/11</div>
+                  <div class="evi" id="e2"><b>FABRICIO IA</b> <span>· 02/11 · Ligação</span><br>Registro (IA)</div>
+                  <div class="evi" id="e3"><b>RECEPÇÃO</b> <span>· 28/10 · Visita</span><br>Conheceu a unidade</div>
+                </div>
+              </div>
+              <div class="cardr" id="cardReg">
+                <div class="h">REGISTRAR NO EVO</div>
+                <div class="lab">Esse telefone já tem cadastro no EVO</div>
+                <div class="rad"><i><b id="radB"></b></i>Oportunidade 245963 · Rafael Nunes</div>
+                <div class="lab">Observação do relacionamento (opcional)</div>
+                <div class="campo" id="fObs"><span id="obsTx"></span><span id="obsCar" style="width:2px;height:18px;background:var(--ink);margin-left:1px"></span></div>
+                <div class="lab">Data do próximo contato (opcional)</div>
+                <div style="position:relative">
+                  <div class="campo" id="fData"><span id="dataTx" style="color:var(--mut)">dd/mm/aaaa</span></div>
+                  <div id="cal"><b style="font-size:12px">novembro de 2026</b>
+                    <div class="g" id="calG"></div>
+                  </div>
+                </div>
+                <div class="lab" id="dicaData" style="font-weight:500">Sem data: o registro entra como ligação finalizada.</div>
+                <div style="margin-top:12px"><span class="btn pri" id="btReg">Registrar relacionamento</span></div>
+                <div class="okmsg" id="okReg">Relacionamento na fila. Entra no EVO <span class="mkw">no seu nome<span class="mk" id="mkNome"></span></span> em até 1 minuto. Próximo contato agendado para 21/11.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+    <div id="cursor"><div class="anel" id="anel"></div><svg viewBox="0 0 24 24"><path d="M4 2l15 11-6.5 1.2L16 21l-3 1.4-3.4-6.6L5 20z" fill="#141417" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+  </div>
+
+  <div id="legenda"></div>
+  <div id="fim"><div id="fimTx"><div class="a" id="fimA">Bora<br>chamar!</div><div class="b" id="fimB">Menu Pendentes · Chatwoot da Exemplo</div><div id="fimBdg">Pendentes <i id="fimN">0</i></div></div></div>
+</div>
+
+<script>
+// ================= utilidades (tudo função pura do tempo) =================
+const D = 0.4;                       // a narração começa 0,4 s depois do vídeo
+const TOTAL = 64;
+const cl = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const p = (t, a, b) => cl((t - a) / (b - a));
+const eo = x => 1 - Math.pow(1 - x, 4);             // quart out
+const ex = x => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x)); // expo out
+const io = x => (x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const bk = x => { const c = 1.25; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const $ = id => document.getElementById(id);
+const lerp = (a, b, k) => a + (b - a) * k;
+const show = (el, o) => { el.style.opacity = o; el.style.visibility = o <= 0.001 ? "hidden" : ""; };
+
+// ================= dados fictícios =================
+const HOJE = [
+  { n: "Mariana Costa", t: "C", id: 214587, a: "Renovação do plano", q: "Agendado para 16/11", b: "abrir" },
+  { n: "Rafael Nunes", t: "P", id: 245963, a: "Interesse planos", q: "Agendado para 16/11", b: "chamar" },
+  { n: "Bianca Rocha", t: "C", id: 198430, a: "Retorno da visita", q: "Agendado para 16/11", b: "abrir" },
+  { n: "Lucas Prado", t: "P", id: 251207, a: "LEADS", q: "Agendado para 16/11", b: "chamar" },
+  { n: "Fernanda Alves", t: "C", id: 176902, a: "Troca de unidade", q: "Agendado para 16/11", b: "abrir" },
+  { n: "Tiago Mendes", t: "C", id: 230118, a: "Plano anual", q: "Agendado para 16/11", b: "chamar" },
+];
+const ATR = [
+  { n: "Carla Souza", t: "C", id: 201774, a: "Renovação", q: "1 dia de atraso (era 15/11)", b: "abrir" },
+  { n: "Diego Ramos", t: "P", id: 249310, a: "Interesse planos", q: "2 dias de atraso (era 14/11)", b: "chamar" },
+  { n: "Helena Dias", t: "C", id: 188215, a: "Retorno", q: "3 dias de atraso (era 13/11)", b: "abrir" },
+  { n: "Bruno Teixeira", t: "P", id: 252640, a: "LEADS", q: "5 dias de atraso (era 11/11)", b: "chamar" },
+  { n: "Sofia Lopes", t: "C", id: 166012, a: "Plano anual", q: "6 dias de atraso (era 10/11)", b: "chamar" },
+];
+const AMA = [
+  { n: "André Pires", t: "C", id: 210931, a: "Renovação", q: "Agendado para 17/11", b: "abrir" },
+  { n: "Camila Freitas", t: "P", id: 250114, a: "Interesse planos", q: "Agendado para 17/11", b: "chamar" },
+  { n: "Gustavo Reis", t: "C", id: 199876, a: "Troca de unidade", q: "Agendado para 17/11", b: "abrir" },
+  { n: "Larissa Moura", t: "P", id: 253002, a: "LEADS", q: "Agendado para 17/11", b: "chamar" },
+  { n: "Pedro Henrique", t: "C", id: 221450, a: "Plano anual", q: "Agendado para 17/11", b: "chamar" },
+];
+const ini = n => n.split(" ").map(x => x[0]).slice(0, 2).join("");
+function linha(it, i, pref) {
+  const tipo = it.t === "C" ? "Aluno" : "Oportunidade";
+  const bt = it.b === "abrir" ? `<span class="btn sec" id="${pref}b${i}">Abrir conversa</span>` : `<span class="btn pri" id="${pref}b${i}"><span id="${pref}bt${i}">Chamar</span></span>`;
+  return `<li class="row" id="${pref}r${i}"><div class="l1"><div class="av">${ini(it.n)}</div>
+    <span class="mkw nm" id="${pref}n${i}">${it.n}<span class="mk" id="${pref}mkn${i}"></span></span>
+    <span class="bd ${it.t === "C" ? "info" : "neu"}" id="${pref}t${i}">${tipo}</span></div>
+    <div class="l2">${it.q} · <span class="mkw" id="${pref}a${i}">${it.a}<span class="mk" id="${pref}mka${i}"></span></span></div>
+    <div class="l3">${tipo} ${it.id} no EVO</div><div class="bt">${bt}</div></li>`;
+}
+$("lHoje").innerHTML = HOJE.map((x, i) => linha(x, i, "h")).join("");
+$("lAtr").innerHTML = ATR.map((x, i) => linha(x, i, "a")).join("");
+$("lAma").innerHTML = AMA.map((x, i) => linha(x, i, "m")).join("");
+
+const EVO = ["MARIANA COSTA|RENOVAÇÃO|16/11", "RAFAEL NUNES|INTERESSE PLANOS|16/11", "BIANCA ROCHA|RETORNO VISITA|16/11", "CARLA SOUZA|RENOVAÇÃO|15/11",
+  "LUCAS PRADO|LEADS|16/11", "DIEGO RAMOS|INTERESSE PLANOS|14/11", "FERNANDA ALVES|TROCA UNIDADE|16/11", "HELENA DIAS|RETORNO|13/11", "TIAGO MENDES|PLANO ANUAL|16/11",
+  "ANDRÉ PIRES|RENOVAÇÃO|17/11", "CAMILA FREITAS|INTERESSE PLANOS|17/11", "BRUNO TEIXEIRA|LEADS|11/11", "GUSTAVO REIS|TROCA UNIDADE|17/11", "SOFIA LOPES|PLANO ANUAL|10/11",
+  "LARISSA MOURA|LEADS|17/11", "PEDRO HENRIQUE|PLANO ANUAL|17/11", "PAULA LIMA|RETORNO|12/11", "JOÃO VITOR|LEADS|16/11", "RENATA CRUZ|RENOVAÇÃO|09/11", "VINÍCIUS SÁ|INTERESSE|16/11",
+  "LETÍCIA PORTO|RETORNO|08/11", "MATEUS LIMA|LEADS|16/11", "ALINE ROCHA|PLANO ANUAL|07/11", "CAIO MELO|RENOVAÇÃO|16/11"];
+$("evoRows").innerHTML = EVO.map((r, i) => { const [a, b, c] = r.split("|"); return `<div class="evo-lin" id="ev${i}"><div>${a}</div><div>${b}</div><div class="${c < "16/11" ? "d" : ""}">${c}</div></div>`; }).join("");
+
+// calendário
+(() => { const h = ["D", "S", "T", "Q", "Q", "S", "S"].map(x => `<span class="x">${x}</span>`); const c = [];
+  for (let i = 0; i < 0; i++) c.push("<span></span>");
+  for (let d = 1; d <= 30; d++) c.push(d === 21 ? `<span id="dia21"><b></b><em id="dia21n">21</em></span>` : `<span class="${d === 16 ? "hj" : d < 17 ? "x" : ""}">${d}</span>`);
+  $("calG").innerHTML = h.join("") + c.join(""); })();
+
+// ================= títulos do topo =================
+const TIT = [[0, "TUTORIAL", "Menu Pendentes"], [5.3, "PASSO 1", "Onde fica"], [13.8, "PASSO 2", "As três abas"], [18.3, "PASSO 3", "Cada linha"],
+  [25.0, "PASSO 4", "Abrir conversa"], [30.7, "PASSO 5", "Chamar"], [39.7, "PASSO 6", "Aba Pipeline"], [46.2, "PASSO 7", "Registrar"],
+  [51.4, "PASSO 8", "Saiu da lista"], [58.4, "PRONTO", "Lista zerada"]];
+$("topo").innerHTML = TIT.map((x, i) => `<div class="tit" id="ti${i}"><div class="p"><i></i>${x[1]}</div><div class="t">${x[2]}</div></div>`).join("");
+
+// ================= legenda (palavras da narração) =================
+const CH = []; { let cur = [];
+  PAL.forEach((w, i) => { const prev = PAL[i - 1]; if (cur.length && (cur.length >= 5 || w[1] - prev[2] > 0.28)) { CH.push(cur); cur = []; } cur.push([w[0], w[1] + D, w[2] + D]); });
+  if (cur.length) CH.push(cur); }
+$("legenda").innerHTML = CH.map((c, i) => `<div class="chunk" id="ch${i}">${c.map((w, j) => `<span class="w" id="w${i}_${j}"><b id="wb${i}_${j}"></b>${w[0]}</span>`).join("")}</div>`).join("");
+
+// ================= posições (mundo) =================
+const POS = {};
+function anc(id, ax = .5, ay = .5) {
+  let el = $(id), x = 0, y = 0, w = el.offsetWidth, h = el.offsetHeight;
+  while (el && el.id !== "mundo") { x += el.offsetLeft; y += el.offsetTop; el = el.offsetParent; }
+  return [x + w * ax, y + h * ay];
+}
+let ROWH = [];
+function medir() {
+  ["itNao", "itPend", "pHoje", "pAtr", "pAma", "hb0", "hb1", "hn0", "ht0", "ht1", "ha0", "tMsg", "tTpl", "tPipe", "btWa", "tp1", "btEnvTpl", "radB", "fObs", "fData", "dia21", "btReg", "hr1", "cardReg", "cardRel"].forEach(k => POS[k] = anc(k));
+  ROWH = HOJE.map((_, i) => $("hr" + i).offsetHeight + 9);
+  ["tMsg", "tTpl", "tPipe"].forEach(k => { POS[k + "_x"] = $(k).offsetLeft; POS[k + "_w"] = $(k).offsetWidth; });
+  // notas da linha 1 (abaixo do elemento)
+  const pn = anc("hn0", 0, 0), pt = anc("ht1", 0, 0), pa = anc("ha0", 0, 0), pv = anc("hr1", 1, 0);
+  const pos = (id, q) => { const el = $(id); el.style.left = (q[0] - 4 - 12) + "px"; el.style.top = (q[1] - el.offsetHeight - 8 - 12) + "px"; };
+  pos("notaNome", pn); pos("notaTipo", pt); pos("notaAss", pa);
+  $("notaVolta").style.left = (pv[0] - 150 - 12) + "px"; $("notaVolta").style.top = (pv[1] + 20 - 12) + "px";
+}
+
+// ================= câmera =================
+// cada passo: [início, fim, centroX, centroY, escala] no mundo de 480 de largura
+const JW = 1000, JH = 1250;
+const CAM0 = [240, 300, 2.08];
+const CAM = [
+  [3.9, 4.6, 300, 330, 1.45],   // abre o Chatwoot por inteiro
+  [4.8, 6.2, 150, 260, 2.6],    // entra no menu
+  [9.0, 10.2, 130, 300, 3.3],   // Pendentes em close
+  [12.9, 13.6, 150, 280, 2.6],
+  [13.85, 13.86, 240, 300, 2.08], // corte para a tela Pendentes
+  [14.0, 14.9, 240, 330, 2.08],
+  [18.4, 19.4, 200, 300, 3.1],  // linha 1 em close
+  [22.6, 23.2, 210, 390, 3.0],  // desce para a linha 2 (oportunidade)
+  [23.6, 24.2, 200, 310, 3.1],  // volta pro assunto
+  [25.2, 26.4, 240, 340, 2.5],
+  [27.95, 27.96, 240, 300, 2.08], // corte para a conversa
+  [30.65, 30.66, 240, 420, 2.5],  // volta para a lista, linha 2
+  [31.0, 32.2, 220, 440, 2.7],
+  [33.75, 33.76, 240, 300, 2.08], // conversa nova
+  [34.6, 35.6, 240, 280, 2.3],
+  [37.2, 38.0, 240, 330, 2.08],
+  [39.6, 40.0, 240, 300, 2.08],
+  [41.4, 42.3, 230, 300, 2.25], // relacionamento
+  [44.6, 45.6, 230, 440, 2.15], // histórico
+  [46.2, 47.4, 230, 640, 2.25], // card de registro
+  [49.0, 49.7, 230, 790, 2.25],
+  [51.2, 52.2, 230, 790, 2.3],  // mensagem de sucesso
+  [54.5, 54.51, 240, 330, 2.08], // volta pros Pendentes
+  [54.6, 55.2, 240, 380, 2.3],
+  [58.2, 58.9, 240, 330, 2.08],
+];
+function cam(t) {
+  let [cx, cy, s] = CAM0;
+  for (const [a, b, x, y, z] of CAM) { if (t <= a) break; const k = io(p(t, a, b)); cx = lerp(cx, x, k); cy = lerp(cy, y, k); s = lerp(s, z, k); }
+  return [cx, cy, s];
+}
+const tela = (pt, c) => [(pt[0] - c[0]) * c[2] + JW / 2, (pt[1] - c[1]) * c[2] + JH / 2];
+
+// ================= cursor =================
+const CUR = () => [
+  [6.0, 7.3, ...POS.itNao], [8.4, 9.2, ...POS.itPend], [13.1, 13.5, ...POS.itPend],
+  [14.6, 15.6, ...POS.pHoje], [16.0, 16.4, ...POS.pAtr], [16.9, 17.3, ...POS.pAma], [17.7, 18.1, ...POS.pHoje],
+  [26.0, 27.5, ...POS.hb0], [31.4, 32.8, ...POS.hb1],
+  [36.4, 37.2, ...POS.btWa], [37.6, 38.1, ...POS.tp1], [38.5, 38.9, ...POS.btEnvTpl],
+  [39.4, 40.1, ...POS.tPipe], [46.8, 47.3, ...POS.radB], [47.4, 47.7, ...POS.fObs], [48.9, 49.4, ...POS.fData], [49.7, 50.2, ...POS.dia21], [50.4, 50.9, ...POS.btReg],
+];
+const CLIQUES = [7.35, 13.55, 15.65, 16.45, 17.35, 18.15, 27.6, 32.9, 37.25, 38.15, 38.95, 40.15, 47.3, 47.7, 49.4, 50.2, 50.95];
+const CUR_VIS = [[5.6, 13.8], [14.2, 18.7], [25.7, 27.9], [30.9, 33.7], [35.8, 41.2], [46.4, 51.3]];
+
+// ================= render =================
+function render(t) {
+  const c = cam(t);
+  $("mundo").style.transform = `translate(${JW / 2}px,${JH / 2}px) scale(${c[2]}) translate(${-c[0]}px,${-c[1]}px)`;
+
+  // ---------- topo ----------
+  TIT.forEach((x, i) => {
+    const a = x[0], b = i + 1 < TIT.length ? TIT[i + 1][0] : 99, el = $("ti" + i);
+    const kin = ex(p(t, a, a + .55)), kout = io(p(t, b - .05, b + .3));
+    show(el, i === 0 ? (1 - kout) : kin * (1 - kout));
+    el.style.transform = `translateY(${(1 - kin) * 60 - kout * 50}px)`;
+  });
+
+  // ---------- cenas ----------
+  const vA = 1 - p(t, 3.85, 4.15);
+  const vB = p(t, 3.95, 4.3) * (1 - p(t, 13.8, 14.05));
+  const vC = Math.max(p(t, 13.8, 14.1) * (1 - p(t, 27.85, 28.0)), p(t, 30.6, 30.8) * (1 - p(t, 33.65, 33.8)), p(t, 54.45, 54.65));
+  const vD = Math.max(p(t, 27.9, 28.1) * (1 - p(t, 30.55, 30.7)), p(t, 33.7, 33.9) * (1 - p(t, 54.45, 54.6)));
+  show($("cA"), vA); show($("cB"), vB); show($("cC"), vC); show($("cD"), vD);
+  // entradas de navegação: a tela nova desliza um pouco da direita
+  const slide = (a) => (1 - ex(p(t, a, a + .5))) * 60;
+  $("cC").style.transform = `translateX(${t < 30 ? slide(13.8) : t < 50 ? -slide(30.6) + 0 : -slide(54.45)}px)`;
+  $("cD").style.transform = `translateX(${t < 33 ? slide(27.9) : slide(33.7)}px)`;
+
+  // ---------- A: lista do EVO ----------
+  $("evoRows").style.transform = `translateY(${-ex(p(t, 0, 2.6)) * 420}px)`;
+  EVO.forEach((_, i) => {
+    const k = io(p(t, 2.3 + i * .02, 3.1 + i * .02));
+    const el = $("ev" + i); el.style.transform = `translateY(${k * (300 - (i * 38 - ex(p(t, 0, 2.6)) * 420))}px) scale(${1 - k * .6})`;
+    el.style.opacity = 1 - k;
+  });
+  const g = bk(p(t, 2.9, 3.4)); $("gancho").style.transform = `scale(${g})`; show($("gancho"), p(t, 2.9, 3.0));
+  $("ganchoN").textContent = Math.round(cl((t - 2.9) / .6) * 12);
+
+  // ---------- B: menu ----------
+  const hov = p(t, 9.0, 9.3);
+  $("itPendBg").style.opacity = hov;
+  const pulso = Math.sin(cl((t - 10.8) / .5) * Math.PI);
+  $("bdgPend").style.transform = `scale(${1 + .35 * pulso})`;
+  $("bdgPend").textContent = t < 10.6 ? 12 : Math.round(lerp(0, 12, eo(p(t, 10.6, 11.4))));
+  $("itTodas").className = t > 13.55 ? "it" : "it on";
+
+  // ---------- C: Pendentes ----------
+  let aba = "h";
+  if (t >= 16.45 && t < 17.35) aba = "a"; else if (t >= 17.35 && t < 18.15) aba = "m";
+  show($("pHojeOn"), aba === "h" ? 1 : 0); show($("pAtrOn"), aba === "a" ? 1 : 0); show($("pAmaOn"), aba === "m" ? 1 : 0);
+  const troca = { a: 16.45, m: 17.35, h: t > 18 ? 18.15 : 13.8 }[aba];
+  [["h", "lHoje", HOJE, "h"], ["a", "lAtr", ATR, "a"], ["m", "lAma", AMA, "m"]].forEach(([k, id, arr, pref]) => {
+    const on = aba === k; show($(id), on ? 1 : 0);
+    if (!on) return;
+    arr.forEach((_, i) => {
+      const r = $(pref + "r" + i); const kk = ex(p(t, troca + .04 * i, troca + .45 + .04 * i));
+      if (pref !== "h" || t < 50) { r.style.transform = `translateX(${(1 - kk) * 70}px)`; r.style.opacity = kk; }
+    });
+  });
+  // contador da aba Hoje
+  let nHoje = 12;
+  if (t > 55.7) nHoje = 11;
+  if (t > 58.5) nHoje = Math.round(lerp(11, 0, eo(p(t, 58.5, 60.0))));
+  const txH = "Hoje · " + nHoje; if ($("pHojeOn").textContent !== txH) { $("pHojeOn").textContent = txH; $("pHojeTx").textContent = txH; }
+  $("pHoje").style.transform = `scale(${1 + .12 * Math.sin(cl((t - 55.7) / .4) * Math.PI)})`;
+  // marcadores amarelos da linha
+  const mk = (id, a) => { $(id).style.transform = `scaleX(${ex(p(t, a, a + .35))})`; };
+  mk("hmkn0", 21.3); mk("hmka0", 24.1);
+  $("hmkn0").style.opacity = 1 - p(t, 25.0, 25.3); $("hmka0").style.opacity = 1 - p(t, 25.0, 25.3);
+  [["notaNome", 21.4, 22.6], ["notaTipo", 22.9, 24.0], ["notaAss", 24.2, 25.1]].forEach(([id, a, b]) => {
+    const k = bk(p(t, a, a + .35)); show($(id), p(t, a, a + .1) * (1 - p(t, b, b + .25))); $(id).style.transform = `translateY(${(1 - k) * 12}px)`;
+  });
+  [["ht0", 22.3], ["ht1", 22.9]].forEach(([id, a]) => { $(id).style.transform = `scale(${1 + .3 * Math.sin(cl((t - a) / .45) * Math.PI)})`; });
+  // botões apertados
+  const aperta = (id, a) => { $(id).style.transform = `scale(${1 - .08 * Math.sin(cl((t - a + .05) / .25) * Math.PI)})`; };
+  aperta("hb0", 27.6); aperta("hb1", 32.9);
+  $("hbt1").textContent = t > 32.95 && t < 34 ? "Abrindo…" : "Chamar";
+  // Rafael sai da lista e depois todo mundo
+  const REM = [58.55, 55.1, 58.8, 59.05, 59.3, 59.55];
+  if (t > 50) {
+    let sobe = 0;
+    HOJE.forEach((_, i) => {
+      const r = $("hr" + i), k = io(p(t, REM[i], REM[i] + .45));
+      r.style.transform = `translate(${k * 120}px,${-sobe}px)`; r.style.opacity = 1 - k;
+      sobe += ROWH[i] * io(p(t, REM[i] + .25, REM[i] + .7));
+    });
+  }
+  const riscoK = ex(p(t, 54.9, 55.2)); $("hmkn1").style.transform = `scaleX(${riscoK})`; $("hmkn1").style.top = "45%"; $("hmkn1").style.height = t > 54 ? "12%" : "42%"; $("hmkn1").style.background = t > 54 ? "#141417" : "";
+  show($("notaVolta"), p(t, 56.3, 56.5) * (1 - p(t, 58.0, 58.3)));
+  $("notaVolta").style.transform = `translate(${-ex(p(t, 56.3, 56.9)) * 0}px,${(1 - bk(p(t, 56.3, 56.8))) * 20 - io(p(t, 57.5, 58.3)) * 140}px)`;
+  show($("vazio"), p(t, 59.9, 60.2)); $("vazio").style.transform = `translateY(${(1 - ex(p(t, 59.9, 60.5))) * 30}px)`;
+  $("okPath").style.strokeDashoffset = 24 * (1 - eo(p(t, 60.0, 60.5)));
+
+  // ---------- D: conversa ----------
+  const novaConv = t > 33;
+  $("cNome").textContent = novaConv ? "Rafael Nunes" : "Mariana Costa"; $("cAv").textContent = novaConv ? "RN" : "MC";
+  show($("chatA"), novaConv ? 0 : 1); show($("chatB"), novaConv ? 1 : 0);
+  ["m1", "m2", "m3"].forEach((id, i) => { const k = bk(p(t, 28.3 + i * .45, 28.7 + i * .45)); $(id).style.opacity = p(t, 28.3 + i * .45, 28.4 + i * .45); $(id).style.transform = `translateY(${(1 - k) * 18}px) scale(${.96 + .04 * k})`; });
+  // aba ativa
+  let tab = "tMsg"; if (t > 40.15 && t < 54.6) tab = "tPipe";
+  const tx = POS[tab + "_x"] || 0, tw = POS[tab + "_w"] || 0;
+  $("tabLinha").style.transform = `translateX(${tx}px) scaleX(${tw})`; $("tabLinha").style.width = "1px";
+  ["tMsg", "tTpl", "tPipe"].forEach(k => $(k).style.color = k === tab ? "var(--cw-azul)" : "");
+  show($("pMsgs"), tab === "tMsg" ? 1 : 0); show($("pPipe"), tab === "tPipe" ? 1 : 0);
+  $("pipeIn").style.transform = `translateY(${(1 - ex(p(t, 40.15, 40.7))) * 40}px)`;
+  // conversa nova: etiquetas
+  show($("vazB"), 1 - p(t, 39.0, 39.2));
+  $("etqOf").style.transform = `scale(${1 + .12 * Math.sin(cl((t - 35.1) / .45) * Math.PI)})`;
+  $("mkDona").style.transform = `scaleX(${ex(p(t, 36.3, 36.7))})`;
+  // modal de templates
+  const mOn = p(t, 37.3, 37.5) * (1 - p(t, 39.0, 39.2));
+  show($("modal"), mOn); $("modal").style.transform = `translateY(${(1 - ex(p(t, 37.3, 37.8))) * 40}px)`;
+  show($("tpSel"), p(t, 38.15, 38.25));
+  show($("mLista"), 1 - p(t, 38.3, 38.45)); show($("prev"), p(t, 38.35, 38.55));
+  aperta("btEnvTpl", 38.95); aperta("btWa", 37.25);
+  const kt = ex(p(t, 39.1, 39.6)); show($("mTpl"), p(t, 39.1, 39.2)); $("mTpl").style.transform = `translateY(${(1 - kt) * 80}px) scale(${.9 + .1 * kt})`;
+  $("tkTpl").style.opacity = p(t, 39.6, 39.8);
+  // relacionamento
+  [["r1", 41.0], ["r2", 41.3], ["r3", 41.6], ["r4", 41.9]].forEach(([id, a]) => { const k = ex(p(t, a, a + .4)); $(id).style.opacity = k; $(id).style.transform = `translateY(${(1 - k) * 14}px)`; });
+  mk("mk1", 42.6); mk("mk2", 43.3); mk("mk4", 44.8);
+  [["e1", 45.0], ["e2", 45.2], ["e3", 45.4]].forEach(([id, a]) => { const k = bk(p(t, a, a + .4)); $(id).style.opacity = p(t, a, a + .12); $(id).style.transform = `translateX(${(1 - k) * 30}px)`; });
+  // registro
+  $("radB").style.transform = `scale(${bk(p(t, 47.3, 47.55))})`;
+  const OBS = "Quer conhecer a unidade sexta";
+  const nObs = Math.floor(cl((t - 47.8) / 1.0) * OBS.length); $("obsTx").textContent = OBS.slice(0, nObs);
+  $("obsCar").style.opacity = t > 47.7 && t < 49.3 && Math.floor(t * 3) % 2 === 0 ? 1 : 0;
+  const calOn = p(t, 49.45, 49.6) * (1 - p(t, 50.4, 50.6));
+  show($("cal"), calOn); $("cal").style.transform = `translateY(${(1 - ex(p(t, 49.45, 49.9))) * -14}px)`;
+  $("dia21").querySelector("b").style.transform = `scale(${bk(p(t, 50.2, 50.4))})`; $("dia21n").style.color = t > 50.25 ? "#fff" : "";
+  $("dataTx").textContent = t > 50.3 ? "21/11/2026" : "dd/mm/aaaa"; $("dataTx").style.color = t > 50.3 ? "var(--ink)" : "var(--mut)";
+  $("dicaData").textContent = t > 50.3 ? "Próximo contato em 21/11." : "Sem data: o registro entra como ligação finalizada.";
+  aperta("btReg", 50.95);
+  $("btReg").textContent = t > 50.95 && t < 51.6 ? "Registrando…" : "Registrar relacionamento";
+  const ok = ex(p(t, 51.6, 52.1)); show($("okReg"), p(t, 51.6, 51.7)); $("okReg").style.transform = `translateY(${(1 - ok) * 16}px)`;
+  mk("mkNome", 54.0);
+
+  // ---------- cursor ----------
+  let [x, y] = [600, 900], vis = 0;
+  let wp = null; for (const [a, b, px, py] of CUR()) { if (t < a) break; const k = io(p(t, a, b)); wp = wp ? [lerp(wp[0], px, k), lerp(wp[1], py, k)] : [px, py]; }
+  if (wp) { [x, y] = tela(wp, c); }
+  for (const [a, b] of CUR_VIS) vis = Math.max(vis, p(t, a, a + .3) * (1 - p(t, b - .25, b)));
+  if (!wp) vis = 0;
+  const cu = $("cursor"); show(cu, vis);
+  let aperto = 0, anel = 0;
+  for (const k of CLIQUES) { aperto = Math.max(aperto, Math.sin(cl((t - k + .08) / .22) * Math.PI)); const q = p(t, k, k + .5); if (q > 0 && q < 1) anel = q; }
+  cu.style.transform = `translate(${x}px,${y}px) scale(${1 - .18 * aperto})`;
+  $("anel").style.opacity = anel > 0 ? (1 - anel) * .9 : 0; $("anel").style.transform = `scale(${.3 + anel * 1.1})`;
+
+  // ---------- legenda ----------
+  CH.forEach((ch, i) => {
+    const a = ch[0][1] - .12, b = i + 1 < CH.length ? CH[i + 1][0][1] - .12 : ch[ch.length - 1][2] + .8;
+    const el = $("ch" + i); const on = t >= a && t < b;
+    show(el, on ? 1 : 0); if (!on) return;
+    el.style.transform = `translateY(${(1 - ex(p(t, a, a + .3))) * 24}px)`;
+    ch.forEach((w, j) => {
+      const nx = j + 1 < ch.length ? ch[j + 1][1] : w[2] + .2;
+      const ativa = t >= w[1] && t < nx;
+      $(`wb${i}_${j}`).style.transform = `scaleX(${ativa ? ex(p(t, w[1], w[1] + .14)) : 0})`;
+      $(`w${i}_${j}`).style.color = t < w[1] ? "var(--mut)" : "var(--ink)";
+    });
+  });
+
+  // ---------- final ----------
+  const f = ex(p(t, 60.3, 60.9)); $("fim").style.transform = `scaleY(${f})`;
+  const fa = bk(p(t, 60.6, 61.1)); $("fimA").style.transform = `scale(${.6 + .4 * fa})`; $("fimA").style.opacity = p(t, 60.6, 60.7);
+  $("fimB").style.opacity = p(t, 61.1, 61.4); $("fimBdg").style.opacity = p(t, 61.4, 61.6);
+  $("fimBdg").style.transform = `translateY(${(1 - ex(p(t, 61.4, 61.9))) * 30}px)`;
+}
+
+document.fonts.ready.then(() => { medir(); render(0); window.PRONTO = true; });
+window.render = render;
+</script>
+</body>
+</html>

@@ -133,6 +133,9 @@ Sinais implicitos: usuario mostrou um trailer/comercial como referencia, ou diss
 - **Quiz / formulario / wizard** - /criacao-form.
 - **Componente isolado** - /component-builder.
 - **Apenas animacao SVG/scroll sem video** - /gsap-animations.
+- **A pagina INTEIRA e a experiencia de rolagem** (secoes fixam e avancam, trilhos laterais, fundo mudando de cor, titulos montando linha a linha, nao so um hero) - skill `scrollar` do Felipe Borges (manual: leia `.claude/skills/scrollar/SKILL.md`), que tambem fotografa a propria rolagem para verificar. Ela usa o mesmo truque de video quadro a quadro e pode receber o MP4 que esta skill produz.
+
+Referencias e polimento (valem aqui tambem): DESIGN.md de site real via `python3 .claude/skills/site-elite/scripts/refero.py <url>`; loop construtor + 3 criticos contra a referencia com a skill `loop-de-design`; modelos copiam bem a imagem e mal o scroll e as camadas, entao descreva a camada e o efeito explicitamente e verifique rolando.
 
 ---
 
@@ -727,7 +730,7 @@ Cliente nao tem produto definido nem ideia de visual
 
 ### Onde vivem os arquivos cinema da sessao
 
-Convencao: `/root/teste-aios/output/cinema-{projeto}/{data}/` contendo `frame-base.png`, `veo-input.png`, `raw-veo.mp4`, `hero-scrub.mp4`, `prompts.log`, `cost.log`. Log de prompts + custos ajuda a iterar e justificar gasto pro usuario.
+Convencao: `<pasta-do-projeto>/output/cinema-{data}/` contendo `frame-base.png`, `veo-input.png`, `raw-veo.mp4`, `hero-scrub.mp4`, `prompts.log`, `cost.log`. Log de prompts + custos ajuda a iterar e justificar gasto pro usuario.
 
 ---
 

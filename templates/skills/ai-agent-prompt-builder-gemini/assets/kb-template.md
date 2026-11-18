@@ -121,14 +121,18 @@ SEMPRE contextualize com a situação específica do lead antes de ofertar. Nunc
 
 ---
 
+> **Como o agente deve usar as seções OBJEÇÃO:** são matéria-prima, não script. O prompt do agente deve conter a regra "nunca recite o script da KB palavra por palavra" — o agente escolhe UM ângulo que casa com o cenário que o lead trouxe e compõe a fala fresca. Ver skill Gemini, `references/persuasao-e-naturalidade.md` §2.
+
 ## OBJEÇÃO: Preço / "Quanto custa?"
 Tags: preço, caro, valor, investimento, dinheiro, orçamento, quanto custa
 
 ### Contexto
 Leads perguntando sobre preço antes de avaliação são muito comuns. O objetivo é redirecionar para qualificação mostrando empatia pela preocupação financeira.
 
-### Script Principal
-"[Script natural explicando por que o valor depende da avaliação, com empatia e redirecionamento para o primeiro passo]"
+### Ângulos de contorno (matéria-prima — adapte ao que o lead disse, não recite)
+- [Ângulo 1: por que o valor depende da avaliação individual]
+- [Ângulo 2: o custo de adiar / valor percebido antes do preço]
+- [Ângulo 3: o primeiro passo é menor do que parece]
 
 ### Perguntas Técnicas (se insistirem)
 - "[Pergunta que mostra complexidade]"
@@ -148,8 +152,10 @@ Tags: medo, receio, dor, ansiedade, trauma, nervoso, assustado
 ### Contexto
 Medo é uma emoção legítima que deve ser validada, nunca minimizada.
 
-### Script Principal
-"[Script empático validando o medo, apresentando técnicas modernas, mencionando experiência da equipe com pacientes ansiosos]"
+### Ângulos de contorno (matéria-prima — adapte ao medo específico que o lead trouxe, não recite)
+- [Ângulo 1: validar o medo como comum e legítimo]
+- [Ângulo 2: o que diferencia a abordagem — técnicas, supervisão, experiência com casos assim]
+- [Ângulo 3: separar o cenário temido do cenário real com acompanhamento]
 
 ### Linhas de Reforço
 - "[Linha alternativa de conforto 1]"
@@ -166,8 +172,10 @@ Tags: tempo, ocupado, agenda, sem tempo, depois, correria
 ### Contexto
 Objeções de tempo frequentemente mascaram outras preocupações. Use urgência sutil sobre consequências do adiamento.
 
-### Script Principal
-"[Script reconhecendo a vida corrida, introduzindo urgência sutil sobre consequências do adiamento, posicionando a avaliação como rápida]"
+### Ângulos de contorno (matéria-prima — adapte à rotina que o lead descreveu, não recite)
+- [Ângulo 1: o serviço foi desenhado pra rotina intensa — encaixe e praticidade]
+- [Ângulo 2: o custo de adiar — o que continuar como está custa pra ELE]
+- [Ângulo 3: o primeiro passo é rápido/simples]
 
 ---
 
@@ -177,8 +185,10 @@ Tags: pensar, pensando, considerar, decidir, pesquisar, comparando, indeciso
 ### Contexto
 Esta é frequentemente a objeção mais difícil porque o motivo real está escondido. Investigue antes de responder.
 
-### Script Principal
-"[Script reconhecendo a necessidade de pensar, introduzindo urgência sutil sobre agravamento com o tempo, posicionando a avaliação como etapa de coleta de informação sem compromisso]"
+### Ângulos de contorno (matéria-prima — adapte ao que o lead está ponderando, não recite)
+- [Ângulo 1: validar a pesquisa/reflexão como decisão responsável]
+- [Ângulo 2: a avaliação como coleta de informação pra decidir melhor, não compromisso]
+- [Ângulo 3: manter continuidade — deixar o próximo passo encaminhado]
 
 ---
 
@@ -188,16 +198,22 @@ Tags: experiência ruim, trauma, decepção, profissional ruim, não gostei
 ### Contexto
 Leads com experiências anteriores ruins carregam frustração e desconfiança. Precisam de empatia extra e diferenciação.
 
-### Script Principal
-"[Script validando frustração, reconhecendo que experiências ruins acontecem, diferenciando sua equipe/abordagem, posicionando a avaliação como chance de entender o que deu errado e o que pode ser corrigido]"
+### Ângulos de contorno (matéria-prima — adapte ao que deu errado na experiência dele, não recite)
+- [Ângulo 1: acolher a frustração de verdade, sem defender o mercado]
+- [Ângulo 2: o que é diferente aqui — sem prometer o que não pode]
+- [Ângulo 3: entender o caso dele como chance de corrigir a rota]
+
+Nunca fabricar para reconquistar: sem "já registrei sua reclamação", sem desconto inventado, sem "agendei pra você".
 
 ---
 
 ## OBJEÇÃO: "Cliquei sem querer"
 Tags: sem querer, engano, erro, não queria
 
-### Script Principal
-"[Script leve e amigável transformando o acidente em oportunidade de apresentar brevemente o serviço sem pressão]"
+### Ângulos de contorno (matéria-prima — leve, sem pressão)
+- [Ângulo 1: acolher com humor leve, zero cobrança]
+- [Ângulo 2: uma frase só sobre o que o serviço resolve, como porta aberta]
+- [Ângulo 3: se não houver interesse, encerrar com elegância na hora — esta objeção não conta pro teto de 3]
 
 ---
 

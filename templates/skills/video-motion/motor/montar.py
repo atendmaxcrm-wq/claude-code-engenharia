@@ -22,8 +22,9 @@ SO_VERTICAL = {"destaque", "grafico_linha", "linha_tempo", "radar", "barras", "v
 
 PROJ = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else ".")
 R = json.load(open(os.path.join(PROJ, "roteiro.json"), encoding="utf-8"))
-KIT = os.path.join(PROJ, R.get("kit_marca", "marca.json"))   # gerado pelo capturar_marca.sh; o roteiro sobrescreve
-if os.path.exists(KIT) and R.get("kit_marca", True):
+_kit = R.get("kit_marca", "marca.json")                        # gerado pelo capturar_marca.sh; o roteiro sobrescreve; false = ignorar
+KIT = os.path.join(PROJ, _kit) if isinstance(_kit, str) else None
+if KIT and os.path.exists(KIT):
     for k, v in json.load(open(KIT, encoding="utf-8")).items(): R.setdefault(k, v)
 A = os.path.join(PROJ, "assets"); os.makedirs(A, exist_ok=True)
 OUT = os.path.join(PROJ, "out"); os.makedirs(OUT, exist_ok=True)

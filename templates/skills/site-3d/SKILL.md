@@ -163,6 +163,7 @@ realmente satura draw calls e o publico tem hardware recente.
 - `/gsap-animations` - deep-dive de scroll/pin/parallax (rota B DOM-first).
 - `/site-elite-cinema` - quando o "3D" e na verdade video scroll-scrub.
 - `/safari-check` - compatibilidade Safari iOS/macOS antes de entregar.
+- `loop-de-design` (Felipe Borges) - loop construtor + 3 criticos contra a referencia ate vencer a comparacao visual; `scrollar` (manual) quando a pagina inteira e scrollytelling sem 3D; DESIGN.md de site real via `python3 .claude/skills/site-elite/scripts/refero.py <url>`.
 
 ## Referencias internas
 

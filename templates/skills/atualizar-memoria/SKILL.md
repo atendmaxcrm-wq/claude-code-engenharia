@@ -58,6 +58,9 @@ titulo/tema para nao duplicar memoria ja existente.
 5. Para cada **nota de sessao**: `store_memory` com `memory_type: 'session_note'`
 6. Chame `end_session` com summary, work_done, next_steps, files_changed
 7. Chame `sync_from_markdown` para garantir sincronizacao completa
+8. Importe as auto-memorias do Claude Code (`~/.claude/projects/<projeto>/memory/*.md`, que o `sync_from_markdown` NAO le), da raiz onde o CCE foi instalado:
+   `node memory/scripts/importar-auto-memoria.js` (idempotente: atualiza o que mudou, cria o que e novo)
+9. Se o `MEMORY.md` das auto-memorias passar de ~22 KB, enxugar: 1 linha por memoria, titulo curto + gancho de ate ~110 caracteres (o detalhe fica no arquivo e no pgvector)
 
 Se o MCP aios-memory nao estiver disponivel, pule silenciosamente.
 Os arquivos Markdown continuam como source of truth; pgvector e camada de aceleracao.
@@ -75,3 +78,8 @@ contextual falha silenciosamente (try/catch + exit 0).
 - So atualize o que realmente mudou (nao reescreva tudo)
 - Priorize informacao que ajude a proxima sessao a continuar sem perguntas
 - O `progresso.md` deve ser escrito como se fosse um briefing para outro desenvolvedor
+
+### Fechamento (economia de contexto)
+Ao terminar, encerre a resposta com uma linha curta pro dono:
+"Memoria salva. Se for mudar de assunto, rode /clear (a proxima sessao ja comeca com o briefing do progresso.md). Se for continuar no mesmo assunto, /compact."
+Motivo: cada resposta rele o historico inteiro; sessao longa misturando assuntos multiplica o consumo do plano (medido: ~290 mil tokens relidos por chamada).

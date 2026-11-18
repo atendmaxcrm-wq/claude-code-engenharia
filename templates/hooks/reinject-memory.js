@@ -30,6 +30,15 @@ function loadCriticalRules() {
   return '';
 }
 
+
+// Linhas **PROXIMO** do topo do progresso.md (briefing de todas as frentes, nao so da ultima sessao).
+function proximosDoProgresso() {
+  try {
+    const t = fs.readFileSync(path.join(MEMORIA_DIR, 'progresso.md'), 'utf-8').split('\n').slice(0, 40);
+    return t.filter((l) => /^\*\*PROXIMO/.test(l)).slice(0, 3).map((l) => '- ' + l.slice(0, 900));
+  } catch { return []; }
+}
+
 async function injectFromPgvector() {
   // Load env from .mcp.json
   try {
@@ -45,7 +54,7 @@ async function injectFromPgvector() {
 
   const output = [];
   output.push('---');
-  output.push('## [MEMORIA REINJETADA apos compactacao]');
+  output.push('## [MEMORIA REINJETADA apos /compact ou /clear]');
   output.push('');
 
   // Last session info
@@ -77,6 +86,8 @@ async function injectFromPgvector() {
   `);
 
   if (gotchas.rows.length > 0) {
+    const prox = proximosDoProgresso();
+    if (prox.length) { output.push('### Pendencias (progresso.md)'); output.push(...prox); output.push(''); }
     output.push('### Armadilhas Criticas');
     gotchas.rows.forEach(g => {
       output.push(`- **${g.title}**: ${g.content.substring(0, 120)}`);

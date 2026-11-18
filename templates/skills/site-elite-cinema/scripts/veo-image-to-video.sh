@@ -19,15 +19,16 @@ if [ ! -f "$IMAGE_PATH" ]; then
   exit 66
 fi
 
-ENV_FILE="/root/teste-aios/aios-core/apps/monitor-server/.env"
-if [ ! -f "$ENV_FILE" ]; then
-  echo "ERROR: .env not found at $ENV_FILE" >&2
-  exit 66
+# Chave: GOOGLE_API_KEY (ou GEMINI_API_KEY) no ambiente; senao lida de $ENV_FILE (padrao ./.env).
+GOOGLE_API_KEY="${GOOGLE_API_KEY:-${GEMINI_API_KEY:-}}"
+if [ -z "$GOOGLE_API_KEY" ]; then
+  ENV_FILE="${ENV_FILE:-./.env}"
+  if [ -f "$ENV_FILE" ]; then
+    GOOGLE_API_KEY="$(grep -E '^(GOOGLE|GEMINI)_API_KEY=' "$ENV_FILE" | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'" | tr -d '\r')"
+  fi
 fi
-
-GOOGLE_API_KEY="$(grep -E '^GOOGLE_API_KEY=' "$ENV_FILE" | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'" | tr -d '\r')"
 if [ -z "${GOOGLE_API_KEY:-}" ]; then
-  echo "ERROR: GOOGLE_API_KEY missing in $ENV_FILE" >&2
+  echo "ERROR: defina GOOGLE_API_KEY (ou GEMINI_API_KEY) no ambiente ou em ENV_FILE" >&2
   exit 78
 fi
 
